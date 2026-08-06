@@ -876,12 +876,93 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* TAB 4: EMAIL AUTOMATION */}
+        {/* TAB 4: MAILCHIMP-STYLE EMAIL AUTOMATION SUITE */}
         {activeTab === "email" && (
-          <div>
-            <div style={{ backgroundColor: "#ffffff", padding: "30px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 30 }}>
+            {/* Top Mailchimp Analytics Metrics Bar */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
+              <div style={{ backgroundColor: "#ffffff", padding: "22px", borderRadius: 16, border: "1px solid #E2DDD3" }}>
+                <span style={{ fontSize: 13, color: "#6B7A70", fontWeight: 600 }}>Total Audience</span>
+                <div style={{ fontSize: 32, fontWeight: 700, color: "#2691BA", margin: "6px 0 2px" }}>{subscribers.length}</div>
+                <span style={{ fontSize: 12, color: "#45A027", fontWeight: 600 }}>{activeSubscribersCount} Active Subscribed</span>
+              </div>
+              <div style={{ backgroundColor: "#ffffff", padding: "22px", borderRadius: 16, border: "1px solid #E2DDD3" }}>
+                <span style={{ fontSize: 13, color: "#6B7A70", fontWeight: 600 }}>Avg Open Rate</span>
+                <div style={{ fontSize: 32, fontWeight: 700, color: "#54BC33", margin: "6px 0 2px" }}>74.2%</div>
+                <span style={{ fontSize: 12, color: "#6B7A70" }}>+12.4% vs industry avg</span>
+              </div>
+              <div style={{ backgroundColor: "#ffffff", padding: "22px", borderRadius: 16, border: "1px solid #E2DDD3" }}>
+                <span style={{ fontSize: 13, color: "#6B7A70", fontWeight: 600 }}>Avg Click-Through Rate</span>
+                <div style={{ fontSize: 32, fontWeight: 700, color: "#1A6E8F", margin: "6px 0 2px" }}>32.1%</div>
+                <span style={{ fontSize: 12, color: "#6B7A70" }}>High engagement</span>
+              </div>
+              <div style={{ backgroundColor: "#ffffff", padding: "22px", borderRadius: 16, border: "1px solid #E2DDD3" }}>
+                <span style={{ fontSize: 13, color: "#6B7A70", fontWeight: 600 }}>Active Drip Sequences</span>
+                <div style={{ fontSize: 32, fontWeight: 700, color: "#8E44AD", margin: "6px 0 2px" }}>3</div>
+                <span style={{ fontSize: 12, color: "#45A027", fontWeight: 600 }}>Automated Journeys</span>
+              </div>
+            </div>
+
+            {/* Mailchimp Automated Journeys (Customer Drip Automations) */}
+            <div style={{ backgroundColor: "#ffffff", padding: "28px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", margin: 0 }}>Email Broadcasts &amp; Newsletters</h3>
+                <div>
+                  <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", margin: 0 }}>Automated Customer Journeys</h3>
+                  <p style={{ color: "#6B7A70", fontSize: 14, margin: "4px 0 0" }}>Multi-step drip emails automatically sent based on user actions.</p>
+                </div>
+                <button onClick={() => setShowEmailModal(true)} className="btn-pill btn-pill-cyan">
+                  + Create Automation Journey
+                </button>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+                {[
+                  {
+                    title: "Welcome & Onboarding Sequence",
+                    trigger: "Trigger: New Subscriber Sign Up",
+                    steps: "Step 1: Immediate Welcome Email → Step 2: Practice Guide (Day 3)",
+                    active: true,
+                    sentCount: 142,
+                  },
+                  {
+                    title: "Weekly Class TEAMS Invite Drip",
+                    trigger: "Trigger: 2 Hours Before Monday/Wednesday Class",
+                    steps: "Step 1: Send Teams Join Link + Breathwork Notes",
+                    active: true,
+                    sentCount: 84,
+                  },
+                  {
+                    title: "Greece Retreat Welcome Package",
+                    trigger: "Trigger: Retreat Deposit Received",
+                    steps: "Step 1: Instant Confirmation → Step 2: Flight & Travel Itinerary (Day 7)",
+                    active: true,
+                    sentCount: 12,
+                  },
+                ].map((journey, i) => (
+                  <div key={i} style={{ padding: "20px", borderRadius: 14, border: "1px solid #E2DDD3", backgroundColor: "#FBF9F4", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                        <strong style={{ fontSize: 16, color: "#1A252C" }}>{journey.title}</strong>
+                        <span style={{ padding: "3px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: "#54BC3318", color: "#45A027" }}>
+                          Active
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "#2691BA", marginBottom: 8 }}>{journey.trigger}</div>
+                      <p style={{ fontSize: 13, color: "#6B7A70", margin: "0 0 16px", lineHeight: 1.5 }}>{journey.steps}</p>
+                    </div>
+                    <div style={{ borderTop: "1px solid #E2DDD3", paddingTop: 12, fontSize: 12, color: "#6B7A70", display: "flex", justifyContent: "space-between" }}>
+                      <span>Enrolled: {journey.sentCount} clients</span>
+                      <span style={{ color: "#2691BA", fontWeight: 700, cursor: "pointer" }}>Edit Flow</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Campaign Broadcasts & Newsletters Table */}
+            <div style={{ backgroundColor: "#ffffff", padding: "28px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", margin: 0 }}>Email Newsletters &amp; Broadcasts</h3>
                 <button onClick={() => setShowEmailModal(true)} className="btn-pill btn-pill-cyan">
                   + Create New Broadcast
                 </button>
