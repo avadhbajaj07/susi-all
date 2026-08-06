@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -28,19 +28,34 @@ import {
   UserCheck,
   UserX,
   Share2,
+  Trash2,
+  Sparkles,
 } from "lucide-react";
 
-import { SusiInvoiceTemplate } from "@/components/invoice-template";
+import { SusiInvoiceTemplate, InvoiceItem } from "@/components/invoice-template";
+
+// Initial Studio Services Presets
+const studioPresetServices = [
+  { desc: "Private yoga, breathwork and movement therapy session", rate: 150 },
+  { desc: "Life coaching and leadership mentoring session", rate: 180 },
+  { desc: "Teacher mentoring & Art of Teaching Yoga session", rate: 200 },
+  { desc: "Dynamic Movement weekly online class pass", rate: 25 },
+  { desc: "Peloponnese Greece Retreat deposit", rate: 350 },
+];
 
 // Initial Studio Data
 const initialBookings: any[] = [];
 const initialInvoices: any[] = [
   {
     id: "SD-2026-001",
+    number: "SD-2026-001",
     client: "Avadh Bajaj",
-    email: "avadh@example.com",
+    clientName: "Avadh Bajaj",
+    clientEmail: "avadh@example.com",
     date: "05 Jun 2026",
+    issued: "05 Jun 2026",
     dueDate: "19 Jun 2026",
+    due: "19 Jun 2026",
     status: "draft",
     paymentNotice: "You need to pay in next 14 days.",
     paymentMethod: "Bank transfer details or TWINT (+41 79 854 97 52)",
@@ -49,7 +64,7 @@ const initialInvoices: any[] = [
       { desc: "Yiga online", qty: 1, rate: 20, amount: 20 },
     ],
     subtotal: 170,
-    total: "CHF 170.00",
+    total: 170,
   },
 ];
 const initialCampaigns: any[] = [];
@@ -77,13 +92,84 @@ export default function AdminPage() {
   const [resendKey, setResendKey] = useState("");
   const [blotatoKey, setBlotatoKey] = useState("");
 
-  // Invoice Generator State
-  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-  const [activeInvoice, setActiveInvoice] = useState<any>(null);
-  const [invClient, setInvClient] = useState("");
-  const [invEmail, setInvEmail] = useState("");
-  const [invItemDesc, setInvItemDesc] = useState("Private Yoga & Movement Session");
-  const [invPrice, setInvPrice] = useState(150);
+  // Interactive Live Invoice Builder Form State
+  const [invNumber, setInvNumber] = useState("SD-2026-002");
+  const [invClientName, setInvClientName] = useState("Elena Rossi");
+  const [invClientEmail, setInvClientEmail] = useState("elena@example.ch");
+  const [invIssueDate, setInvIssueDate] = useState("06 Aug 2026");
+  const [invDueDate, setInvDueDate] = useState("20 Aug 2026");
+  const [invStatus, setInvStatus] = useState("draft");
+  const [invPaymentNotice, setInvPaymentNotice] = useState("You need to pay in next 14 days.");
+  const [invPaymentMethod, setInvPaymentMethod] = useState("Bank transfer details or TWINT (+41 79 854 97 52)");
+
+  const [invItems, setInvItems] = useState<InvoiceItem[]>([
+    { desc: "Private yoga, breathwork and movement therapy session", qty: 1, rate: 150, amount: 150 },
+  ]);
+
+  const [activeInvoice, setActiveInvoice] = useState<any>(initialInvoices[0]);
+
+  // Invoice Math Calculations
+  const calculatedSubtotal = useMemo(() => {
+    return invItems.reduce((sum, item) => sum + (item.amount || item.qty * item.rate), 0);
+  }, [invItems]);
+
+  const handleUpdateItem = (index: number, patch: Partial<InvoiceItem>) => {
+    const updated = [...invItems];
+    const current = updated[index];
+    const newQty = patch.qty !== undefined ? patch.qty : current.qty;
+    const newRate = patch.rate !== undefined ? patch.rate : current.rate;
+    updated[index] = {
+      ...current,
+      ...patch,
+      qty: newQty,
+      rate: newRate,
+      amount: newQty * newRate,
+    };
+    setInvItems(updated);
+  };
+
+  const handleAddItem = (preset?: { desc: string; rate: number }) => {
+    if (preset) {
+      setInvItems([
+        ...invItems,
+        { desc: preset.desc, qty: 1, rate: preset.rate, amount: preset.rate },
+      ]);
+    } else {
+      setInvItems([
+        ...invItems,
+        { desc: "Custom studio session", qty: 1, rate: 100, amount: 100 },
+      ]);
+    }
+  };
+
+  const handleRemoveItem = (index: number) => {
+    setInvItems(invItems.filter((_, i) => i !== index));
+  };
+
+  const handleSaveInvoice = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newInv = {
+      id: invNumber,
+      number: invNumber,
+      client: invClientName,
+      clientName: invClientName,
+      clientEmail: invClientEmail,
+      email: invClientEmail,
+      date: invIssueDate,
+      issued: invIssueDate,
+      dueDate: invDueDate,
+      due: invDueDate,
+      status: invStatus,
+      paymentNotice: invPaymentNotice,
+      paymentMethod: invPaymentMethod,
+      items: invItems,
+      subtotal: calculatedSubtotal,
+      total: calculatedSubtotal,
+    };
+    setInvoices([newInv, ...invoices]);
+    setActiveInvoice(newInv);
+    setInvNumber(`SD-2026-00${invoices.length + 2}`);
+  };
 
   // Email Campaign Modal State
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -91,7 +177,7 @@ export default function AdminPage() {
   const [emailSegment, setEmailSegment] = useState("All Subscribers");
   const [emailBody, setEmailBody] = useState("");
 
-  // New Article Modal State (with LinkedIn & Email Broadcast)
+  // New Article Modal State
   const [showArticleModal, setShowArticleModal] = useState(false);
   const [artTitle, setArtTitle] = useState("");
   const [artCategory, setArtCategory] = useState("Practice Notes");
@@ -131,24 +217,6 @@ export default function AdminPage() {
     setNewClient("");
     setNewEmail("");
     setShowAddBooking(false);
-  };
-
-  const handleCreateInvoice = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!invClient || !invEmail) return;
-    const newInv = {
-      id: `INV-2026-00${invoices.length + 1}`,
-      client: invClient,
-      email: invEmail,
-      date: new Date().toISOString().split("T")[0],
-      dueDate: "2026-08-25",
-      items: [{ desc: invItemDesc, qty: 1, price: invPrice }],
-      total: `CHF ${invPrice}`,
-      status: "Pending",
-    };
-    setInvoices([newInv, ...invoices]);
-    setActiveInvoice(newInv);
-    setShowInvoiceModal(false);
   };
 
   const handleCreateCampaign = (e: React.FormEvent) => {
@@ -326,7 +394,7 @@ export default function AdminPage() {
             <h2 style={{ fontFamily: "var(--serif)", fontSize: 36, color: "#2691BA", margin: "4px 0 0" }}>
               {activeTab === "overview" && "Studio Overview"}
               {activeTab === "bookings" && "Bookings & Clients Management"}
-              {activeTab === "invoices" && "Invoice Generator & Revenue"}
+              {activeTab === "invoices" && "Interactive Studio Invoice Builder"}
               {activeTab === "email" && "Email Automation & Newsletters"}
               {activeTab === "subscribers" && "Subscribers & Consent Directory"}
               {activeTab === "retreats" && "Greece Retreat 2026 Reservations"}
@@ -363,10 +431,6 @@ export default function AdminPage() {
               <button onClick={() => setShowSubModal(true)} className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <UserPlus size={16} /> Add Subscriber
               </button>
-            ) : activeTab === "invoices" ? (
-              <button onClick={() => setShowInvoiceModal(true)} className="btn-pill btn-pill-cyan">
-                + Create New Invoice
-              </button>
             ) : activeTab === "email" ? (
               <button onClick={() => setShowEmailModal(true)} className="btn-pill btn-pill-cyan">
                 + New Email Broadcast
@@ -386,7 +450,7 @@ export default function AdminPage() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, marginBottom: 35 }}>
               {[
                 { label: "Active Bookings", val: bookings.length, icon: Calendar, change: "Ready for new entries", color: "#2691BA" },
-                { label: "Studio Revenue", val: invoices.length > 0 ? `CHF ${invoices.reduce((a, b) => a + parseInt(b.total.replace(/\D/g, "") || "0"), 0)}` : "CHF 0", icon: DollarSign, change: "TWINT & Bank", color: "#54BC33" },
+                { label: "Studio Revenue", val: invoices.length > 0 ? `CHF ${invoices.reduce((a, b) => a + (typeof b.total === "number" ? b.total : parseFloat((b.total || "").replace(/[^\d.]/g, "") || 0)), 0).toFixed(2)}` : "CHF 0.00", icon: DollarSign, change: "TWINT & Bank", color: "#54BC33" },
                 { label: "Active Subscribers", val: activeSubscribersCount, icon: Mail, change: "Managed Directory", color: "#1A6E8F" },
                 { label: "Published Articles", val: articles.length, icon: PenSquare, change: "LinkedIn Auto-Sync", color: "#8E44AD" },
               ].map((card, i) => {
@@ -460,7 +524,7 @@ export default function AdminPage() {
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderRadius: 12, backgroundColor: "#F9F8F5", border: "1px solid #E2DDD3" }}>
                     <div>
                       <strong style={{ fontSize: 14, display: "block" }}>Supabase Database</strong>
-                      <span style={{ fontSize: 11, color: "#6B7A70" }}>PostgreSQL Active</span>
+                      <span style={{ fontSize: 11, color: "#6B7A70" }}>13 PostgreSQL Tables Live</span>
                     </div>
                     <CheckCircle2 size={20} color="#54BC33" />
                   </div>
@@ -475,7 +539,7 @@ export default function AdminPage() {
 
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderRadius: 12, backgroundColor: "#F9F8F5", border: "1px solid #E2DDD3" }}>
                     <div>
-                      <strong style={{ fontSize: 14, display: "block" }}>LinkedIn Cross-Posting</strong>
+                      <strong style={{ fontSize: 14, display: "block" }}>LinkedIn Auto-Sync</strong>
                       <span style={{ fontSize: 11, color: "#6B7A70" }}>Blotato API Ready</span>
                     </div>
                     <AlertCircle size={20} color="#D68910" />
@@ -553,118 +617,261 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* TAB 3: INVOICE GENERATOR */}
+        {/* TAB 3: SPLIT INTERACTIVE INVOICE BUILDER */}
         {activeTab === "invoices" && (
           <div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 30 }}>
-              {/* Left Column: Create Invoice Form */}
-              <div style={{ backgroundColor: "#ffffff", padding: "28px", borderRadius: 18, border: "1px solid #E2DDD3", height: "fit-content" }}>
-                <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, color: "#2691BA", marginBottom: 20 }}>Generate Studio Invoice</h3>
-                <form onSubmit={handleCreateInvoice}>
-                  <div style={{ marginBottom: 16 }}>
-                    <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Client Name</label>
-                    <input type="text" className="form-input" required value={invClient} onChange={(e) => setInvClient(e.target.value)} placeholder="e.g. Elena Rossi" />
-                  </div>
-                  <div style={{ marginBottom: 16 }}>
-                    <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Client Email</label>
-                    <input type="email" className="form-input" required value={invEmail} onChange={(e) => setInvEmail(e.target.value)} placeholder="e.g. elena@example.ch" />
-                  </div>
-                  <div style={{ marginBottom: 16 }}>
-                    <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Item Description</label>
-                    <input type="text" className="form-input" required value={invItemDesc} onChange={(e) => setInvItemDesc(e.target.value)} />
-                  </div>
-                  <div style={{ marginBottom: 25 }}>
-                    <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Amount (CHF)</label>
-                    <input type="number" className="form-input" required value={invPrice} onChange={(e) => setInvPrice(Number(e.target.value))} />
-                  </div>
-                  <button type="submit" className="btn-pill btn-pill-cyan" style={{ width: "100%" }}>
-                    GENERATE &amp; PREVIEW INVOICE
-                  </button>
-                </form>
-              </div>
-
-              {/* Right Column: Invoices List & Live Invoice Preview */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1.15fr", gap: 30, alignItems: "start" }}>
+              
+              {/* Left Column: Interactive Form Panel (Like Dominique Invoice App) */}
               <div style={{ backgroundColor: "#ffffff", padding: "28px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
-                <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, color: "#2691BA", marginBottom: 20 }}>Generated Studio Invoices</h3>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                  <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, color: "#2691BA", margin: 0 }}>Invoice Parameters</h3>
+                  <button
+                    type="button"
+                    onClick={handleSaveInvoice}
+                    className="btn-pill btn-pill-cyan"
+                    style={{ padding: "8px 18px", fontSize: 12 }}
+                  >
+                    Save &amp; Record Invoice
+                  </button>
+                </div>
 
-                {invoices.length === 0 ? (
-                  <div style={{ textAlign: "center", padding: "40px 20px", color: "#6B7A70" }}>
-                    <FileText size={36} color="#2691BA" style={{ marginBottom: 10, opacity: 0.5 }} />
-                    <p style={{ fontWeight: 600, fontSize: 15, margin: 0 }}>No invoices generated yet. Use the form on the left to create an invoice.</p>
+                <form onSubmit={handleSaveInvoice}>
+                  {/* Client Select / Name & Email */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 700, color: "#2691BA", textTransform: "uppercase", display: "block", marginBottom: 4 }}>Client Name</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        required
+                        value={invClientName}
+                        onChange={(e) => setInvClientName(e.target.value)}
+                        placeholder="e.g. Elena Rossi"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 700, color: "#2691BA", textTransform: "uppercase", display: "block", marginBottom: 4 }}>Client Email</label>
+                      <input
+                        type="email"
+                        className="form-input"
+                        value={invClientEmail}
+                        onChange={(e) => setInvClientEmail(e.target.value)}
+                        placeholder="e.g. elena@example.ch"
+                      />
+                    </div>
                   </div>
-                ) : (
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, marginBottom: 30 }}>
-                    <thead>
-                      <tr style={{ borderBottom: "2px solid #E2DDD3", textAlign: "left", color: "#6B7A70", fontSize: 12, textTransform: "uppercase" }}>
-                        <th style={{ padding: "10px" }}>Invoice #</th>
-                        <th style={{ padding: "10px" }}>Client</th>
-                        <th style={{ padding: "10px" }}>Date</th>
-                        <th style={{ padding: "10px" }}>Total</th>
-                        <th style={{ padding: "10px" }}>Status</th>
-                        <th style={{ padding: "10px" }}>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {invoices.map((inv) => (
-                        <tr key={inv.id} style={{ borderBottom: "1px solid #F0ECE1" }}>
-                          <td style={{ padding: "12px 10px", fontWeight: 700, color: "#2691BA" }}>{inv.id}</td>
-                          <td style={{ padding: "12px 10px", fontWeight: 600 }}>{inv.client}</td>
-                          <td style={{ padding: "12px 10px", color: "#6B7A70" }}>{inv.date}</td>
-                          <td style={{ padding: "12px 10px", fontWeight: 700 }}>{inv.total}</td>
-                          <td style={{ padding: "12px 10px" }}>
-                            <span style={{ padding: "3px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: inv.status.includes("Paid") ? "#54BC3318" : "#F39C1218", color: inv.status.includes("Paid") ? "#45A027" : "#D68910" }}>
-                              {inv.status}
-                            </span>
-                          </td>
-                          <td style={{ padding: "12px 10px" }}>
-                            <button
-                              onClick={() => setActiveInvoice(inv)}
-                              style={{ background: "none", border: "none", color: "#2691BA", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontWeight: 600, fontSize: 13 }}
-                            >
-                              <Eye size={15} /> Preview
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
 
-                {/* Active Invoice Preview Box with User's Exact Design */}
-                {activeInvoice && (
-                  <div style={{ marginTop: 25 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 15 }}>
-                      <h4 style={{ fontFamily: "var(--serif)", fontSize: 20, color: "#2691BA", margin: 0 }}>Invoice Live Preview</h4>
+                  {/* Metadata: Invoice #, Issue Date, Due Date, Status */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 700, color: "#6B7A70", display: "block", marginBottom: 4 }}>Invoice #</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={invNumber}
+                        onChange={(e) => setInvNumber(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 700, color: "#6B7A70", display: "block", marginBottom: 4 }}>Issued Date</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={invIssueDate}
+                        onChange={(e) => setInvIssueDate(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 700, color: "#6B7A70", display: "block", marginBottom: 4 }}>Due Date</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={invDueDate}
+                        onChange={(e) => setInvDueDate(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Payment Info */}
+                  <div style={{ marginBottom: 20 }}>
+                    <label style={{ fontSize: 12, fontWeight: 700, color: "#6B7A70", display: "block", marginBottom: 4 }}>Payment Notice</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={invPaymentNotice}
+                      onChange={(e) => setInvPaymentNotice(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Service Picker Presets */}
+                  <div style={{ marginBottom: 20, backgroundColor: "#FBF9F4", padding: "16px", borderRadius: 12, border: "1px solid #E2DDD3" }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#2691BA", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+                      <Sparkles size={14} /> Add Preset Studio Service
+                    </span>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                      {studioPresetServices.map((srv, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => handleAddItem(srv)}
+                          style={{
+                            fontSize: 12,
+                            padding: "6px 12px",
+                            borderRadius: 100,
+                            border: "1px solid #2691BA",
+                            backgroundColor: "#ffffff",
+                            color: "#2691BA",
+                            cursor: "pointer",
+                            fontWeight: 600,
+                          }}
+                        >
+                          + {srv.desc.slice(0, 24)}... (CHF {srv.rate})
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Line Items Table */}
+                  <div style={{ marginBottom: 25 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "#1A252C" }}>Line Items</span>
                       <button
-                        onClick={() => window.print()}
-                        className="btn-pill btn-pill-cyan"
-                        style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 20px", fontSize: 13 }}
+                        type="button"
+                        onClick={() => handleAddItem()}
+                        style={{ fontSize: 12, color: "#2691BA", background: "none", border: "none", cursor: "pointer", fontWeight: 700 }}
                       >
-                        <Printer size={15} /> Print / Save PDF
+                        + Add Custom Line Item
                       </button>
                     </div>
 
-                    <SusiInvoiceTemplate
-                      data={{
-                        number: activeInvoice.number || activeInvoice.id || "SD-2026-001",
-                        issued: activeInvoice.issued || activeInvoice.date || "05 Jun 2026",
-                        due: activeInvoice.due || activeInvoice.dueDate || "19 Jun 2026",
-                        status: activeInvoice.status || "draft",
-                        clientName: activeInvoice.clientName || activeInvoice.client || "Avadh Bajaj",
-                        clientEmail: activeInvoice.clientEmail || activeInvoice.email,
-                        paymentNotice: activeInvoice.paymentNotice || "You need to pay in next 14 days.",
-                        paymentMethod: activeInvoice.paymentMethod || "Bank transfer details or TWINT (+41 79 854 97 52)",
-                        items: activeInvoice.items || [
-                          { desc: "Private yoga, breathwork and movement therapy session", qty: 1, rate: 150, amount: 150 },
-                          { desc: "Yiga online", qty: 1, rate: 20, amount: 20 },
-                        ],
-                        subtotal: activeInvoice.subtotal || 170,
-                        total: typeof activeInvoice.total === "number" ? activeInvoice.total : (parseFloat((activeInvoice.total || "").replace(/[^\d.]/g, "")) || 170),
-                      }}
-                    />
+                    {invItems.map((item, idx) => (
+                      <div key={idx} style={{ display: "grid", gridTemplateColumns: "3fr 1fr 1.5fr 1.5fr 35px", gap: 8, alignItems: "center", marginBottom: 10 }}>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={item.desc}
+                          onChange={(e) => handleUpdateItem(idx, { desc: e.target.value })}
+                          placeholder="Description"
+                          style={{ fontSize: 13 }}
+                        />
+                        <input
+                          type="number"
+                          className="form-input"
+                          value={item.qty}
+                          onChange={(e) => handleUpdateItem(idx, { qty: Number(e.target.value) })}
+                          placeholder="Qty"
+                          style={{ fontSize: 13, textAlign: "center" }}
+                        />
+                        <input
+                          type="number"
+                          className="form-input"
+                          value={item.rate}
+                          onChange={(e) => handleUpdateItem(idx, { rate: Number(e.target.value) })}
+                          placeholder="Rate"
+                          style={{ fontSize: 13, textAlign: "right" }}
+                        />
+                        <div style={{ fontSize: 13, fontWeight: 700, textAlign: "right", color: "#1f78b4" }}>
+                          CHF {(item.qty * item.rate).toFixed(2)}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveItem(idx)}
+                          style={{ background: "none", border: "none", color: "#C0392B", cursor: "pointer" }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                )}
+
+                  {/* Calculated Subtotal */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "2px solid #2691BA", paddingTop: 14 }}>
+                    <strong style={{ fontSize: 16 }}>Calculated Total:</strong>
+                    <strong style={{ fontSize: 24, color: "#1f78b4" }}>CHF {calculatedSubtotal.toFixed(2)}</strong>
+                  </div>
+                </form>
               </div>
+
+              {/* Right Column: Live Preview Panel */}
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 15 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "#6B7A70" }}>
+                    Live Invoice Preview
+                  </span>
+                  <button
+                    onClick={() => window.print()}
+                    className="btn-pill btn-pill-cyan"
+                    style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 20px", fontSize: 13 }}
+                  >
+                    <Printer size={15} /> Print / Save PDF
+                  </button>
+                </div>
+
+                <SusiInvoiceTemplate
+                  data={{
+                    number: invNumber,
+                    issued: invIssueDate,
+                    due: invDueDate,
+                    status: invStatus,
+                    clientName: invClientName,
+                    clientEmail: invClientEmail,
+                    paymentNotice: invPaymentNotice,
+                    paymentMethod: invPaymentMethod,
+                    items: invItems,
+                    subtotal: calculatedSubtotal,
+                    total: calculatedSubtotal,
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Saved Invoices History Table */}
+            <div style={{ marginTop: 40, backgroundColor: "#ffffff", padding: "28px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
+              <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, color: "#2691BA", marginBottom: 20 }}>Saved Studio Invoices</h3>
+
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+                <thead>
+                  <tr style={{ borderBottom: "2px solid #E2DDD3", textAlign: "left", color: "#6B7A70", fontSize: 12, textTransform: "uppercase" }}>
+                    <th style={{ padding: "10px" }}>Invoice #</th>
+                    <th style={{ padding: "10px" }}>Client</th>
+                    <th style={{ padding: "10px" }}>Date</th>
+                    <th style={{ padding: "10px" }}>Total</th>
+                    <th style={{ padding: "10px" }}>Status</th>
+                    <th style={{ padding: "10px" }}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoices.map((inv) => (
+                    <tr key={inv.id} style={{ borderBottom: "1px solid #F0ECE1" }}>
+                      <td style={{ padding: "12px 10px", fontWeight: 700, color: "#2691BA" }}>{inv.number || inv.id}</td>
+                      <td style={{ padding: "12px 10px", fontWeight: 600 }}>{inv.clientName || inv.client}</td>
+                      <td style={{ padding: "12px 10px", color: "#6B7A70" }}>{inv.issued || inv.date}</td>
+                      <td style={{ padding: "12px 10px", fontWeight: 700 }}>
+                        CHF {typeof inv.total === "number" ? inv.total.toFixed(2) : inv.total}
+                      </td>
+                      <td style={{ padding: "12px 10px" }}>
+                        <span style={{ padding: "3px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: inv.status.includes("paid") ? "#54BC3318" : "#F39C1218", color: inv.status.includes("paid") ? "#45A027" : "#D68910" }}>
+                          {inv.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: "12px 10px" }}>
+                        <button
+                          onClick={() => {
+                            setInvNumber(inv.number || inv.id);
+                            setInvClientName(inv.clientName || inv.client);
+                            setInvClientEmail(inv.clientEmail || inv.email || "");
+                            setInvItems(inv.items || []);
+                          }}
+                          style={{ background: "none", border: "none", color: "#2691BA", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontWeight: 600, fontSize: 13 }}
+                        >
+                          <Eye size={15} /> Edit / Load
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
