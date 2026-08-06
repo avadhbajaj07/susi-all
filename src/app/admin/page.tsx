@@ -22,43 +22,38 @@ import {
   Send,
   Printer,
   DollarSign,
-  Download,
   Eye,
-  Trash2,
+  Linkedin,
+  UserPlus,
+  UserCheck,
+  UserX,
+  Share2,
 } from "lucide-react";
 
-// Initial Studio Data
-const initialBookings = [
-  { id: "BK-1001", client: "Elena Rossi", email: "elena@example.ch", service: "Private Yoga Session", date: "2026-08-18", time: "10:00 AM", status: "Confirmed", payment: "TWINT Paid", amount: "CHF 150" },
-  { id: "BK-1002", client: "Markus Weber", email: "m.weber@example.com", service: "Life Coaching & Mentoring", date: "2026-08-19", time: "02:00 PM", status: "Pending", payment: "Invoice Sent", amount: "CHF 180" },
-  { id: "BK-1003", client: "Sophie Martin", email: "sophie.m@example.fr", service: "Greece Retreat 2026 (Twin Share)", date: "2026-10-11", time: "7 Days", status: "Confirmed", payment: "Deposit CHF 350", amount: "CHF 1,810" },
-  { id: "BK-1004", client: "Anna Keller", email: "anna.k@example.ch", service: "Dynamic Movement Weekly Online", date: "2026-08-17", time: "06:30 PM", status: "Confirmed", payment: "TWINT Paid", amount: "CHF 25" },
+// Real Initial Clean Data
+const initialBookings: any[] = [];
+const initialInvoices: any[] = [];
+const initialCampaigns: any[] = [];
+const initialArticles: any[] = [
+  { id: 1, title: "Movement & Neural Alignment: Moving with Intention", category: "Practice Notes", status: "Published", date: "Aug 06, 2026", linkedin: true, broadcastSent: true },
+  { id: 2, title: "Finding Calm in Motion: The Power of Breathwork", category: "Mindful Living", status: "Published", date: "Jul 28, 2026", linkedin: true, broadcastSent: true },
+  { id: 3, title: "Reflections from the Peloponnese Sanctuary", category: "Retreat Insights", status: "Draft", date: "Aug 01, 2026", linkedin: false, broadcastSent: false },
 ];
 
-const initialInvoices = [
-  { id: "INV-2026-001", client: "Elena Rossi", email: "elena@example.ch", date: "2026-08-01", dueDate: "2026-08-15", items: [{ desc: "1-on-1 Private Movement Session", qty: 1, price: 150 }], total: "CHF 150", status: "Paid (TWINT)" },
-  { id: "INV-2026-002", client: "Markus Weber", email: "m.weber@example.com", date: "2026-08-03", dueDate: "2026-08-17", items: [{ desc: "Life Coaching & Mentoring Session", qty: 1, price: 180 }], total: "CHF 180", status: "Pending" },
-  { id: "INV-2026-003", client: "Sophie Martin", email: "sophie.m@example.fr", date: "2026-08-05", dueDate: "2026-08-20", items: [{ desc: "Greece Retreat Deposit 2026", qty: 1, price: 350 }], total: "CHF 350", status: "Paid (Bank Transfer)" },
-];
-
-const initialCampaigns = [
-  { id: "CMP-01", subject: "Welcome to Susi Davies Studio & Weekly Schedule", segment: "All Subscribers (342)", status: "Sent", sentDate: "Aug 02, 2026", opens: "74.2%", clicks: "32.1%" },
-  { id: "CMP-02", subject: "Dynamic Movement Class Link – Monday 18:30", segment: "Online Students (84)", status: "Scheduled", sentDate: "Aug 10, 2026", opens: "-", clicks: "-" },
-  { id: "CMP-03", subject: "Greece Peloponnese Retreat 2026 Details & Itinerary", segment: "Retreat Guests (12)", status: "Draft", sentDate: "Aug 12, 2026", opens: "-", clicks: "-" },
-];
-
-const initialArticles = [
-  { id: 1, title: "Movement & Neural Alignment: Moving with Intention", category: "Practice Notes", status: "Published", date: "Aug 06, 2026" },
-  { id: 2, title: "Finding Calm in Motion: The Power of Breathwork", category: "Mindful Living", status: "Published", date: "Jul 28, 2026" },
-  { id: 3, title: "Reflections from the Peloponnese Sanctuary", category: "Retreat Insights", status: "Draft", date: "Aug 01, 2026" },
+const initialSubscribers = [
+  { id: "SUB-101", name: "Elena Rossi", email: "elena@example.ch", segment: "Online Students", date: "Aug 01, 2026", status: "Subscribed" },
+  { id: "SUB-102", name: "Markus Weber", email: "m.weber@example.com", segment: "Coaching Clients", date: "Aug 02, 2026", status: "Subscribed" },
+  { id: "SUB-103", name: "Sophie Martin", email: "sophie.m@example.fr", segment: "Retreat Guests", date: "Aug 03, 2026", status: "Subscribed" },
+  { id: "SUB-104", name: "Anna Keller", email: "anna.k@example.ch", segment: "Journal Subscribers", date: "Aug 04, 2026", status: "Unsubscribed" },
 ];
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "bookings" | "invoices" | "email" | "retreats" | "content" | "settings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "bookings" | "invoices" | "email" | "subscribers" | "retreats" | "content" | "settings">("overview");
   const [bookings, setBookings] = useState(initialBookings);
   const [invoices, setInvoices] = useState(initialInvoices);
   const [campaigns, setCampaigns] = useState(initialCampaigns);
   const [articles, setArticles] = useState(initialArticles);
+  const [subscribers, setSubscribers] = useState(initialSubscribers);
   const [searchQuery, setSearchQuery] = useState("");
   const [resendKey, setResendKey] = useState("");
   const [blotatoKey, setBlotatoKey] = useState("");
@@ -68,15 +63,28 @@ export default function AdminPage() {
   const [activeInvoice, setActiveInvoice] = useState<any>(null);
   const [invClient, setInvClient] = useState("");
   const [invEmail, setInvEmail] = useState("");
-  const [invAddress, setInvAddress] = useState("");
   const [invItemDesc, setInvItemDesc] = useState("Private Yoga & Movement Session");
   const [invPrice, setInvPrice] = useState(150);
 
   // Email Campaign Modal State
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [emailSubject, setEmailSubject] = useState("");
-  const [emailSegment, setEmailSegment] = useState("All Subscribers (342)");
+  const [emailSegment, setEmailSegment] = useState("All Subscribers");
   const [emailBody, setEmailBody] = useState("");
+
+  // New Article Modal State (with LinkedIn & Email Broadcast)
+  const [showArticleModal, setShowArticleModal] = useState(false);
+  const [artTitle, setArtTitle] = useState("");
+  const [artCategory, setArtCategory] = useState("Practice Notes");
+  const [artContent, setArtContent] = useState("");
+  const [postToLinkedin, setPostToLinkedin] = useState(true);
+  const [broadcastToEmail, setBroadcastToEmail] = useState(true);
+
+  // New Subscriber Modal State
+  const [showSubModal, setShowSubModal] = useState(false);
+  const [subName, setSubName] = useState("");
+  const [subEmail, setSubEmail] = useState("");
+  const [subSegment, setSubSegment] = useState("Journal Subscribers");
 
   // New Booking State
   const [showAddBooking, setShowAddBooking] = useState(false);
@@ -142,12 +150,75 @@ export default function AdminPage() {
     setShowEmailModal(false);
   };
 
+  const handlePublishArticle = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!artTitle) return;
+    const newArt = {
+      id: articles.length + 1,
+      title: artTitle,
+      category: artCategory,
+      status: "Published",
+      date: "Aug 06, 2026",
+      linkedin: postToLinkedin,
+      broadcastSent: broadcastToEmail,
+    };
+    setArticles([newArt, ...articles]);
+
+    if (broadcastToEmail) {
+      setCampaigns([
+        {
+          id: `CMP-0${campaigns.length + 1}`,
+          subject: `New Journal Note: ${artTitle}`,
+          segment: "All Subscribers",
+          status: "Sent",
+          sentDate: "Today",
+          opens: "100%",
+          clicks: "50%",
+        },
+        ...campaigns,
+      ]);
+    }
+
+    setArtTitle("");
+    setArtContent("");
+    setShowArticleModal(false);
+  };
+
+  const handleAddSubscriber = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!subEmail) return;
+    const newSub = {
+      id: `SUB-${Math.floor(100 + Math.random() * 900)}`,
+      name: subName || subEmail.split("@")[0],
+      email: subEmail,
+      segment: subSegment,
+      date: new Date().toISOString().split("T")[0],
+      status: "Subscribed",
+    };
+    setSubscribers([newSub, ...subscribers]);
+    setSubName("");
+    setSubEmail("");
+    setShowSubModal(false);
+  };
+
+  const toggleSubscriberStatus = (id: string) => {
+    setSubscribers(
+      subscribers.map((s) =>
+        s.id === id
+          ? { ...s, status: s.status === "Subscribed" ? "Unsubscribed" : "Subscribed" }
+          : s
+      )
+    );
+  };
+
   const filteredBookings = bookings.filter(
     (b) =>
       b.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
       b.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       b.service.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const activeSubscribersCount = subscribers.filter((s) => s.status === "Subscribed").length;
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#F7F5F0", fontFamily: "var(--sans)", color: "#1A252C" }}>
@@ -180,8 +251,9 @@ export default function AdminPage() {
             { id: "bookings", label: "Bookings & Clients", icon: Calendar },
             { id: "invoices", label: "Invoice Generator", icon: FileText },
             { id: "email", label: "Email Automation", icon: Mail },
+            { id: "subscribers", label: "Subscribers & Opt-Outs", icon: Users },
             { id: "retreats", label: "Retreat Reservations", icon: Users },
-            { id: "content", label: "Journal & Content", icon: PenSquare },
+            { id: "content", label: "Journal & LinkedIn", icon: PenSquare },
             { id: "settings", label: "API & Integrations", icon: Key },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -237,8 +309,9 @@ export default function AdminPage() {
               {activeTab === "bookings" && "Bookings & Clients Management"}
               {activeTab === "invoices" && "Invoice Generator & Revenue"}
               {activeTab === "email" && "Email Automation & Newsletters"}
+              {activeTab === "subscribers" && "Subscribers & Consent Directory"}
               {activeTab === "retreats" && "Greece Retreat 2026 Reservations"}
-              {activeTab === "content" && "Journal & Articles Manager"}
+              {activeTab === "content" && "Journal & LinkedIn Cross-Posting"}
               {activeTab === "settings" && "API Keys & Integrations Hub"}
             </h2>
           </div>
@@ -263,7 +336,15 @@ export default function AdminPage() {
             >
               View Live Site <ExternalLink size={14} />
             </Link>
-            {activeTab === "invoices" ? (
+            {activeTab === "content" ? (
+              <button onClick={() => setShowArticleModal(true)} className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <Plus size={16} /> New Blog &amp; LinkedIn Post
+              </button>
+            ) : activeTab === "subscribers" ? (
+              <button onClick={() => setShowSubModal(true)} className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <UserPlus size={16} /> Add Subscriber
+              </button>
+            ) : activeTab === "invoices" ? (
               <button onClick={() => setShowInvoiceModal(true)} className="btn-pill btn-pill-cyan">
                 + Create New Invoice
               </button>
@@ -285,10 +366,10 @@ export default function AdminPage() {
             {/* Stat Cards */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, marginBottom: 35 }}>
               {[
-                { label: "Total Bookings", val: bookings.length, icon: Calendar, change: "+2 this week", color: "#2691BA" },
-                { label: "Studio Revenue", val: "CHF 2,680", icon: DollarSign, change: "TWINT & Bank", color: "#54BC33" },
-                { label: "Email Subscribers", val: "342", icon: Mail, change: "Mailchimp Alt", color: "#1A6E8F" },
-                { label: "Published Articles", val: articles.length, icon: PenSquare, change: "3 Reflections", color: "#8E44AD" },
+                { label: "Active Bookings", val: bookings.length, icon: Calendar, change: "Ready for new entries", color: "#2691BA" },
+                { label: "Studio Revenue", val: invoices.length > 0 ? `CHF ${invoices.reduce((a, b) => a + parseInt(b.total.replace(/\D/g, "") || "0"), 0)}` : "CHF 0", icon: DollarSign, change: "TWINT & Bank", color: "#54BC33" },
+                { label: "Active Subscribers", val: activeSubscribersCount, icon: Mail, change: "Managed Directory", color: "#1A6E8F" },
+                { label: "Published Articles", val: articles.length, icon: PenSquare, change: "LinkedIn Auto-Sync", color: "#8E44AD" },
               ].map((card, i) => {
                 const Icon = card.icon;
                 return (
@@ -310,39 +391,47 @@ export default function AdminPage() {
 
             {/* Quick Actions & Recent Activity Grid */}
             <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 25 }}>
-              {/* Recent Bookings Table Preview */}
+              {/* Recent Bookings Table */}
               <div style={{ backgroundColor: "#ffffff", padding: "28px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                  <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, color: "#2691BA", margin: 0 }}>Recent Client Bookings</h3>
+                  <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, color: "#2691BA", margin: 0 }}>Client Bookings</h3>
                   <button onClick={() => setActiveTab("bookings")} style={{ background: "none", border: "none", color: "#2691BA", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
                     View All <ChevronRight size={14} />
                   </button>
                 </div>
 
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
-                  <thead>
-                    <tr style={{ borderBottom: "1.5px solid #E2DDD3", textAlign: "left", color: "#6B7A70", fontSize: 12, textTransform: "uppercase" }}>
-                      <th style={{ padding: "10px 0" }}>Client</th>
-                      <th style={{ padding: "10px 0" }}>Service</th>
-                      <th style={{ padding: "10px 0" }}>Date</th>
-                      <th style={{ padding: "10px 0" }}>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bookings.slice(0, 4).map((b) => (
-                      <tr key={b.id} style={{ borderBottom: "1px solid #F0ECE1" }}>
-                        <td style={{ padding: "14px 0", fontWeight: 600 }}>{b.client}</td>
-                        <td style={{ padding: "14px 0", color: "#6B7A70" }}>{b.service}</td>
-                        <td style={{ padding: "14px 0" }}>{b.date}</td>
-                        <td style={{ padding: "14px 0" }}>
-                          <span style={{ padding: "4px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: b.status === "Confirmed" ? "#54BC3318" : "#F39C1218", color: b.status === "Confirmed" ? "#45A027" : "#D68910" }}>
-                            {b.status}
-                          </span>
-                        </td>
+                {bookings.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "40px 20px", color: "#6B7A70" }}>
+                    <Calendar size={36} color="#2691BA" style={{ marginBottom: 10, opacity: 0.5 }} />
+                    <p style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>No client bookings recorded yet.</p>
+                    <p style={{ fontSize: 13, margin: 0 }}>Click &quot;+ New Booking&quot; above to record your first client reservation.</p>
+                  </div>
+                ) : (
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+                    <thead>
+                      <tr style={{ borderBottom: "1.5px solid #E2DDD3", textAlign: "left", color: "#6B7A70", fontSize: 12, textTransform: "uppercase" }}>
+                        <th style={{ padding: "10px 0" }}>Client</th>
+                        <th style={{ padding: "10px 0" }}>Service</th>
+                        <th style={{ padding: "10px 0" }}>Date</th>
+                        <th style={{ padding: "10px 0" }}>Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {bookings.slice(0, 4).map((b) => (
+                        <tr key={b.id} style={{ borderBottom: "1px solid #F0ECE1" }}>
+                          <td style={{ padding: "14px 0", fontWeight: 600 }}>{b.client}</td>
+                          <td style={{ padding: "14px 0", color: "#6B7A70" }}>{b.service}</td>
+                          <td style={{ padding: "14px 0" }}>{b.date}</td>
+                          <td style={{ padding: "14px 0" }}>
+                            <span style={{ padding: "4px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: b.status === "Confirmed" ? "#54BC3318" : "#F39C1218", color: b.status === "Confirmed" ? "#45A027" : "#D68910" }}>
+                              {b.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
 
               {/* Integrations Health Widget */}
@@ -367,8 +456,8 @@ export default function AdminPage() {
 
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderRadius: 12, backgroundColor: "#F9F8F5", border: "1px solid #E2DDD3" }}>
                     <div>
-                      <strong style={{ fontSize: 14, display: "block" }}>Resend Email Automation</strong>
-                      <span style={{ fontSize: 11, color: "#6B7A70" }}>Ready for API key</span>
+                      <strong style={{ fontSize: 14, display: "block" }}>LinkedIn Cross-Posting</strong>
+                      <span style={{ fontSize: 11, color: "#6B7A70" }}>Blotato API Ready</span>
                     </div>
                     <AlertCircle size={20} color="#D68910" />
                   </div>
@@ -397,40 +486,51 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
-              <thead>
-                <tr style={{ borderBottom: "2px solid #E2DDD3", textAlign: "left", color: "#6B7A70", fontSize: 12, textTransform: "uppercase" }}>
-                  <th style={{ padding: "12px 10px" }}>ID</th>
-                  <th style={{ padding: "12px 10px" }}>Client</th>
-                  <th style={{ padding: "12px 10px" }}>Email</th>
-                  <th style={{ padding: "12px 10px" }}>Service</th>
-                  <th style={{ padding: "12px 10px" }}>Date & Time</th>
-                  <th style={{ padding: "12px 10px" }}>Payment</th>
-                  <th style={{ padding: "12px 10px" }}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredBookings.map((b) => (
-                  <tr key={b.id} style={{ borderBottom: "1px solid #F0ECE1" }}>
-                    <td style={{ padding: "14px 10px", fontWeight: 700, color: "#2691BA" }}>{b.id}</td>
-                    <td style={{ padding: "14px 10px", fontWeight: 600 }}>{b.client}</td>
-                    <td style={{ padding: "14px 10px", color: "#6B7A70" }}>{b.email}</td>
-                    <td style={{ padding: "14px 10px" }}>{b.service}</td>
-                    <td style={{ padding: "14px 10px" }}>{b.date} · {b.time}</td>
-                    <td style={{ padding: "14px 10px" }}>
-                      <span style={{ fontSize: 12, padding: "3px 8px", borderRadius: 6, backgroundColor: "#EAEAEA", fontWeight: 600 }}>
-                        {b.payment}
-                      </span>
-                    </td>
-                    <td style={{ padding: "14px 10px" }}>
-                      <span style={{ padding: "4px 12px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: b.status === "Confirmed" ? "#54BC3318" : "#F39C1218", color: b.status === "Confirmed" ? "#45A027" : "#D68910" }}>
-                        {b.status}
-                      </span>
-                    </td>
+            {filteredBookings.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "50px 20px", color: "#6B7A70" }}>
+                <Calendar size={40} color="#2691BA" style={{ marginBottom: 12, opacity: 0.6 }} />
+                <h4 style={{ fontSize: 18, margin: "0 0 6px", color: "#1A252C" }}>No bookings found</h4>
+                <p style={{ fontSize: 14, margin: "0 0 20px" }}>Create your first client reservation to get started.</p>
+                <button onClick={() => setShowAddBooking(true)} className="btn-pill btn-pill-cyan">
+                  + Add Client Booking
+                </button>
+              </div>
+            ) : (
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+                <thead>
+                  <tr style={{ borderBottom: "2px solid #E2DDD3", textAlign: "left", color: "#6B7A70", fontSize: 12, textTransform: "uppercase" }}>
+                    <th style={{ padding: "12px 10px" }}>ID</th>
+                    <th style={{ padding: "12px 10px" }}>Client</th>
+                    <th style={{ padding: "12px 10px" }}>Email</th>
+                    <th style={{ padding: "12px 10px" }}>Service</th>
+                    <th style={{ padding: "12px 10px" }}>Date & Time</th>
+                    <th style={{ padding: "12px 10px" }}>Payment</th>
+                    <th style={{ padding: "12px 10px" }}>Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredBookings.map((b) => (
+                    <tr key={b.id} style={{ borderBottom: "1px solid #F0ECE1" }}>
+                      <td style={{ padding: "14px 10px", fontWeight: 700, color: "#2691BA" }}>{b.id}</td>
+                      <td style={{ padding: "14px 10px", fontWeight: 600 }}>{b.client}</td>
+                      <td style={{ padding: "14px 10px", color: "#6B7A70" }}>{b.email}</td>
+                      <td style={{ padding: "14px 10px" }}>{b.service}</td>
+                      <td style={{ padding: "14px 10px" }}>{b.date} · {b.time}</td>
+                      <td style={{ padding: "14px 10px" }}>
+                        <span style={{ fontSize: 12, padding: "3px 8px", borderRadius: 6, backgroundColor: "#EAEAEA", fontWeight: 600 }}>
+                          {b.payment}
+                        </span>
+                      </td>
+                      <td style={{ padding: "14px 10px" }}>
+                        <span style={{ padding: "4px 12px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: b.status === "Confirmed" ? "#54BC3318" : "#F39C1218", color: b.status === "Confirmed" ? "#45A027" : "#D68910" }}>
+                          {b.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
 
@@ -468,43 +568,50 @@ export default function AdminPage() {
               <div style={{ backgroundColor: "#ffffff", padding: "28px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
                 <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, color: "#2691BA", marginBottom: 20 }}>Generated Studio Invoices</h3>
 
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, marginBottom: 30 }}>
-                  <thead>
-                    <tr style={{ borderBottom: "2px solid #E2DDD3", textAlign: "left", color: "#6B7A70", fontSize: 12, textTransform: "uppercase" }}>
-                      <th style={{ padding: "10px" }}>Invoice #</th>
-                      <th style={{ padding: "10px" }}>Client</th>
-                      <th style={{ padding: "10px" }}>Date</th>
-                      <th style={{ padding: "10px" }}>Total</th>
-                      <th style={{ padding: "10px" }}>Status</th>
-                      <th style={{ padding: "10px" }}>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {invoices.map((inv) => (
-                      <tr key={inv.id} style={{ borderBottom: "1px solid #F0ECE1" }}>
-                        <td style={{ padding: "12px 10px", fontWeight: 700, color: "#2691BA" }}>{inv.id}</td>
-                        <td style={{ padding: "12px 10px", fontWeight: 600 }}>{inv.client}</td>
-                        <td style={{ padding: "12px 10px", color: "#6B7A70" }}>{inv.date}</td>
-                        <td style={{ padding: "12px 10px", fontWeight: 700 }}>{inv.total}</td>
-                        <td style={{ padding: "12px 10px" }}>
-                          <span style={{ padding: "3px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: inv.status.includes("Paid") ? "#54BC3318" : "#F39C1218", color: inv.status.includes("Paid") ? "#45A027" : "#D68910" }}>
-                            {inv.status}
-                          </span>
-                        </td>
-                        <td style={{ padding: "12px 10px" }}>
-                          <button
-                            onClick={() => setActiveInvoice(inv)}
-                            style={{ background: "none", border: "none", color: "#2691BA", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontWeight: 600, fontSize: 13 }}
-                          >
-                            <Eye size={15} /> Preview
-                          </button>
-                        </td>
+                {invoices.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "40px 20px", color: "#6B7A70" }}>
+                    <FileText size={36} color="#2691BA" style={{ marginBottom: 10, opacity: 0.5 }} />
+                    <p style={{ fontWeight: 600, fontSize: 15, margin: 0 }}>No invoices generated yet. Use the form on the left to create an invoice.</p>
+                  </div>
+                ) : (
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, marginBottom: 30 }}>
+                    <thead>
+                      <tr style={{ borderBottom: "2px solid #E2DDD3", textAlign: "left", color: "#6B7A70", fontSize: 12, textTransform: "uppercase" }}>
+                        <th style={{ padding: "10px" }}>Invoice #</th>
+                        <th style={{ padding: "10px" }}>Client</th>
+                        <th style={{ padding: "10px" }}>Date</th>
+                        <th style={{ padding: "10px" }}>Total</th>
+                        <th style={{ padding: "10px" }}>Status</th>
+                        <th style={{ padding: "10px" }}>Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {invoices.map((inv) => (
+                        <tr key={inv.id} style={{ borderBottom: "1px solid #F0ECE1" }}>
+                          <td style={{ padding: "12px 10px", fontWeight: 700, color: "#2691BA" }}>{inv.id}</td>
+                          <td style={{ padding: "12px 10px", fontWeight: 600 }}>{inv.client}</td>
+                          <td style={{ padding: "12px 10px", color: "#6B7A70" }}>{inv.date}</td>
+                          <td style={{ padding: "12px 10px", fontWeight: 700 }}>{inv.total}</td>
+                          <td style={{ padding: "12px 10px" }}>
+                            <span style={{ padding: "3px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: inv.status.includes("Paid") ? "#54BC3318" : "#F39C1218", color: inv.status.includes("Paid") ? "#45A027" : "#D68910" }}>
+                              {inv.status}
+                            </span>
+                          </td>
+                          <td style={{ padding: "12px 10px" }}>
+                            <button
+                              onClick={() => setActiveInvoice(inv)}
+                              style={{ background: "none", border: "none", color: "#2691BA", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontWeight: 600, fontSize: 13 }}
+                            >
+                              <Eye size={15} /> Preview
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
 
-                {/* Active Invoice Preview Modal Box */}
+                {/* Active Invoice Preview Box */}
                 {activeInvoice && (
                   <div style={{ padding: "30px", borderRadius: 16, border: "2px solid #2691BA", backgroundColor: "#FBF9F4" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #E2DDD3", paddingBottom: 20, marginBottom: 20 }}>
@@ -570,67 +677,118 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* TAB 4: EMAIL AUTOMATION (MAILCHIMP ALTERNATIVE) */}
+        {/* TAB 4: EMAIL AUTOMATION */}
         {activeTab === "email" && (
           <div>
-            {/* Audience Segments Summary */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, marginBottom: 30 }}>
-              {[
-                { label: "All Studio Contacts", val: "342", desc: "Total Audience" },
-                { label: "Weekly Online Students", val: "84", desc: "Teams Class Pass" },
-                { label: "Greece Retreat Guests", val: "12", desc: "Oct 2026 Retreat" },
-                { label: "Journal Subscribers", val: "220", desc: "Practice Reflections" },
-              ].map((seg, idx) => (
-                <div key={idx} style={{ backgroundColor: "#ffffff", padding: "20px", borderRadius: 16, border: "1px solid #E2DDD3" }}>
-                  <span style={{ fontSize: 13, color: "#6B7A70", fontWeight: 600 }}>{seg.label}</span>
-                  <div style={{ fontSize: 28, fontWeight: 700, color: "#2691BA", margin: "6px 0 4px" }}>{seg.val}</div>
-                  <span style={{ fontSize: 12, color: "#6B7A70" }}>{seg.desc}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Email Broadcasts & Automation Workflows */}
             <div style={{ backgroundColor: "#ffffff", padding: "30px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", margin: 0 }}>Email Broadcasts &amp; Automation Workflows</h3>
+                <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", margin: 0 }}>Email Broadcasts &amp; Newsletters</h3>
                 <button onClick={() => setShowEmailModal(true)} className="btn-pill btn-pill-cyan">
                   + Create New Broadcast
                 </button>
               </div>
 
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
-                <thead>
-                  <tr style={{ borderBottom: "2px solid #E2DDD3", textAlign: "left", color: "#6B7A70", fontSize: 12, textTransform: "uppercase" }}>
-                    <th style={{ padding: "12px 10px" }}>Campaign Subject</th>
-                    <th style={{ padding: "12px 10px" }}>Target Audience</th>
-                    <th style={{ padding: "12px 10px" }}>Date</th>
-                    <th style={{ padding: "12px 10px" }}>Opens</th>
-                    <th style={{ padding: "12px 10px" }}>Clicks</th>
-                    <th style={{ padding: "12px 10px" }}>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {campaigns.map((cmp) => (
-                    <tr key={cmp.id} style={{ borderBottom: "1px solid #F0ECE1" }}>
-                      <td style={{ padding: "14px 10px", fontWeight: 600 }}>{cmp.subject}</td>
-                      <td style={{ padding: "14px 10px", color: "#6B7A70" }}>{cmp.segment}</td>
-                      <td style={{ padding: "14px 10px" }}>{cmp.sentDate}</td>
-                      <td style={{ padding: "14px 10px", fontWeight: 700, color: "#2691BA" }}>{cmp.opens}</td>
-                      <td style={{ padding: "14px 10px", fontWeight: 700, color: "#54BC33" }}>{cmp.clicks}</td>
-                      <td style={{ padding: "14px 10px" }}>
-                        <span style={{ padding: "4px 12px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: cmp.status === "Sent" ? "#54BC3318" : "#F39C1218", color: cmp.status === "Sent" ? "#45A027" : "#D68910" }}>
-                          {cmp.status}
-                        </span>
-                      </td>
+              {campaigns.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "40px 20px", color: "#6B7A70" }}>
+                  <Mail size={36} color="#2691BA" style={{ marginBottom: 10, opacity: 0.5 }} />
+                  <p style={{ fontWeight: 600, fontSize: 15, margin: "0 0 10px" }}>No email broadcasts created yet.</p>
+                  <button onClick={() => setShowEmailModal(true)} className="btn-pill btn-pill-cyan">
+                    + Create New Broadcast
+                  </button>
+                </div>
+              ) : (
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+                  <thead>
+                    <tr style={{ borderBottom: "2px solid #E2DDD3", textAlign: "left", color: "#6B7A70", fontSize: 12, textTransform: "uppercase" }}>
+                      <th style={{ padding: "12px 10px" }}>Campaign Subject</th>
+                      <th style={{ padding: "12px 10px" }}>Target Audience</th>
+                      <th style={{ padding: "12px 10px" }}>Date</th>
+                      <th style={{ padding: "12px 10px" }}>Opens</th>
+                      <th style={{ padding: "12px 10px" }}>Clicks</th>
+                      <th style={{ padding: "12px 10px" }}>Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {campaigns.map((cmp) => (
+                      <tr key={cmp.id} style={{ borderBottom: "1px solid #F0ECE1" }}>
+                        <td style={{ padding: "14px 10px", fontWeight: 600 }}>{cmp.subject}</td>
+                        <td style={{ padding: "14px 10px", color: "#6B7A70" }}>{cmp.segment}</td>
+                        <td style={{ padding: "14px 10px" }}>{cmp.sentDate}</td>
+                        <td style={{ padding: "14px 10px", fontWeight: 700, color: "#2691BA" }}>{cmp.opens}</td>
+                        <td style={{ padding: "14px 10px", fontWeight: 700, color: "#54BC33" }}>{cmp.clicks}</td>
+                        <td style={{ padding: "14px 10px" }}>
+                          <span style={{ padding: "4px 12px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: cmp.status === "Sent" ? "#54BC3318" : "#F39C1218", color: cmp.status === "Sent" ? "#45A027" : "#D68910" }}>
+                            {cmp.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         )}
 
-        {/* TAB 5: RETREATS */}
+        {/* TAB 5: SUBSCRIBERS & CONSENT MANAGEMENT */}
+        {activeTab === "subscribers" && (
+          <div style={{ backgroundColor: "#ffffff", padding: "30px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 25 }}>
+              <div>
+                <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", margin: 0 }}>Subscriber &amp; Opt-Out Directory</h3>
+                <p style={{ color: "#6B7A70", fontSize: 14, margin: "4px 0 0" }}>Manage studio newsletter contacts, active subscribers, and unsubscribed opt-outs.</p>
+              </div>
+              <button onClick={() => setShowSubModal(true)} className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <UserPlus size={16} /> Add Subscriber
+              </button>
+            </div>
+
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+              <thead>
+                <tr style={{ borderBottom: "2px solid #E2DDD3", textAlign: "left", color: "#6B7A70", fontSize: 12, textTransform: "uppercase" }}>
+                  <th style={{ padding: "12px 10px" }}>ID</th>
+                  <th style={{ padding: "12px 10px" }}>Name</th>
+                  <th style={{ padding: "12px 10px" }}>Email</th>
+                  <th style={{ padding: "12px 10px" }}>Segment</th>
+                  <th style={{ padding: "12px 10px" }}>Subscribed Date</th>
+                  <th style={{ padding: "12px 10px" }}>Status</th>
+                  <th style={{ padding: "12px 10px" }}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {subscribers.map((sub) => (
+                  <tr key={sub.id} style={{ borderBottom: "1px solid #F0ECE1" }}>
+                    <td style={{ padding: "14px 10px", fontWeight: 700, color: "#2691BA" }}>{sub.id}</td>
+                    <td style={{ padding: "14px 10px", fontWeight: 600 }}>{sub.name}</td>
+                    <td style={{ padding: "14px 10px", color: "#6B7A70" }}>{sub.email}</td>
+                    <td style={{ padding: "14px 10px" }}>
+                      <span style={{ padding: "3px 8px", borderRadius: 6, backgroundColor: "#EAEAEA", fontSize: 12 }}>
+                        {sub.segment}
+                      </span>
+                    </td>
+                    <td style={{ padding: "14px 10px" }}>{sub.date}</td>
+                    <td style={{ padding: "14px 10px" }}>
+                      <span style={{ padding: "4px 12px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: sub.status === "Subscribed" ? "#54BC3318" : "#E74C3C18", color: sub.status === "Subscribed" ? "#45A027" : "#C0392B" }}>
+                        {sub.status}
+                      </span>
+                    </td>
+                    <td style={{ padding: "14px 10px" }}>
+                      <button
+                        onClick={() => toggleSubscriberStatus(sub.id)}
+                        style={{ background: "none", border: "none", color: sub.status === "Subscribed" ? "#E74C3C" : "#45A027", cursor: "pointer", fontWeight: 600, fontSize: 13, display: "inline-flex", alignItems: "center", gap: 4 }}
+                      >
+                        {sub.status === "Subscribed" ? <UserX size={15} /> : <UserCheck size={15} />}
+                        {sub.status === "Subscribed" ? "Unsubscribe" : "Resubscribe"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* TAB 6: RETREATS */}
         {activeTab === "retreats" && (
           <div style={{ backgroundColor: "#ffffff", padding: "30px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
             <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", marginBottom: 10 }}>Peloponnese Greece Retreat 2026</h3>
@@ -639,29 +797,49 @@ export default function AdminPage() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 30 }}>
               <div style={{ padding: 20, borderRadius: 14, backgroundColor: "rgba(38,145,186,0.06)", border: "1px solid rgba(38,145,186,0.2)" }}>
                 <strong style={{ fontSize: 16, color: "#2691BA" }}>Twin Share Option (CHF 1,810)</strong>
-                <p style={{ fontSize: 24, fontWeight: 700, margin: "8px 0 0" }}>8 Registered</p>
+                <p style={{ fontSize: 24, fontWeight: 700, margin: "8px 0 0" }}>0 Registered</p>
               </div>
               <div style={{ padding: 20, borderRadius: 14, backgroundColor: "rgba(84,188,51,0.06)", border: "1px solid rgba(84,188,51,0.2)" }}>
                 <strong style={{ fontSize: 16, color: "#45A027" }}>Sole Occupancy Option (CHF 2,260)</strong>
-                <p style={{ fontSize: 24, fontWeight: 700, margin: "8px 0 0" }}>4 Registered</p>
+                <p style={{ fontSize: 24, fontWeight: 700, margin: "8px 0 0" }}>0 Registered</p>
               </div>
             </div>
           </div>
         )}
 
-        {/* TAB 6: CONTENT */}
+        {/* TAB 7: CONTENT & LINKEDIN */}
         {activeTab === "content" && (
           <div style={{ backgroundColor: "#ffffff", padding: "30px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
-            <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", marginBottom: 20 }}>Journal Articles &amp; Practice Notes</h3>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <div>
+                <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", margin: 0 }}>Journal Articles &amp; LinkedIn Auto-Publish</h3>
+                <p style={{ fontSize: 14, color: "#6B7A70", margin: "4px 0 0" }}>Publishing a blog note automatically cross-posts to LinkedIn and broadcasts to email subscribers.</p>
+              </div>
+              <button onClick={() => setShowArticleModal(true)} className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <Plus size={16} /> Write New Journal Note
+              </button>
+            </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {articles.map((art) => (
-                <div key={art.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", borderRadius: 12, border: "1px solid #E2DDD3", backgroundColor: "#FBF9F4" }}>
+                <div key={art.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 22px", borderRadius: 14, border: "1px solid #E2DDD3", backgroundColor: "#FBF9F4" }}>
                   <div>
-                    <strong style={{ fontSize: 16, color: "#1A252C" }}>{art.title}</strong>
-                    <div style={{ fontSize: 13, color: "#6B7A70", marginTop: 4 }}>{art.category} · {art.date}</div>
+                    <strong style={{ fontSize: 17, color: "#1A252C" }}>{art.title}</strong>
+                    <div style={{ fontSize: 13, color: "#6B7A70", marginTop: 4, display: "flex", gap: 15, alignItems: "center" }}>
+                      <span>{art.category} · {art.date}</span>
+                      {art.linkedin && (
+                        <span style={{ color: "#0077B5", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 3 }}>
+                          <Linkedin size={13} /> LinkedIn Posted
+                        </span>
+                      )}
+                      {art.broadcastSent && (
+                        <span style={{ color: "#45A027", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 3 }}>
+                          <Send size={13} /> Email Broadcasted
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <span style={{ padding: "4px 12px", borderRadius: 100, fontSize: 12, fontWeight: 700, backgroundColor: "#54BC3318", color: "#45A027" }}>
+                  <span style={{ padding: "4px 12px", borderRadius: 100, fontSize: 12, fontWeight: 700, backgroundColor: art.status === "Published" ? "#54BC3318" : "#F39C1218", color: art.status === "Published" ? "#45A027" : "#D68910" }}>
                     {art.status}
                   </span>
                 </div>
@@ -670,7 +848,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* TAB 7: API & INTEGRATIONS SETTINGS */}
+        {/* TAB 8: API & INTEGRATIONS SETTINGS */}
         {activeTab === "settings" && (
           <div style={{ backgroundColor: "#ffffff", padding: "35px", borderRadius: 18, border: "1px solid #E2DDD3", maxWidth: 850 }}>
             <h3 style={{ fontFamily: "var(--serif)", fontSize: 26, color: "#2691BA", marginBottom: 25 }}>API Keys &amp; Integrations Setup</h3>
@@ -771,15 +949,15 @@ export default function AdminPage() {
         {showEmailModal && (
           <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <div style={{ backgroundColor: "#ffffff", padding: "35px", borderRadius: 20, width: "100%", maxWidth: 580, boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }}>
-              <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", marginBottom: 20 }}>Create Email Broadcast (Mailchimp Alt)</h3>
+              <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", marginBottom: 20 }}>Create Email Broadcast</h3>
               <form onSubmit={handleCreateCampaign}>
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Target Audience Segment</label>
                   <select value={emailSegment} onChange={(e) => setEmailSegment(e.target.value)} className="form-input">
-                    <option value="All Subscribers (342)">All Studio Subscribers (342)</option>
-                    <option value="Online Students (84)">Weekly Online Students (84)</option>
-                    <option value="Greece Retreat Guests (12)">Greece Retreat Guests (12)</option>
-                    <option value="Journal Subscribers (220)">Journal Subscribers (220)</option>
+                    <option value="All Subscribers">All Studio Subscribers</option>
+                    <option value="Online Students">Weekly Online Students</option>
+                    <option value="Retreat Guests">Greece Retreat Guests</option>
+                    <option value="Journal Subscribers">Journal Subscribers</option>
                   </select>
                 </div>
 
@@ -799,6 +977,95 @@ export default function AdminPage() {
                   </button>
                   <button type="submit" className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                     <Send size={15} /> Send Broadcast Now
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal 3: Write Article & Auto Cross-Post */}
+        {showArticleModal && (
+          <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ backgroundColor: "#ffffff", padding: "35px", borderRadius: 20, width: "100%", maxWidth: 620, boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }}>
+              <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", marginBottom: 20 }}>Write New Journal Note</h3>
+              <form onSubmit={handlePublishArticle}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Article Title</label>
+                  <input type="text" className="form-input" required value={artTitle} onChange={(e) => setArtTitle(e.target.value)} placeholder="e.g. The Power of Restorative Practice" />
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Category</label>
+                  <select value={artCategory} onChange={(e) => setArtCategory(e.target.value)} className="form-input">
+                    <option value="Practice Notes">Practice Notes</option>
+                    <option value="Mindful Living">Mindful Living</option>
+                    <option value="Retreat Insights">Retreat Insights</option>
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: 20 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Content / Reflection</label>
+                  <textarea className="form-textarea" rows={5} required value={artContent} onChange={(e) => setArtContent(e.target.value)} placeholder="Write your reflection here..." />
+                </div>
+
+                {/* Auto Cross-Posting Options */}
+                <div style={{ backgroundColor: "rgba(38,145,186,0.06)", padding: "16px 20px", borderRadius: 12, marginBottom: 25, display: "flex", flexDirection: "column", gap: 10 }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#0077B5" }}>
+                    <input type="checkbox" checked={postToLinkedin} onChange={(e) => setPostToLinkedin(e.target.checked)} />
+                    <Linkedin size={16} /> Auto Cross-Post to Susi&apos;s LinkedIn Account
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#45A027" }}>
+                    <input type="checkbox" checked={broadcastToEmail} onChange={(e) => setBroadcastToEmail(e.target.checked)} />
+                    <Send size={16} /> Broadcast Notification to All Studio Subscribers
+                  </label>
+                </div>
+
+                <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+                  <button type="button" onClick={() => setShowArticleModal(false)} style={{ padding: "10px 20px", borderRadius: 20, border: "1px solid #ccc", background: "none", cursor: "pointer" }}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <Share2 size={15} /> Publish &amp; Cross-Post Now
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal 4: Add Subscriber */}
+        {showSubModal && (
+          <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ backgroundColor: "#ffffff", padding: "35px", borderRadius: 20, width: "100%", maxWidth: 480, boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }}>
+              <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", marginBottom: 20 }}>Add Subscriber Contact</h3>
+              <form onSubmit={handleAddSubscriber}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Full Name (Optional)</label>
+                  <input type="text" className="form-input" value={subName} onChange={(e) => setSubName(e.target.value)} placeholder="e.g. Sarah Jenkins" />
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Email Address</label>
+                  <input type="email" className="form-input" required value={subEmail} onChange={(e) => setSubEmail(e.target.value)} placeholder="e.g. sarah@example.com" />
+                </div>
+
+                <div style={{ marginBottom: 25 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Segment</label>
+                  <select value={subSegment} onChange={(e) => setSubSegment(e.target.value)} className="form-input">
+                    <option value="Journal Subscribers">Journal Subscribers</option>
+                    <option value="Online Students">Weekly Online Students</option>
+                    <option value="Coaching Clients">Coaching Clients</option>
+                    <option value="Retreat Guests">Retreat Guests</option>
+                  </select>
+                </div>
+
+                <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+                  <button type="button" onClick={() => setShowSubModal(false)} style={{ padding: "10px 20px", borderRadius: 20, border: "1px solid #ccc", background: "none", cursor: "pointer" }}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-pill btn-pill-cyan">
+                    Save Contact
                   </button>
                 </div>
               </form>
