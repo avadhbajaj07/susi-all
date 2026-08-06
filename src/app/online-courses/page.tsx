@@ -90,17 +90,15 @@ export default function OnlineCoursesPage() {
                   </svg>
                 </div>
 
-                {/* E-RYT 500 Yoga Alliance Badge */}
+                {/* E-RYT 500 Yoga Alliance Badge Image */}
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  <svg width="115" height="115" viewBox="0 0 110 110" fill="none">
-                    <circle cx="55" cy="55" r="50" stroke="#1A1A1A" strokeWidth="3.5"/>
-                    <circle cx="55" cy="55" r="42" stroke="#1A1A1A" strokeWidth="1.5"/>
-                    <path d="M 25 36 A 35 35 0 0 1 85 36" fill="none" id="arcText" />
-                    <text x="55" y="30" textAnchor="middle" fill="#1A1A1A" fontSize="7" fontWeight="700" letterSpacing="0.8">REGISTERED YOGA TEACHER</text>
-                    <text x="55" y="52" textAnchor="middle" fill="#1A1A1A" fontSize="13" fontWeight="900" letterSpacing="1">E-RYT</text>
-                    <text x="55" y="72" textAnchor="middle" fill="#1A1A1A" fontSize="20" fontWeight="900">500</text>
-                    <text x="55" y="88" textAnchor="middle" fill="#1A1A1A" fontSize="9" fontStyle="italic" fontWeight="600">yoga alliance</text>
-                  </svg>
+                  <Image
+                    src="/images/e-ryt.png"
+                    alt="E-RYT 500 Yoga Alliance Registered Yoga Teacher"
+                    width={130}
+                    height={130}
+                    style={{ objectFit: "contain" }}
+                  />
                 </div>
               </div>
             </div>
