@@ -182,6 +182,10 @@ export default function AdminPage() {
   const [artTitle, setArtTitle] = useState("");
   const [artCategory, setArtCategory] = useState("Practice Notes");
   const [artContent, setArtContent] = useState("");
+  const [artImage, setArtImage] = useState("");
+  const [artScheduleMode, setArtScheduleMode] = useState<"now" | "schedule">("now");
+  const [artScheduleDate, setArtScheduleDate] = useState("2026-08-10");
+  const [artScheduleTime, setArtScheduleTime] = useState("09:00 AM");
   const [postToLinkedin, setPostToLinkedin] = useState(true);
   const [broadcastToEmail, setBroadcastToEmail] = useState(true);
 
@@ -240,12 +244,14 @@ export default function AdminPage() {
   const handlePublishArticle = (e: React.FormEvent) => {
     e.preventDefault();
     if (!artTitle) return;
+    const isScheduled = artScheduleMode === "schedule";
     const newArt = {
       id: articles.length + 1,
       title: artTitle,
       category: artCategory,
-      status: "Published",
-      date: "Aug 06, 2026",
+      image: artImage,
+      status: isScheduled ? `Scheduled (${artScheduleDate} ${artScheduleTime})` : "Published",
+      date: isScheduled ? artScheduleDate : "Aug 06, 2026",
       linkedin: postToLinkedin,
       broadcastSent: broadcastToEmail,
     };
@@ -255,12 +261,12 @@ export default function AdminPage() {
       setCampaigns([
         {
           id: `CMP-0${campaigns.length + 1}`,
-          subject: `New Journal Note: ${artTitle}`,
+          subject: `${isScheduled ? "[Scheduled] " : ""}New Journal Note: ${artTitle}`,
           segment: "All Subscribers",
-          status: "Sent",
-          sentDate: "Today",
-          opens: "100%",
-          clicks: "50%",
+          status: isScheduled ? `Scheduled (${artScheduleDate})` : "Sent",
+          sentDate: isScheduled ? artScheduleDate : "Today",
+          opens: isScheduled ? "0%" : "100%",
+          clicks: isScheduled ? "0%" : "50%",
         },
         ...campaigns,
       ]);
@@ -268,6 +274,7 @@ export default function AdminPage() {
 
     setArtTitle("");
     setArtContent("");
+    setArtImage("");
     setShowArticleModal(false);
   };
 
@@ -1103,23 +1110,31 @@ export default function AdminPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {articles.map((art) => (
                 <div key={art.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 22px", borderRadius: 14, border: "1px solid #E2DDD3", backgroundColor: "#FBF9F4" }}>
-                  <div>
-                    <strong style={{ fontSize: 17, color: "#1A252C" }}>{art.title}</strong>
-                    <div style={{ fontSize: 13, color: "#6B7A70", marginTop: 4, display: "flex", gap: 15, alignItems: "center" }}>
-                      <span>{art.category} · {art.date}</span>
-                      {art.linkedin && (
-                        <span style={{ color: "#0077B5", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 3 }}>
-                          <Linkedin size={13} /> LinkedIn Posted
-                        </span>
-                      )}
-                      {art.broadcastSent && (
-                        <span style={{ color: "#45A027", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 3 }}>
-                          <Send size={13} /> Email Broadcasted
-                        </span>
-                      )}
+                  <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+                    {art.image && (
+                      <div style={{ width: 60, height: 60, borderRadius: 8, overflow: "hidden", flexShrink: 0 }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={art.image} alt={art.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      </div>
+                    )}
+                    <div>
+                      <strong style={{ fontSize: 17, color: "#1A252C" }}>{art.title}</strong>
+                      <div style={{ fontSize: 13, color: "#6B7A70", marginTop: 4, display: "flex", gap: 15, alignItems: "center", flexWrap: "wrap" }}>
+                        <span>{art.category} · {art.date}</span>
+                        {art.linkedin && (
+                          <span style={{ color: "#0077B5", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 3 }}>
+                            <Linkedin size={13} /> LinkedIn {art.status.includes("Scheduled") ? "Scheduled" : "Posted"}
+                          </span>
+                        )}
+                        {art.broadcastSent && (
+                          <span style={{ color: "#45A027", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 3 }}>
+                            <Send size={13} /> Email {art.status.includes("Scheduled") ? "Scheduled" : "Broadcasted"}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <span style={{ padding: "4px 12px", borderRadius: 100, fontSize: 12, fontWeight: 700, backgroundColor: art.status === "Published" ? "#54BC3318" : "#F39C1218", color: art.status === "Published" ? "#45A027" : "#D68910" }}>
+                  <span style={{ padding: "4px 12px", borderRadius: 100, fontSize: 12, fontWeight: 700, backgroundColor: art.status === "Published" ? "#54BC3318" : art.status.includes("Scheduled") ? "#3498DB18" : "#F39C1218", color: art.status === "Published" ? "#45A027" : art.status.includes("Scheduled") ? "#2980B9" : "#D68910" }}>
                     {art.status}
                   </span>
                 </div>
@@ -1264,10 +1279,10 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Modal 3: Write Article & Auto Cross-Post */}
+        {/* Modal 3: Write Article & Auto Cross-Post with Image Upload & Scheduling */}
         {showArticleModal && (
           <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <div style={{ backgroundColor: "#ffffff", padding: "35px", borderRadius: 20, width: "100%", maxWidth: 620, boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }}>
+            <div style={{ backgroundColor: "#ffffff", padding: "35px", borderRadius: 20, width: "100%", maxWidth: 650, boxShadow: "0 10px 40px rgba(0,0,0,0.2)", maxHeight: "90vh", overflowY: "auto" }}>
               <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", marginBottom: 20 }}>Write New Journal Note</h3>
               <form onSubmit={handlePublishArticle}>
                 <div style={{ marginBottom: 16 }}>
@@ -1284,9 +1299,74 @@ export default function AdminPage() {
                   </select>
                 </div>
 
+                {/* Featured Cover Image Upload */}
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Featured Cover Image</label>
+                  <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setArtImage(reader.result as string);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      style={{ fontSize: 13 }}
+                    />
+                  </div>
+                  {artImage && (
+                    <div style={{ marginTop: 10, position: "relative", width: 120, height: 80, borderRadius: 8, overflow: "hidden", border: "1px solid #2691BA" }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={artImage} alt="Cover Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <button
+                        type="button"
+                        onClick={() => setArtImage("")}
+                        style={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,0.6)", color: "#fff", border: "none", borderRadius: "50%", width: 20, height: 20, cursor: "pointer", fontSize: 11 }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <div style={{ marginBottom: 20 }}>
                   <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Content / Reflection</label>
-                  <textarea className="form-textarea" rows={5} required value={artContent} onChange={(e) => setArtContent(e.target.value)} placeholder="Write your reflection here..." />
+                  <textarea className="form-textarea" rows={4} required value={artContent} onChange={(e) => setArtContent(e.target.value)} placeholder="Write your reflection here..." />
+                </div>
+
+                {/* Scheduling Controls */}
+                <div style={{ backgroundColor: "#FBF9F4", padding: "16px 20px", borderRadius: 12, marginBottom: 20, border: "1px solid #E2DDD3" }}>
+                  <label style={{ fontSize: 13, fontWeight: 700, color: "#2691BA", textTransform: "uppercase", display: "block", marginBottom: 10 }}>
+                    Publish &amp; Distribution Schedule
+                  </label>
+                  <div style={{ display: "flex", gap: 20, marginBottom: 12 }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                      <input type="radio" name="scheduleMode" checked={artScheduleMode === "now"} onChange={() => setArtScheduleMode("now")} />
+                      ⚡ Publish &amp; Broadcast Immediately
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                      <input type="radio" name="scheduleMode" checked={artScheduleMode === "schedule"} onChange={() => setArtScheduleMode("schedule")} />
+                      📅 Schedule for Future Date &amp; Time
+                    </label>
+                  </div>
+
+                  {artScheduleMode === "schedule" && (
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 10 }}>
+                      <div>
+                        <label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>Schedule Date</label>
+                        <input type="date" className="form-input" value={artScheduleDate} onChange={(e) => setArtScheduleDate(e.target.value)} />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>Schedule Time</label>
+                        <input type="text" className="form-input" value={artScheduleTime} onChange={(e) => setArtScheduleTime(e.target.value)} placeholder="e.g. 09:00 AM" />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Auto Cross-Posting Options */}
@@ -1306,7 +1386,7 @@ export default function AdminPage() {
                     Cancel
                   </button>
                   <button type="submit" className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                    <Share2 size={15} /> Publish &amp; Cross-Post Now
+                    <Share2 size={15} /> {artScheduleMode === "schedule" ? `Schedule for ${artScheduleDate || "Later"}` : "Publish & Cross-Post Now"}
                   </button>
                 </div>
               </form>
