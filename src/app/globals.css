@@ -139,6 +139,21 @@ h1 {
   width: 100%;
 }
 
+.mobile-toggle-wrapper {
+  display: none;
+}
+
+.menu-button {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
 /* Page Hero Banner */
 .page-banner {
   height: clamp(340px, 38vh, 460px);
