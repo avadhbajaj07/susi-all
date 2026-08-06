@@ -30,9 +30,28 @@ import {
   Share2,
 } from "lucide-react";
 
-// Real Initial Clean Data
+import { SusiInvoiceTemplate } from "@/components/invoice-template";
+
+// Initial Studio Data
 const initialBookings: any[] = [];
-const initialInvoices: any[] = [];
+const initialInvoices: any[] = [
+  {
+    id: "SD-2026-001",
+    client: "Avadh Bajaj",
+    email: "avadh@example.com",
+    date: "05 Jun 2026",
+    dueDate: "19 Jun 2026",
+    status: "draft",
+    paymentNotice: "You need to pay in next 14 days.",
+    paymentMethod: "Bank transfer details or TWINT (+41 79 854 97 52)",
+    items: [
+      { desc: "Private yoga, breathwork and movement therapy session", qty: 1, rate: 150, amount: 150 },
+      { desc: "Yiga online", qty: 1, rate: 20, amount: 20 },
+    ],
+    subtotal: 170,
+    total: "CHF 170.00",
+  },
+];
 const initialCampaigns: any[] = [];
 const initialArticles: any[] = [
   { id: 1, title: "Movement & Neural Alignment: Moving with Intention", category: "Practice Notes", status: "Published", date: "Aug 06, 2026", linkedin: true, broadcastSent: true },
@@ -611,65 +630,38 @@ export default function AdminPage() {
                   </table>
                 )}
 
-                {/* Active Invoice Preview Box */}
+                {/* Active Invoice Preview Box with User's Exact Design */}
                 {activeInvoice && (
-                  <div style={{ padding: "30px", borderRadius: 16, border: "2px solid #2691BA", backgroundColor: "#FBF9F4" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #E2DDD3", paddingBottom: 20, marginBottom: 20 }}>
-                      <div>
-                        <h2 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", margin: 0 }}>SUSI DAVIES STUDIO</h2>
-                        <span style={{ fontSize: 12, color: "#6B7A70" }}>Gewerbestrasse 24, 8800 Thalwil · Switzerland</span>
-                      </div>
-                      <div style={{ textAlign: "right" }}>
-                        <h3 style={{ fontSize: 18, margin: 0, color: "#1A252C" }}>INVOICE</h3>
-                        <span style={{ fontSize: 14, fontWeight: 700, color: "#2691BA" }}>{activeInvoice.id}</span>
-                      </div>
-                    </div>
-
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 25, fontSize: 14 }}>
-                      <div>
-                        <strong>Billed To:</strong>
-                        <div style={{ fontSize: 15, fontWeight: 600, marginTop: 4 }}>{activeInvoice.client}</div>
-                        <div style={{ color: "#6B7A70" }}>{activeInvoice.email}</div>
-                      </div>
-                      <div style={{ textAlign: "right" }}>
-                        <div><strong>Invoice Date:</strong> {activeInvoice.date}</div>
-                        <div><strong>Due Date:</strong> {activeInvoice.dueDate}</div>
-                      </div>
-                    </div>
-
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, marginBottom: 20 }}>
-                      <thead>
-                        <tr style={{ borderBottom: "1px solid #2691BA", textAlign: "left", color: "#2691BA" }}>
-                          <th style={{ padding: "8px 0" }}>Description</th>
-                          <th style={{ padding: "8px 0", textAlign: "center" }}>Qty</th>
-                          <th style={{ padding: "8px 0", textAlign: "right" }}>Price</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {activeInvoice.items.map((item: any, idx: number) => (
-                          <tr key={idx} style={{ borderBottom: "1px solid #E2DDD3" }}>
-                            <td style={{ padding: "10px 0" }}>{item.desc}</td>
-                            <td style={{ padding: "10px 0", textAlign: "center" }}>{item.qty}</td>
-                            <td style={{ padding: "10px 0", textAlign: "right", fontWeight: 600 }}>CHF {item.price}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "2px solid #2691BA", paddingTop: 16 }}>
-                      <div>
-                        <span style={{ fontSize: 12, color: "#6B7A70", display: "block" }}>Payment Info: TWINT (+41 79 854 97 52)</span>
-                      </div>
-                      <div style={{ fontSize: 20, fontWeight: 700, color: "#2691BA" }}>
-                        Total: {activeInvoice.total}
-                      </div>
-                    </div>
-
-                    <div style={{ display: "flex", gap: 12, marginTop: 25, justifyContent: "flex-end" }}>
-                      <button onClick={() => window.print()} className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 18px", fontSize: 13 }}>
+                  <div style={{ marginTop: 25 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 15 }}>
+                      <h4 style={{ fontFamily: "var(--serif)", fontSize: 20, color: "#2691BA", margin: 0 }}>Invoice Live Preview</h4>
+                      <button
+                        onClick={() => window.print()}
+                        className="btn-pill btn-pill-cyan"
+                        style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 20px", fontSize: 13 }}
+                      >
                         <Printer size={15} /> Print / Save PDF
                       </button>
                     </div>
+
+                    <SusiInvoiceTemplate
+                      data={{
+                        number: activeInvoice.number || activeInvoice.id || "SD-2026-001",
+                        issued: activeInvoice.issued || activeInvoice.date || "05 Jun 2026",
+                        due: activeInvoice.due || activeInvoice.dueDate || "19 Jun 2026",
+                        status: activeInvoice.status || "draft",
+                        clientName: activeInvoice.clientName || activeInvoice.client || "Avadh Bajaj",
+                        clientEmail: activeInvoice.clientEmail || activeInvoice.email,
+                        paymentNotice: activeInvoice.paymentNotice || "You need to pay in next 14 days.",
+                        paymentMethod: activeInvoice.paymentMethod || "Bank transfer details or TWINT (+41 79 854 97 52)",
+                        items: activeInvoice.items || [
+                          { desc: "Private yoga, breathwork and movement therapy session", qty: 1, rate: 150, amount: 150 },
+                          { desc: "Yiga online", qty: 1, rate: 20, amount: 20 },
+                        ],
+                        subtotal: activeInvoice.subtotal || 170,
+                        total: typeof activeInvoice.total === "number" ? activeInvoice.total : (parseFloat((activeInvoice.total || "").replace(/[^\d.]/g, "")) || 170),
+                      }}
+                    />
                   </div>
                 )}
               </div>
