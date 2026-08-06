@@ -27,6 +27,7 @@ export default function OnlineCoursesPage() {
                 alt="Practice with Susi Davies online"
                 width={500}
                 height={550}
+                style={{ width: "100%", height: "auto", objectFit: "contain" }}
                 priority
               />
             </div>
@@ -40,6 +41,69 @@ export default function OnlineCoursesPage() {
             <p className="body-text">
               Join weekly live sessions, masterclasses, and guided breathwork routines directly from your home studio.
             </p>
+          </div>
+        </section>
+
+        {/* Format & Certifications Section (User Requested) */}
+        <section style={{ margin: "70px 0 80px" }}>
+          <p className="body-text" style={{ textAlign: "center", color: "var(--muted)", marginBottom: 40 }}>
+            We offer the following pricing options and details for your convenience
+          </p>
+
+          <div className="grid-2col">
+            <div className="col-media">
+              <div className="image-card-rounded">
+                <Image
+                  src="/images/coaching4.jpg"
+                  alt="Susi Davies yoga posture in red swimsuit"
+                  width={500}
+                  height={620}
+                  style={{ width: "100%", height: "auto", objectFit: "contain" }}
+                />
+              </div>
+            </div>
+
+            <div className="col-content">
+              <h2 className="section-heading" style={{ fontSize: 46, marginBottom: 20 }}>
+                Format
+              </h2>
+              <ul className="bullet-list" style={{ marginBottom: 25 }}>
+                <li>Online via TEAMS</li>
+                <li>Structured course format</li>
+                <li>Details and schedule shared before launch</li>
+                <li>Officially starting August 15, 2026</li>
+              </ul>
+              <p className="body-text" style={{ marginBottom: 35 }}>
+                For updates or registration details, please get in touch directly.
+              </p>
+
+              {/* Certification Badges */}
+              <div style={{ display: "flex", gap: 30, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
+                {/* QualiCert Badge */}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <svg width="115" height="115" viewBox="0 0 110 110" fill="none">
+                    <circle cx="55" cy="55" r="50" stroke="#B89B5E" strokeWidth="2.5" strokeDasharray="3 3"/>
+                    <circle cx="55" cy="55" r="44" stroke="#2691BA" strokeWidth="2"/>
+                    <text x="55" y="32" textAnchor="middle" fill="#8C733E" fontSize="8" fontWeight="700" letterSpacing="1">WIR SIND</text>
+                    <text x="55" y="60" textAnchor="middle" fill="#2691BA" fontSize="17" fontWeight="800">QualiCert</text>
+                    <text x="55" y="80" textAnchor="middle" fill="#8C733E" fontSize="8" fontWeight="700" letterSpacing="1">ZERTIFIZIERT</text>
+                  </svg>
+                </div>
+
+                {/* E-RYT 500 Yoga Alliance Badge */}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <svg width="115" height="115" viewBox="0 0 110 110" fill="none">
+                    <circle cx="55" cy="55" r="50" stroke="#1A1A1A" strokeWidth="3.5"/>
+                    <circle cx="55" cy="55" r="42" stroke="#1A1A1A" strokeWidth="1.5"/>
+                    <path d="M 25 36 A 35 35 0 0 1 85 36" fill="none" id="arcText" />
+                    <text x="55" y="30" textAnchor="middle" fill="#1A1A1A" fontSize="7" fontWeight="700" letterSpacing="0.8">REGISTERED YOGA TEACHER</text>
+                    <text x="55" y="52" textAnchor="middle" fill="#1A1A1A" fontSize="13" fontWeight="900" letterSpacing="1">E-RYT</text>
+                    <text x="55" y="72" textAnchor="middle" fill="#1A1A1A" fontSize="20" fontWeight="900">500</text>
+                    <text x="55" y="88" textAnchor="middle" fill="#1A1A1A" fontSize="9" fontStyle="italic" fontWeight="600">yoga alliance</text>
+                  </svg>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
