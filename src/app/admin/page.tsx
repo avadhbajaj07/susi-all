@@ -30,6 +30,11 @@ import {
   Share2,
   Trash2,
   Sparkles,
+  Inbox,
+  Paperclip,
+  Reply,
+  Archive,
+  Download,
 } from "lucide-react";
 
 import { SusiInvoiceTemplate, InvoiceItem } from "@/components/invoice-template";
@@ -81,8 +86,47 @@ const initialSubscribers = [
   { id: "SUB-104", name: "Anna Keller", email: "anna.k@example.ch", segment: "Journal Subscribers", date: "Aug 04, 2026", status: "Unsubscribed" },
 ];
 
+const initialInboxMessages = [
+  {
+    id: "MSG-101",
+    fromName: "Elena Rossi",
+    fromEmail: "elena@example.ch",
+    to: "hello@susidavies.com",
+    subject: "Inquiry about 1-on-1 Movement Therapy Session in Thalwil",
+    body: "Dear Susi,\n\nI was recommended your studio by a friend in Zurich. I would love to know more about your 1-on-1 posture and alignment sessions. Do you have availability on Thursday afternoons?\n\nWarm regards,\nElena Rossi",
+    date: "Aug 06, 2026, 14:30",
+    read: false,
+    folder: "inbox",
+    attachments: [],
+  },
+  {
+    id: "MSG-102",
+    fromName: "Markus Weber",
+    fromEmail: "m.weber@example.com",
+    to: "hello@susidavies.com",
+    subject: "Greece Retreat October 2026 Sole Occupancy Details",
+    body: "Hi Susi,\n\nI just saw your Peloponnese Sanctuary retreat announcement! Could you please send me the full brochure and payment details for the sole occupancy suite?\n\nBest,\nMarkus",
+    date: "Aug 05, 2026, 11:15",
+    read: true,
+    folder: "inbox",
+    attachments: [{ name: "Greece_Retreat_Brochure.pdf", size: "2.4 MB" }],
+  },
+  {
+    id: "MSG-103",
+    fromName: "Susi Davies Studio",
+    fromEmail: "hello@susidavies.com",
+    to: "Avadh Bajaj <avadh@example.com>",
+    subject: "Your Studio Invoice SD-2026-001 & Session Preparation",
+    body: "Dear Avadh,\n\nThank you for booking your private breathwork and movement session. Attached is your studio invoice SD-2026-001.\n\nPlease let me know if you have any questions.\n\nNamaste,\nSusi Davies",
+    date: "Aug 05, 2026, 09:00",
+    read: true,
+    folder: "sent",
+    attachments: [{ name: "Invoice-SD-2026-001.pdf", size: "145 KB" }],
+  },
+];
+
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "bookings" | "invoices" | "email" | "subscribers" | "retreats" | "content" | "settings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "inbox" | "bookings" | "invoices" | "email" | "subscribers" | "retreats" | "content" | "settings">("overview");
   const [bookings, setBookings] = useState(initialBookings);
   const [invoices, setInvoices] = useState(initialInvoices);
   const [campaigns, setCampaigns] = useState(initialCampaigns);
@@ -91,6 +135,20 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [resendKey, setResendKey] = useState("");
   const [blotatoKey, setBlotatoKey] = useState("");
+
+  // Studio Inbox & Email Composer State
+  const [inboxMessages, setInboxMessages] = useState(initialInboxMessages);
+  const [selectedMessage, setSelectedMessage] = useState<any>(initialInboxMessages[0]);
+  const [inboxFolder, setInboxFolder] = useState<"inbox" | "sent">("inbox");
+  const [replyText, setReplyText] = useState("");
+  const [replyAttachments, setReplyAttachments] = useState<{ name: string; size: string }[]>([]);
+
+  // Composer Modal State
+  const [showComposeModal, setShowComposeModal] = useState(false);
+  const [composeTo, setComposeTo] = useState("");
+  const [composeSubject, setComposeSubject] = useState("");
+  const [composeBody, setComposeBody] = useState("");
+  const [composeAttachments, setComposeAttachments] = useState<{ name: string; size: string }[]>([]);
 
   // Interactive Live Invoice Builder Form State
   const [invNumber, setInvNumber] = useState("SD-2026-002");
@@ -305,6 +363,51 @@ export default function AdminPage() {
     );
   };
 
+  const handleSendComposeEmail = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!composeTo || !composeSubject) return;
+    const newMsg = {
+      id: `MSG-${Math.floor(100 + Math.random() * 900)}`,
+      fromName: "Susi Davies Studio",
+      fromEmail: "hello@susidavies.com",
+      to: composeTo,
+      subject: composeSubject,
+      body: composeBody,
+      date: "Just Now",
+      read: true,
+      folder: "sent",
+      attachments: composeAttachments,
+    };
+    setInboxMessages([newMsg, ...inboxMessages]);
+    setSelectedMessage(newMsg);
+    setComposeTo("");
+    setComposeSubject("");
+    setComposeBody("");
+    setComposeAttachments([]);
+    setShowComposeModal(false);
+  };
+
+  const handleSendReply = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!replyText || !selectedMessage) return;
+    const replyMsg = {
+      id: `MSG-${Math.floor(100 + Math.random() * 900)}`,
+      fromName: "Susi Davies Studio",
+      fromEmail: "hello@susidavies.com",
+      to: `${selectedMessage.fromName} <${selectedMessage.fromEmail}>`,
+      subject: `Re: ${selectedMessage.subject}`,
+      body: replyText,
+      date: "Just Now",
+      read: true,
+      folder: "sent",
+      attachments: replyAttachments,
+    };
+    setInboxMessages([replyMsg, ...inboxMessages]);
+    setReplyText("");
+    setReplyAttachments([]);
+    setSelectedMessage(replyMsg);
+  };
+
   const filteredBookings = bookings.filter(
     (b) =>
       b.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -342,6 +445,7 @@ export default function AdminPage() {
         <nav style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
           {[
             { id: "overview", label: "Overview", icon: LayoutDashboard },
+            { id: "inbox", label: "Studio Inbox", icon: Inbox },
             { id: "bookings", label: "Bookings & Clients", icon: Calendar },
             { id: "invoices", label: "Invoice Generator", icon: FileText },
             { id: "email", label: "Email Automation", icon: Mail },
@@ -543,16 +647,185 @@ export default function AdminPage() {
                     </div>
                     <CheckCircle2 size={20} color="#54BC33" />
                   </div>
-
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderRadius: 12, backgroundColor: "#F9F8F5", border: "1px solid #E2DDD3" }}>
-                    <div>
-                      <strong style={{ fontSize: 14, display: "block" }}>LinkedIn Auto-Sync</strong>
-                      <span style={{ fontSize: 11, color: "#6B7A70" }}>Blotato API Ready</span>
-                    </div>
-                    <AlertCircle size={20} color="#D68910" />
-                  </div>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: STUDIO INBOX & MESSAGING */}
+        {activeTab === "inbox" && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.6fr", gap: 25, height: "calc(100vh - 180px)", minHeight: 650 }}>
+            {/* Left Column: Messages List */}
+            <div style={{ backgroundColor: "#ffffff", borderRadius: 18, border: "1px solid #E2DDD3", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+              {/* Folder Selector Tabs */}
+              <div style={{ display: "flex", borderBottom: "1px solid #E2DDD3", backgroundColor: "#FBF9F4" }}>
+                <button
+                  onClick={() => setInboxFolder("inbox")}
+                  style={{ flex: 1, padding: "14px", border: "none", background: inboxFolder === "inbox" ? "#ffffff" : "transparent", fontWeight: 700, color: inboxFolder === "inbox" ? "#2691BA" : "#6B7A70", fontSize: 13, borderBottom: inboxFolder === "inbox" ? "2px solid #2691BA" : "none", cursor: "pointer" }}
+                >
+                  Inbox (hello@susidavies.com)
+                </button>
+                <button
+                  onClick={() => setInboxFolder("sent")}
+                  style={{ flex: 1, padding: "14px", border: "none", background: inboxFolder === "sent" ? "#ffffff" : "transparent", fontWeight: 700, color: inboxFolder === "sent" ? "#2691BA" : "#6B7A70", fontSize: 13, borderBottom: inboxFolder === "sent" ? "2px solid #2691BA" : "none", cursor: "pointer" }}
+                >
+                  Sent Messages
+                </button>
+              </div>
+
+              {/* Search Inbox */}
+              <div style={{ padding: "14px", borderBottom: "1px solid #E2DDD3" }}>
+                <div style={{ position: "relative" }}>
+                  <Search size={16} style={{ position: "absolute", left: 10, top: 10, color: "#999" }} />
+                  <input
+                    type="text"
+                    placeholder="Search inbox or client email..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ width: "100%", padding: "8px 10px 8px 34px", borderRadius: 8, border: "1px solid #E2DDD3", fontSize: 13, outline: "none" }}
+                  />
+                </div>
+              </div>
+
+              {/* Message List */}
+              <div style={{ flex: 1, overflowY: "auto" }}>
+                {inboxMessages
+                  .filter((m) => m.folder === inboxFolder)
+                  .filter((m) => m.subject.toLowerCase().includes(searchQuery.toLowerCase()) || m.fromName.toLowerCase().includes(searchQuery.toLowerCase()) || m.body.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map((msg) => {
+                    const isSelected = selectedMessage?.id === msg.id;
+                    return (
+                      <div
+                        key={msg.id}
+                        onClick={() => setSelectedMessage(msg)}
+                        style={{
+                          padding: "16px",
+                          borderBottom: "1px solid #F0ECE1",
+                          backgroundColor: isSelected ? "rgba(38,145,186,0.08)" : msg.read ? "#ffffff" : "#F8FCFD",
+                          cursor: "pointer",
+                          transition: "background-color 0.15s ease",
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                          <strong style={{ fontSize: 14, color: "#1A252C" }}>{msg.fromName}</strong>
+                          <span style={{ fontSize: 11, color: "#888" }}>{msg.date}</span>
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: msg.read ? 500 : 700, color: "#2691BA", marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {msg.subject}
+                        </div>
+                        <div style={{ fontSize: 12, color: "#6B7A70", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {msg.body}
+                        </div>
+                        {msg.attachments && msg.attachments.length > 0 && (
+                          <div style={{ marginTop: 6, display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, color: "#2691BA", fontWeight: 600, backgroundColor: "#EBF5F9", padding: "2px 8px", borderRadius: 4 }}>
+                            <Paperclip size={12} /> {msg.attachments.length} Attachment
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+
+            {/* Right Column: Active Message Reader & Reply Composer */}
+            <div style={{ backgroundColor: "#ffffff", borderRadius: 18, border: "1px solid #E2DDD3", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+              {selectedMessage ? (
+                <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+                  {/* Reader Header */}
+                  <div style={{ padding: "24px", borderBottom: "1px solid #E2DDD3", backgroundColor: "#FBF9F4" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: 12 }}>
+                      <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, color: "#1A252C", margin: 0 }}>
+                        {selectedMessage.subject}
+                      </h3>
+                      <button onClick={() => setShowComposeModal(true)} className="btn-pill btn-pill-cyan" style={{ padding: "6px 14px", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                        <Reply size={14} /> Reply
+                      </button>
+                    </div>
+
+                    <div style={{ fontSize: 13, color: "#6B7A70", display: "flex", justifyContent: "space-between" }}>
+                      <div>
+                        <strong>From:</strong> {selectedMessage.fromName} &lt;{selectedMessage.fromEmail}&gt;
+                        <div style={{ marginTop: 2 }}><strong>To:</strong> {selectedMessage.to}</div>
+                      </div>
+                      <span style={{ fontSize: 12 }}>{selectedMessage.date}</span>
+                    </div>
+                  </div>
+
+                  {/* Message Body Content */}
+                  <div style={{ flex: 1, padding: "24px", overflowY: "auto", fontSize: 15, lineHeight: 1.6, color: "#2C3E50", whiteSpace: "pre-wrap" }}>
+                    {selectedMessage.body}
+
+                    {/* Render Attachments */}
+                    {selectedMessage.attachments && selectedMessage.attachments.length > 0 && (
+                      <div style={{ marginTop: 25, paddingTop: 16, borderTop: "1px solid #E2DDD3" }}>
+                        <strong style={{ fontSize: 13, color: "#2691BA", display: "block", marginBottom: 10 }}>Attachments ({selectedMessage.attachments.length})</strong>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                          {selectedMessage.attachments.map((att: any, idx: number) => (
+                            <div key={idx} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 8, border: "1px solid #2691BA", backgroundColor: "#F4FAFC", fontSize: 12 }}>
+                              <Paperclip size={14} color="#2691BA" />
+                              <div>
+                                <strong style={{ display: "block", color: "#1A252C" }}>{att.name}</strong>
+                                <span style={{ fontSize: 10, color: "#666" }}>{att.size}</span>
+                              </div>
+                              <Download size={14} color="#2691BA" style={{ cursor: "pointer", marginLeft: 6 }} />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Quick Reply Form with Attachment Support */}
+                  <form onSubmit={handleSendReply} style={{ padding: "20px", borderTop: "1px solid #E2DDD3", backgroundColor: "#FBF9F4" }}>
+                    <div style={{ marginBottom: 10 }}>
+                      <textarea
+                        className="form-textarea"
+                        rows={3}
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        placeholder={`Reply to ${selectedMessage.fromName} (sending from hello@susidavies.com)...`}
+                        style={{ fontSize: 13 }}
+                      />
+                    </div>
+
+                    {/* Reply Attachment Upload */}
+                    {replyAttachments.length > 0 && (
+                      <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+                        {replyAttachments.map((att, i) => (
+                          <span key={i} style={{ fontSize: 11, padding: "4px 8px", borderRadius: 6, backgroundColor: "#2691BA", color: "#fff", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                            <Paperclip size={10} /> {att.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <label style={{ cursor: "pointer", fontSize: 12, color: "#2691BA", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        <Paperclip size={15} /> Attach File (Invoice / PDF / Image)
+                        <input
+                          type="file"
+                          multiple
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || []);
+                            const newAtts = files.map((f) => ({ name: f.name, size: `${(f.size / 1024).toFixed(0)} KB` }));
+                            setReplyAttachments([...replyAttachments, ...newAtts]);
+                          }}
+                          style={{ display: "none" }}
+                        />
+                      </label>
+
+                      <button type="submit" className="btn-pill btn-pill-cyan" style={{ padding: "8px 18px", fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                        <Send size={14} /> Send Reply (hello@susidavies.com)
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#6B7A70" }}>
+                  Select a message to view
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1426,6 +1699,106 @@ export default function AdminPage() {
                   </button>
                   <button type="submit" className="btn-pill btn-pill-cyan">
                     Save Contact
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal 5: Email Composer with Attachment Support */}
+        {showComposeModal && (
+          <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ backgroundColor: "#ffffff", padding: "35px", borderRadius: 20, width: "100%", maxWidth: 620, boxShadow: "0 10px 40px rgba(0,0,0,0.2)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", margin: 0 }}>Compose New Email</h3>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#45A027", backgroundColor: "#54BC3318", padding: "4px 10px", borderRadius: 100 }}>
+                  From: hello@susidavies.com
+                </span>
+              </div>
+
+              <form onSubmit={handleSendComposeEmail}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>To (Client Email)</label>
+                  <input
+                    type="email"
+                    className="form-input"
+                    required
+                    value={composeTo}
+                    onChange={(e) => setComposeTo(e.target.value)}
+                    placeholder="e.g. client@example.ch"
+                  />
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Subject</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
+                    value={composeSubject}
+                    onChange={(e) => setComposeSubject(e.target.value)}
+                    placeholder="e.g. Session Details &amp; Retreat Registration"
+                  />
+                </div>
+
+                <div style={{ marginBottom: 20 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Message</label>
+                  <textarea
+                    className="form-textarea"
+                    rows={6}
+                    required
+                    value={composeBody}
+                    onChange={(e) => setComposeBody(e.target.value)}
+                    placeholder="Dear Client,&#10;&#10;Write your email message here..."
+                  />
+                </div>
+
+                {/* Attachments Upload Box */}
+                <div style={{ marginBottom: 25, backgroundColor: "#FBF9F4", padding: "16px", borderRadius: 12, border: "1px solid #E2DDD3" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#2691BA", textTransform: "uppercase" }}>File Attachments</span>
+                    <label style={{ cursor: "pointer", fontSize: 12, color: "#2691BA", fontWeight: 700 }}>
+                      + Pick Attachments (PDF, Images, Docs)
+                      <input
+                        type="file"
+                        multiple
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          const newAtts = files.map((f) => ({ name: f.name, size: `${(f.size / 1024).toFixed(0)} KB` }));
+                          setComposeAttachments([...composeAttachments, ...newAtts]);
+                        }}
+                        style={{ display: "none" }}
+                      />
+                    </label>
+                  </div>
+
+                  {composeAttachments.length === 0 ? (
+                    <span style={{ fontSize: 12, color: "#888" }}>No files attached yet.</span>
+                  ) : (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                      {composeAttachments.map((att, idx) => (
+                        <div key={idx} style={{ padding: "4px 10px", borderRadius: 6, backgroundColor: "#2691BA", color: "#ffffff", fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                          <Paperclip size={12} /> {att.name} ({att.size})
+                          <button
+                            type="button"
+                            onClick={() => setComposeAttachments(composeAttachments.filter((_, i) => i !== idx))}
+                            style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", fontSize: 11 }}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+                  <button type="button" onClick={() => setShowComposeModal(false)} style={{ padding: "10px 20px", borderRadius: 20, border: "1px solid #ccc", background: "none", cursor: "pointer" }}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <Send size={15} /> Send Email via hello@susidavies.com
                   </button>
                 </div>
               </form>
