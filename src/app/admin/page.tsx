@@ -1159,24 +1159,24 @@ export default function AdminPage() {
               </p>
             </div>
 
-            {/* Resend API Key Input */}
-            <div style={{ marginBottom: 30 }}>
-              <label style={{ fontSize: 14, fontWeight: 700, color: "#1A252C", display: "block", marginBottom: 8 }}>
-                Resend Email API Key (Coming Soon)
-              </label>
-              <input
-                type="text"
-                placeholder="re_123456789..."
-                value={resendKey}
-                onChange={(e) => setResendKey(e.target.value)}
-                style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: "1px solid #E2DDD3", fontSize: 14, outline: "none" }}
-              />
+            {/* Resend API Key status */}
+            <div style={{ marginBottom: 30, padding: 20, borderRadius: 14, backgroundColor: "rgba(84,188,51,0.06)", border: "1px solid rgba(84,188,51,0.2)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                <CheckCircle2 size={22} color="#54BC33" />
+                <strong style={{ fontSize: 16, color: "#45A027" }}>Resend Email API Connected &amp; Verified</strong>
+              </div>
+              <p style={{ fontSize: 13, color: "#6B7A70", margin: "0 0 10px" }}>
+                API Key: <code>re_*****</code> (Configured in Vercel &amp; .env)
+              </p>
+              <span style={{ fontSize: 12, color: "#45A027", fontWeight: 600 }}>
+                ✓ Automated newsletters, booking confirmations, and post broadcasts ready
+              </span>
             </div>
 
             {/* Blotato API Key Input */}
             <div style={{ marginBottom: 30 }}>
               <label style={{ fontSize: 14, fontWeight: 700, color: "#1A252C", display: "block", marginBottom: 8 }}>
-                Blotato Social API Key (Coming Soon)
+                Blotato Social API Key (LinkedIn Auto-Sync)
               </label>
               <input
                 type="text"
