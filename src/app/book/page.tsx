@@ -33,7 +33,7 @@ const sessionTypes = [
     title: "Weekly Online Class Pass",
     duration: "60 mins",
     price: "CHF 25",
-    desc: "Live dynamic movement session online via Teams (TWINT accepted for Swiss clients).",
+    desc: "Live dynamic movement session online via Teams (Monday 18:30–19:30 & Wednesday 09:00–10:00). TWINT accepted.",
   },
 ];
 
@@ -153,6 +153,8 @@ export default function BookPage() {
                         className="form-input"
                         style={{ cursor: "pointer" }}
                       >
+                        <option value="mon-evening">Monday 18:30 – 19:30 (Online Class)</option>
+                        <option value="wed-morning">Wednesday 09:00 – 10:00 (Online Class)</option>
                         <option value="morning">Morning (09:00 – 12:00)</option>
                         <option value="afternoon">Afternoon (14:00 – 17:00)</option>
                         <option value="evening">Evening (18:00 – 20:00)</option>

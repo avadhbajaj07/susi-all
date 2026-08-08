@@ -41,6 +41,21 @@ export default function OnlineCoursesPage() {
             <p className="body-text">
               Join weekly live sessions, masterclasses, and guided breathwork routines directly from your home studio.
             </p>
+
+            {/* Prominent Weekly Online Schedule Box */}
+            <div style={{ backgroundColor: "rgba(38,145,186,0.08)", border: "1.5px solid var(--blue)", borderRadius: 16, padding: "20px 24px", marginTop: 24 }}>
+              <strong style={{ fontSize: 16, color: "var(--blue)", display: "block", marginBottom: 8 }}>
+                🗓️ Weekly Live Online Class Timings
+              </strong>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 15, fontSize: 15, color: "var(--ink-body)" }}>
+                <div>
+                  <strong style={{ color: "var(--blue)" }}>Monday:</strong> 18:30 – 19:30
+                </div>
+                <div>
+                  <strong style={{ color: "var(--blue)" }}>Wednesday:</strong> 09:00 – 10:00
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
