@@ -53,34 +53,6 @@ export function HomeHero() {
         </div>
       </div>
 
-      {/* 4 Studio Gallery Photos Section */}
-      <div className="susi-hero-gallery-section">
-        <div className="susi-hero-gallery-container">
-          <div className="susi-gallery-header">
-            <span className="eyebrow" style={{ color: "#1f78b4", marginBottom: 6 }}>STUDIO PRACTICE &amp; MOVEMENT WISDOM</span>
-            <h3 style={{ fontFamily: "var(--serif)", fontSize: 32, color: "#1f78b4", margin: 0 }}>The Art of Practice</h3>
-          </div>
-
-          <div className="susi-hero-gallery-grid">
-            {[
-              { src: "/images/susi-gallery-1.jpg", alt: "Susi Davies Mudra Balance Pose", title: "Somatic Balance" },
-              { src: "/images/susi-gallery-2.jpg", alt: "Susi Davies Standing Alignment Pose", title: "Alignment Therapy" },
-              { src: "/images/susi-gallery-3.jpg", alt: "Susi Davies Bound Seated Stretch", title: "Deep Somatic Stretch" },
-              { src: "/images/susi-gallery-4.jpg", alt: "Susi Davies Supine Reclined Pose", title: "Nervous System Reset" },
-            ].map((img, idx) => (
-              <div key={idx} className="susi-gallery-card">
-                <div className="susi-gallery-img-wrap">
-                  <img src={img.src} alt={img.alt} className="susi-gallery-img" />
-                </div>
-                <div className="susi-gallery-caption">
-                  <span>{img.title}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Inspirational Quote Section */}
       <div className="susi-quote-section">
         <div className="susi-quote-container">
