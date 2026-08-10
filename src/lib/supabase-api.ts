@@ -17,7 +17,7 @@ export async function fetchSupabasePosts() {
         return data.map((p: any) => ({
           id: p.id,
           title: p.title,
-          slug: p.slug,
+          slug: p.slug || p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
           category: p.category || "Practice Notes",
           date: p.date || new Date(p.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
           excerpt: p.excerpt || (typeof p.content === "string" ? p.content.slice(0, 160) + "..." : p.title),
@@ -30,6 +30,40 @@ export async function fetchSupabasePosts() {
     }
   } catch (err) {
     console.error("fetchSupabasePosts error:", err);
+  }
+  return null;
+}
+
+export async function fetchSupabasePostBySlug(slug: string) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/posts?slug=eq.${encodeURIComponent(slug)}&select=*`, {
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+      },
+      cache: "no-store",
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        const p = data[0];
+        return {
+          id: p.id,
+          title: p.title,
+          slug: p.slug,
+          category: p.category || "Practice Notes",
+          date: p.date || new Date(p.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
+          excerpt: p.excerpt || (typeof p.content === "string" ? p.content.slice(0, 160) + "..." : p.title),
+          content: typeof p.content === "string" ? p.content : p.excerpt || p.title,
+          image: p.image || p.featured_image_path || "/images/susi davies7.jpg",
+          status: p.status || "published",
+          readTime: "5 min read",
+        };
+      }
+    }
+  } catch (err) {
+    console.error("fetchSupabasePostBySlug error:", err);
   }
   return null;
 }
@@ -71,4 +105,87 @@ export async function insertSupabasePost(post: { title: string; category?: strin
     console.error("insertSupabasePost error:", err);
   }
   return null;
+}
+
+// Comments API
+export async function fetchPostComments(slug: string) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/comments?post_slug=eq.${encodeURIComponent(slug)}&status=eq.approved&order=created_at.desc`, {
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+      },
+      cache: "no-store",
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.error("fetchPostComments error:", err);
+  }
+  return [];
+}
+
+export async function fetchAllComments() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/comments?select=*&order=created_at.desc`, {
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+      },
+      cache: "no-store",
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.error("fetchAllComments error:", err);
+  }
+  return [];
+}
+
+export async function submitComment(data: { post_slug: string; author_name: string; author_email: string; content: string }) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/comments`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+        "Prefer": "return=representation",
+      },
+      body: JSON.stringify({
+        post_slug: data.post_slug,
+        author_name: data.author_name,
+        author_email: data.author_email,
+        content: data.content,
+        status: "pending",
+      }),
+    });
+    if (res.ok) {
+      const resData = await res.json();
+      return Array.isArray(resData) ? resData[0] : resData;
+    }
+  } catch (err) {
+    console.error("submitComment error:", err);
+  }
+  return null;
+}
+
+export async function updateCommentStatus(id: number | string, status: "approved" | "rejected") {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/comments?id=eq.${id}`, {
+      method: "PATCH",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status }),
+    });
+    return res.ok;
+  } catch (err) {
+    console.error("updateCommentStatus error:", err);
+    return false;
+  }
 }

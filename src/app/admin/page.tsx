@@ -176,6 +176,36 @@ export default function AdminPage() {
     fetchPosts();
   }, []);
 
+  const [adminComments, setAdminComments] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const res = await fetch("/api/comments?all=true");
+        const data = await res.json();
+        if (data.comments && Array.isArray(data.comments)) {
+          setAdminComments(data.comments);
+        }
+      } catch (err) {
+        console.error("Comments fetch error:", err);
+      }
+    };
+    fetchComments();
+  }, []);
+
+  const handleModerateComment = async (id: number | string, newStatus: "approved" | "rejected") => {
+    setAdminComments((prev) => prev.map((c) => (c.id === id ? { ...c, status: newStatus } : c)));
+    try {
+      await fetch("/api/comments", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: newStatus }),
+      });
+    } catch (err) {
+      console.error("Moderate comment error:", err);
+    }
+  };
+
   // Composer Modal State
   const [showComposeModal, setShowComposeModal] = useState(false);
   const [composeTo, setComposeTo] = useState("");
@@ -1747,6 +1777,59 @@ export default function AdminPage() {
                   </span>
                 </div>
               ))}
+            </div>
+
+            {/* Reader Feedback & Comments Moderation Section */}
+            <div style={{ marginTop: 40, borderTop: "2px solid #E2DDD3", paddingTop: 30 }}>
+              <h4 style={{ fontFamily: "var(--serif)", fontSize: 20, color: "#2691BA", marginBottom: 12 }}>
+                💬 Reader Feedback &amp; Comments Moderation ({adminComments.length})
+              </h4>
+              <p style={{ color: "#6B7A70", fontSize: 14, marginBottom: 20 }}>
+                Review feedback left by readers on blog posts. Accept to publish on the website, or Reject to remove.
+              </p>
+
+              {adminComments.length === 0 ? (
+                <div style={{ padding: "20px", borderRadius: 12, backgroundColor: "#FBF9F4", fontStyle: "italic", color: "#6B7A70", fontSize: 14 }}>
+                  No reader feedback submitted yet.
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                  {adminComments.map((cmt) => (
+                    <div key={cmt.id} style={{ padding: "18px 22px", borderRadius: 14, border: "1px solid #E2DDD3", backgroundColor: "#FBF9F4", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 15 }}>
+                      <div>
+                        <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
+                          <strong style={{ fontSize: 15, color: "#1A252C" }}>{cmt.author_name}</strong>
+                          <span style={{ fontSize: 13, color: "#6B7A70" }}>({cmt.author_email})</span>
+                          <span style={{ fontSize: 12, padding: "2px 8px", borderRadius: 100, fontWeight: 700, backgroundColor: cmt.status === "approved" ? "#54BC3320" : cmt.status === "rejected" ? "#E74C3C20" : "#F39C1220", color: cmt.status === "approved" ? "#45A027" : cmt.status === "rejected" ? "#C0392B" : "#D68910" }}>
+                            {cmt.status ? cmt.status.toUpperCase() : "PENDING"}
+                          </span>
+                        </div>
+                        <p style={{ margin: "4px 0 6px", fontSize: 14, color: "#2C3E50" }}>{cmt.content}</p>
+                        <span style={{ fontSize: 12, color: "#888" }}>Post Slug: <code>{cmt.post_slug}</code></span>
+                      </div>
+
+                      <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                        {cmt.status !== "approved" && (
+                          <button
+                            onClick={() => handleModerateComment(cmt.id, "approved")}
+                            style={{ padding: "6px 14px", borderRadius: 8, backgroundColor: "#45A027", color: "#fff", border: "none", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+                          >
+                            ✓ Accept
+                          </button>
+                        )}
+                        {cmt.status !== "rejected" && (
+                          <button
+                            onClick={() => handleModerateComment(cmt.id, "rejected")}
+                            style={{ padding: "6px 14px", borderRadius: 8, backgroundColor: "#E74C3C", color: "#fff", border: "none", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+                          >
+                            ✕ Reject
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
