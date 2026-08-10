@@ -52,81 +52,11 @@ const studioPresetServices = [
 
 // Initial Studio Data
 const initialBookings: any[] = [];
-const initialInvoices: any[] = [
-  {
-    id: "SD-2026-001",
-    number: "SD-2026-001",
-    client: "Avadh Bajaj",
-    clientName: "Avadh Bajaj",
-    clientEmail: "avadh@example.com",
-    date: "05 Jun 2026",
-    issued: "05 Jun 2026",
-    dueDate: "19 Jun 2026",
-    due: "19 Jun 2026",
-    status: "draft",
-    paymentNotice: "You need to pay in next 14 days.",
-    paymentMethod: "Bank transfer details or TWINT (+41 79 854 97 52)",
-    items: [
-      { desc: "Private yoga, breathwork and movement therapy session", qty: 1, rate: 150, amount: 150 },
-      { desc: "Yiga online", qty: 1, rate: 20, amount: 20 },
-    ],
-    subtotal: 170,
-    total: 170,
-  },
-];
+const initialInvoices: any[] = [];
 const initialCampaigns: any[] = [];
-const initialArticles: any[] = [
-  { id: 0, title: "Your Body Is Talking — Are You Listening?", category: "Mindful Living", status: "Published", date: "Aug 10, 2026", linkedin: true, broadcastSent: true },
-  { id: 1, title: "Movement & Neural Alignment: Moving with Intention", category: "Practice Notes", status: "Published", date: "Aug 06, 2026", linkedin: true, broadcastSent: true },
-  { id: 2, title: "Finding Calm in Motion: The Power of Breathwork", category: "Mindful Living", status: "Published", date: "Jul 28, 2026", linkedin: true, broadcastSent: true },
-  { id: 3, title: "Reflections from the Peloponnese Sanctuary", category: "Retreat Insights", status: "Draft", date: "Aug 01, 2026", linkedin: false, broadcastSent: false },
-];
-
-const initialSubscribers = [
-  { id: "SUB-101", name: "Elena Rossi", email: "elena@example.ch", segment: "Online Students", date: "Aug 01, 2026", status: "Subscribed" },
-  { id: "SUB-102", name: "Markus Weber", email: "m.weber@example.com", segment: "Coaching Clients", date: "Aug 02, 2026", status: "Subscribed" },
-  { id: "SUB-103", name: "Sophie Martin", email: "sophie.m@example.fr", segment: "Retreat Guests", date: "Aug 03, 2026", status: "Subscribed" },
-  { id: "SUB-104", name: "Anna Keller", email: "anna.k@example.ch", segment: "Journal Subscribers", date: "Aug 04, 2026", status: "Unsubscribed" },
-];
-
-const initialInboxMessages = [
-  {
-    id: "MSG-101",
-    fromName: "Elena Rossi",
-    fromEmail: "elena@example.ch",
-    to: "hello@susidavies.com",
-    subject: "Inquiry about 1-on-1 Movement Therapy Session in Thalwil",
-    body: "Dear Susi,\n\nI was recommended your studio by a friend in Zurich. I would love to know more about your 1-on-1 posture and alignment sessions. Do you have availability on Thursday afternoons?\n\nWarm regards,\nElena Rossi",
-    date: "Aug 06, 2026, 14:30",
-    read: false,
-    folder: "inbox",
-    attachments: [],
-  },
-  {
-    id: "MSG-102",
-    fromName: "Markus Weber",
-    fromEmail: "m.weber@example.com",
-    to: "hello@susidavies.com",
-    subject: "Greece Retreat October 2026 Sole Occupancy Details",
-    body: "Hi Susi,\n\nI just saw your Peloponnese Sanctuary retreat announcement! Could you please send me the full brochure and payment details for the sole occupancy suite?\n\nBest,\nMarkus",
-    date: "Aug 05, 2026, 11:15",
-    read: true,
-    folder: "inbox",
-    attachments: [{ name: "Greece_Retreat_Brochure.pdf", size: "2.4 MB" }],
-  },
-  {
-    id: "MSG-103",
-    fromName: "Susi Davies",
-    fromEmail: "hello@susidavies.com",
-    to: "Avadh Bajaj <avadh@example.com>",
-    subject: "Your Invoice SD-2026-001 & Session Preparation",
-    body: "Dear Avadh,\n\nThank you for booking your private breathwork and movement session. Attached is your studio invoice SD-2026-001.\n\nPlease let me know if you have any questions.\n\nNamaste,\nSusi Davies",
-    date: "Aug 05, 2026, 09:00",
-    read: true,
-    folder: "sent",
-    attachments: [{ name: "Invoice-SD-2026-001.pdf", size: "145 KB" }],
-  },
-];
+const initialArticles: any[] = [];
+const initialSubscribers: any[] = [];
+const initialInboxMessages: any[] = [];
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<"overview" | "inbox" | "bookings" | "invoices" | "email" | "subscribers" | "retreats" | "content" | "settings">("overview");
@@ -141,7 +71,7 @@ export default function AdminPage() {
 
   // Studio Inbox & Email Composer State
   const [inboxMessages, setInboxMessages] = useState(initialInboxMessages);
-  const [selectedMessage, setSelectedMessage] = useState<any>(initialInboxMessages[0]);
+  const [selectedMessage, setSelectedMessage] = useState<any>(null);
   const [inboxFolder, setInboxFolder] = useState<"inbox" | "sent">("inbox");
   const [replyText, setReplyText] = useState("");
   const [replyAttachments, setReplyAttachments] = useState<{ name: string; size: string }[]>([]);
@@ -218,20 +148,18 @@ export default function AdminPage() {
   const [emailSendStatus, setEmailSendStatus] = useState<string | null>(null);
 
   // Interactive Live Invoice Builder Form State
-  const [invNumber, setInvNumber] = useState("SD-2026-002");
-  const [invClientName, setInvClientName] = useState("Elena Rossi");
-  const [invClientEmail, setInvClientEmail] = useState("elena@example.ch");
-  const [invIssueDate, setInvIssueDate] = useState("06 Aug 2026");
-  const [invDueDate, setInvDueDate] = useState("20 Aug 2026");
+  const [invNumber, setInvNumber] = useState("SD-2026-001");
+  const [invClientName, setInvClientName] = useState("");
+  const [invClientEmail, setInvClientEmail] = useState("");
+  const [invIssueDate, setInvIssueDate] = useState("");
+  const [invDueDate, setInvDueDate] = useState("");
   const [invStatus, setInvStatus] = useState("draft");
-  const [invPaymentNotice, setInvPaymentNotice] = useState("You need to pay in next 14 days.");
-  const [invPaymentMethod, setInvPaymentMethod] = useState("Bank transfer details or TWINT (+41 79 854 97 52)");
+  const [invPaymentNotice, setInvPaymentNotice] = useState("Payment due within 14 days via TWINT or IBAN.");
+  const [invPaymentMethod, setInvPaymentMethod] = useState("Bank transfer or TWINT (+41 79 854 97 52)");
 
-  const [invItems, setInvItems] = useState<InvoiceItem[]>([
-    { desc: "Private yoga, breathwork and movement therapy session", qty: 1, rate: 150, amount: 150 },
-  ]);
+  const [invItems, setInvItems] = useState<InvoiceItem[]>([]);
 
-  const [activeInvoice, setActiveInvoice] = useState<any>(initialInvoices[0]);
+  const [activeInvoice, setActiveInvoice] = useState<any>(null);
 
   // Invoice Math Calculations
   const calculatedSubtotal = useMemo(() => {
@@ -2066,6 +1994,7 @@ export default function AdminPage() {
                     <option value="Practice Notes">Practice Notes</option>
                     <option value="Mindful Living">Mindful Living</option>
                     <option value="Retreat Insights">Retreat Insights</option>
+                    <option value="Newsletter">Newsletter</option>
                   </select>
                 </div>
 
@@ -2186,6 +2115,7 @@ export default function AdminPage() {
                     <option value="Mindful Living">Mindful Living</option>
                     <option value="Retreat Insights">Retreat Insights</option>
                     <option value="Remedial Therapy">Remedial Therapy</option>
+                    <option value="Newsletter">Newsletter</option>
                   </select>
                 </div>
 

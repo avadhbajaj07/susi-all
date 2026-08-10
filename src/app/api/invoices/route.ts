@@ -3,38 +3,7 @@ import { getSupabase } from "@/lib/supabase";
 import { renderSusiEmailTemplate } from "@/lib/email-template";
 
 // In-memory invoice fallback store in case Supabase credentials are unavailable locally
-let fallbackInvoices = [
-  {
-    id: "SD-2026-001",
-    number: "SD-2026-001",
-    clientName: "Elena Rossi",
-    clientEmail: "elena@example.ch",
-    issued: "06 Aug 2026",
-    due: "20 Aug 2026",
-    status: "Due",
-    total: 180.00,
-    emailSent: true,
-    paymentNotice: "Payment due within 14 days via TWINT or IBAN.",
-    items: [
-      { desc: "1-on-1 Movement & Alignment Session (Thalwil Studio)", qty: 1, rate: 180.00, amount: 180.00 }
-    ]
-  },
-  {
-    id: "SD-2026-002",
-    number: "SD-2026-002",
-    clientName: "Marcus Weber",
-    clientEmail: "marcus.weber@swiss-tech.ch",
-    issued: "08 Aug 2026",
-    due: "08 Aug 2026",
-    status: "Paid",
-    total: 2400.00,
-    emailSent: true,
-    paymentNotice: "Payment received with thanks. Receipt confirmed.",
-    items: [
-      { desc: "Greece Peloponnese Autumn Retreat 2026 Deposit", qty: 1, rate: 2400.00, amount: 2400.00 }
-    ]
-  }
-];
+let fallbackInvoices: any[] = [];
 
 export async function GET() {
   try {
