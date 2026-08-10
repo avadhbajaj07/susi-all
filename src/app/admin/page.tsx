@@ -149,6 +149,8 @@ export default function AdminPage() {
   const [composeSubject, setComposeSubject] = useState("");
   const [composeBody, setComposeBody] = useState("");
   const [composeAttachments, setComposeAttachments] = useState<{ name: string; size: string }[]>([]);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [emailSendStatus, setEmailSendStatus] = useState<string | null>(null);
 
   // Interactive Live Invoice Builder Form State
   const [invNumber, setInvNumber] = useState("SD-2026-002");
@@ -363,49 +365,113 @@ export default function AdminPage() {
     );
   };
 
-  const handleSendComposeEmail = (e: React.FormEvent) => {
+  const handleSendComposeEmail = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!composeTo || !composeSubject) return;
-    const newMsg = {
-      id: `MSG-${Math.floor(100 + Math.random() * 900)}`,
-      fromName: "Susi Davies Studio",
-      fromEmail: "hello@susidavies.com",
-      to: composeTo,
-      subject: composeSubject,
-      body: composeBody,
-      date: "Just Now",
-      read: true,
-      folder: "sent",
-      attachments: composeAttachments,
-    };
-    setInboxMessages([newMsg, ...inboxMessages]);
-    setSelectedMessage(newMsg);
-    setComposeTo("");
-    setComposeSubject("");
-    setComposeBody("");
-    setComposeAttachments([]);
-    setShowComposeModal(false);
+    if (!composeTo || !composeSubject || isSendingEmail) return;
+
+    setIsSendingEmail(true);
+    setEmailSendStatus("Sending email via Resend API...");
+
+    try {
+      const res = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: composeTo,
+          subject: composeSubject,
+          body: composeBody,
+          fromName: "Susi Davies Studio",
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(`Resend API Error: ${data.error || "Email delivery failed"}`);
+        setIsSendingEmail(false);
+        setEmailSendStatus(null);
+        return;
+      }
+
+      const newMsg = {
+        id: `MSG-${Math.floor(100 + Math.random() * 900)}`,
+        fromName: "Susi Davies Studio",
+        fromEmail: "hello@susidavies.com",
+        to: composeTo,
+        subject: composeSubject,
+        body: composeBody,
+        date: "Just Now",
+        read: true,
+        folder: "sent",
+        attachments: composeAttachments,
+      };
+
+      setInboxMessages([newMsg, ...inboxMessages]);
+      setSelectedMessage(newMsg);
+      setComposeTo("");
+      setComposeSubject("");
+      setComposeBody("");
+      setComposeAttachments([]);
+      setShowComposeModal(false);
+      alert(`✓ Email successfully sent to ${composeTo} via hello@susidavies.com!`);
+    } catch (err: any) {
+      alert(`Network error: ${err.message || "Failed to send email"}`);
+    } finally {
+      setIsSendingEmail(false);
+      setEmailSendStatus(null);
+    }
   };
 
-  const handleSendReply = (e: React.FormEvent) => {
+  const handleSendReply = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!replyText || !selectedMessage) return;
-    const replyMsg = {
-      id: `MSG-${Math.floor(100 + Math.random() * 900)}`,
-      fromName: "Susi Davies Studio",
-      fromEmail: "hello@susidavies.com",
-      to: `${selectedMessage.fromName} <${selectedMessage.fromEmail}>`,
-      subject: `Re: ${selectedMessage.subject}`,
-      body: replyText,
-      date: "Just Now",
-      read: true,
-      folder: "sent",
-      attachments: replyAttachments,
-    };
-    setInboxMessages([replyMsg, ...inboxMessages]);
-    setReplyText("");
-    setReplyAttachments([]);
-    setSelectedMessage(replyMsg);
+    if (!replyText || !selectedMessage || isSendingEmail) return;
+
+    setIsSendingEmail(true);
+
+    try {
+      const recipient = selectedMessage.fromEmail || selectedMessage.to;
+      const res = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: recipient,
+          subject: `Re: ${selectedMessage.subject}`,
+          body: replyText,
+          fromName: "Susi Davies Studio",
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(`Resend API Error: ${data.error || "Reply delivery failed"}`);
+        setIsSendingEmail(false);
+        return;
+      }
+
+      const replyMsg = {
+        id: `MSG-${Math.floor(100 + Math.random() * 900)}`,
+        fromName: "Susi Davies Studio",
+        fromEmail: "hello@susidavies.com",
+        to: `${selectedMessage.fromName} <${recipient}>`,
+        subject: `Re: ${selectedMessage.subject}`,
+        body: replyText,
+        date: "Just Now",
+        read: true,
+        folder: "sent",
+        attachments: replyAttachments,
+      };
+
+      setInboxMessages([replyMsg, ...inboxMessages]);
+      setReplyText("");
+      setReplyAttachments([]);
+      setSelectedMessage(replyMsg);
+      alert(`✓ Reply successfully sent to ${recipient} via hello@susidavies.com!`);
+    } catch (err: any) {
+      alert(`Network error: ${err.message || "Failed to send reply"}`);
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
 
   const filteredBookings = bookings.filter(
@@ -541,7 +607,11 @@ export default function AdminPage() {
             >
               View Live Site <ExternalLink size={14} />
             </Link>
-            {activeTab === "content" ? (
+            {activeTab === "inbox" ? (
+              <button onClick={() => setShowComposeModal(true)} className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <Plus size={16} /> Compose Email
+              </button>
+            ) : activeTab === "content" ? (
               <button onClick={() => setShowArticleModal(true)} className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <Plus size={16} /> New Blog &amp; LinkedIn Post
               </button>
@@ -678,6 +748,17 @@ export default function AdminPage() {
                   style={{ flex: 1, padding: "14px", border: "none", background: inboxFolder === "sent" ? "#ffffff" : "transparent", fontWeight: 700, color: inboxFolder === "sent" ? "#2691BA" : "#6B7A70", fontSize: 13, borderBottom: inboxFolder === "sent" ? "2px solid #2691BA" : "none", cursor: "pointer" }}
                 >
                   Sent Messages
+                </button>
+              </div>
+
+              {/* Compose Email Action Button */}
+              <div style={{ padding: "14px 14px 4px", backgroundColor: "#FBF9F4" }}>
+                <button
+                  onClick={() => setShowComposeModal(true)}
+                  className="btn-pill btn-pill-cyan"
+                  style={{ width: "100%", padding: "11px 16px", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, boxShadow: "0 4px 14px rgba(38,145,186,0.2)" }}
+                >
+                  <Plus size={16} /> COMPOSE NEW EMAIL
                 </button>
               </div>
 
@@ -1726,15 +1807,24 @@ export default function AdminPage() {
 
               <form onSubmit={handleSendComposeEmail}>
                 <div style={{ marginBottom: 16 }}>
-                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>To (Client Email)</label>
+                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>To (Client Email Address)</label>
                   <input
                     type="email"
                     className="form-input"
                     required
+                    list="client-email-suggestions"
                     value={composeTo}
                     onChange={(e) => setComposeTo(e.target.value)}
-                    placeholder="e.g. client@example.ch"
+                    placeholder="Type or select client email (e.g. client@example.ch)..."
                   />
+                  <datalist id="client-email-suggestions">
+                    {bookings.map((b) => (
+                      <option key={b.id} value={b.email}>{b.client} ({b.service})</option>
+                    ))}
+                    {subscribers.map((s) => (
+                      <option key={s.id} value={s.email}>{s.name} (Subscriber)</option>
+                    ))}
+                  </datalist>
                 </div>
 
                 <div style={{ marginBottom: 16 }}>
@@ -1745,19 +1835,19 @@ export default function AdminPage() {
                     required
                     value={composeSubject}
                     onChange={(e) => setComposeSubject(e.target.value)}
-                    placeholder="e.g. Session Details &amp; Retreat Registration"
+                    placeholder="e.g. Studio Session Details &amp; Preparation Guidelines"
                   />
                 </div>
 
                 <div style={{ marginBottom: 20 }}>
-                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Message</label>
+                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Email Message</label>
                   <textarea
                     className="form-textarea"
                     rows={6}
                     required
                     value={composeBody}
                     onChange={(e) => setComposeBody(e.target.value)}
-                    placeholder="Dear Client,&#10;&#10;Write your email message here..."
+                    placeholder="Dear Client,&#10;&#10;Thank you for reaching out to Susi Davies Studio..."
                   />
                 </div>
 
@@ -1766,7 +1856,7 @@ export default function AdminPage() {
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                     <span style={{ fontSize: 12, fontWeight: 700, color: "#2691BA", textTransform: "uppercase" }}>File Attachments</span>
                     <label style={{ cursor: "pointer", fontSize: 12, color: "#2691BA", fontWeight: 700 }}>
-                      + Pick Attachments (PDF, Images, Docs)
+                      + Pick Attachments (PDF, Invoices, Images)
                       <input
                         type="file"
                         multiple
@@ -1800,12 +1890,17 @@ export default function AdminPage() {
                   )}
                 </div>
 
-                <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+                <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", alignItems: "center" }}>
                   <button type="button" onClick={() => setShowComposeModal(false)} style={{ padding: "10px 20px", borderRadius: 20, border: "1px solid #ccc", background: "none", cursor: "pointer" }}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                    <Send size={15} /> Send Email via hello@susidavies.com
+                  <button
+                    type="submit"
+                    disabled={isSendingEmail}
+                    className="btn-pill btn-pill-cyan"
+                    style={{ display: "inline-flex", alignItems: "center", gap: 6, opacity: isSendingEmail ? 0.7 : 1 }}
+                  >
+                    <Send size={15} /> {isSendingEmail ? "Sending via Resend API..." : "Send Email via hello@susidavies.com"}
                   </button>
                 </div>
               </form>
