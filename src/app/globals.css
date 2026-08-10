@@ -978,11 +978,11 @@ h1 {
 
 .susi-hero-stage {
   position: relative;
-  min-height: calc(100vh - 85px);
+  min-height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 60px max(24px, calc((100vw - 1280px) / 2)) 40px;
+  justify-content: center;
+  padding: 50px max(24px, calc((100vw - 1280px) / 2)) 30px;
 }
 
 .susi-hero-bg-container {
@@ -1007,25 +1007,20 @@ h1 {
   background: linear-gradient(
     90deg,
     rgba(247, 243, 236, 0.96) 0%,
-    rgba(247, 243, 236, 0.88) 35%,
-    rgba(247, 243, 236, 0.45) 60%,
-    rgba(247, 243, 236, 0.1) 100%
+    rgba(247, 243, 236, 0.88) 40%,
+    rgba(247, 243, 236, 0.4) 65%,
+    rgba(247, 243, 236, 0.05) 100%
   );
 }
 
 .susi-hero-inner {
   position: relative;
   z-index: 2;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 40px;
+  width: 100%;
 }
 
 .susi-hero-content {
-  max-width: 640px;
-  padding-top: 20px;
+  max-width: 620px;
 }
 
 .susi-hero-eyebrow {
@@ -1058,7 +1053,7 @@ h1 {
 
 .susi-hero-heading {
   font-family: var(--serif);
-  font-size: clamp(42px, 5.2vw, 68px);
+  font-size: clamp(40px, 5vw, 66px);
   line-height: 1.08;
   font-weight: 400;
   color: #1f78b4;
@@ -1108,18 +1103,25 @@ h1 {
   color: #ffffff;
 }
 
-/* Floating Glass Feature Cards */
+/* 4 Feature Glass Cards Bar Section (Pushed DOWN below Hero Stage) */
+.susi-glass-cards-section {
+  position: relative;
+  z-index: 10;
+  background-color: #F7F3EC;
+  padding: 20px max(24px, calc((100vw - 1280px) / 2)) 40px;
+}
+
 .susi-hero-glass-cards {
   display: grid;
   grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
   align-items: center;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  padding: 18px 28px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  padding: 20px 28px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.06);
   width: 100%;
 }
 
@@ -1233,14 +1235,6 @@ h1 {
 
 /* Hero Section Mobile Responsiveness */
 @media (max-width: 1024px) {
-  .susi-hero-overlay {
-    background: linear-gradient(
-      180deg,
-      rgba(247, 243, 236, 0.95) 0%,
-      rgba(247, 243, 236, 0.88) 60%,
-      rgba(247, 243, 236, 0.6) 100%
-    );
-  }
   .susi-hero-glass-cards {
     grid-template-columns: 1fr 1fr;
     gap: 16px;
@@ -1251,17 +1245,39 @@ h1 {
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .susi-hero-stage {
-    padding: 40px 18px 30px;
     min-height: auto;
+    padding: 36px 20px 24px;
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  .susi-hero-bg-container {
+    position: relative;
+    height: 420px;
+    width: 100%;
+    margin-bottom: 24px;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .susi-hero-bg-img {
+    object-fit: cover;
+    object-position: center top;
+  }
+  .susi-hero-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(247, 243, 236, 0) 0%,
+      rgba(247, 243, 236, 0.2) 70%,
+      rgba(247, 243, 236, 0.8) 100%
+    );
   }
   .susi-hero-eyebrow {
     font-size: 11px;
     letter-spacing: 0.16em;
   }
   .susi-hero-heading {
-    font-size: 36px;
+    font-size: 34px;
   }
   .susi-hero-roles {
     font-size: 14px;
@@ -1269,6 +1285,9 @@ h1 {
   .susi-hero-btn {
     width: 100%;
     justify-content: center;
+  }
+  .susi-glass-cards-section {
+    padding: 10px 18px 30px;
   }
   .susi-hero-glass-cards {
     grid-template-columns: 1fr;
