@@ -74,6 +74,7 @@ const initialInvoices: any[] = [
 ];
 const initialCampaigns: any[] = [];
 const initialArticles: any[] = [
+  { id: 0, title: "Your Body Is Talking — Are You Listening?", category: "Mindful Living", status: "Published", date: "Aug 10, 2026", linkedin: true, broadcastSent: true },
   { id: 1, title: "Movement & Neural Alignment: Moving with Intention", category: "Practice Notes", status: "Published", date: "Aug 06, 2026", linkedin: true, broadcastSent: true },
   { id: 2, title: "Finding Calm in Motion: The Power of Breathwork", category: "Mindful Living", status: "Published", date: "Jul 28, 2026", linkedin: true, broadcastSent: true },
   { id: 3, title: "Reflections from the Peloponnese Sanctuary", category: "Retreat Insights", status: "Draft", date: "Aug 01, 2026", linkedin: false, broadcastSent: false },
