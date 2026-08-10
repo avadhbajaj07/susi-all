@@ -6,7 +6,7 @@ export function SiteFooter() {
     <footer className="site-footer">
       <Link href="/" aria-label="Susi Davies home" className="footer-logo-wrap">
         <img
-          src="/images/susi-davies-logo-white.png"
+          src="/images/susi-davies-logo-white-official.png"
           alt="Susi Davies Logo"
           className="footer-logo-img"
         />

@@ -89,7 +89,8 @@ h1 {
 }
 
 .header-logo-img {
-  height: 60px;
+  height: 74px;
+  max-width: 280px;
   width: auto;
   object-fit: contain;
   transition: opacity 0.2s ease, transform 0.2s ease;
