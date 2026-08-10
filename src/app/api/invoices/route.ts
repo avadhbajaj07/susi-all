@@ -127,12 +127,6 @@ export async function POST(req: Request) {
         <div style="text-align: right; font-size: 20px; font-weight: bold; color: #1f78b4; margin-bottom: 25px;">
           Total: CHF ${Number(invoice.total).toFixed(2)}
         </div>
-
-        <div style="background-color: #EEF8FC; padding: 16px; border-radius: 10px; font-size: 13px; margin-bottom: 25px; border: 1px solid #C5E3F3;">
-          <strong style="color: #1f78b4; text-transform: uppercase; font-size: 11px; letter-spacing: 0.1em; display: block; margin-bottom: 4px;">Payment Instructions</strong>
-          <strong>Payment Method:</strong> TWINT (+41 79 854 97 52) or Bank Transfer.<br/>
-          ${invoice.paymentNotice || ""}
-        </div>
       `;
 
       const emailHtml = renderSusiEmailTemplate({
@@ -140,6 +134,71 @@ export async function POST(req: Request) {
         bodyHtml: invoiceContentHtml,
         recipientName: invoice.clientName,
       });
+
+      // Build standalone printable HTML attachment document for the client
+      const attachmentDocumentHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Invoice ${invoice.number} — Susi Davies Studio</title>
+  <style>
+    body { font-family: Georgia, 'Times New Roman', serif; background-color: #F8FCFD; padding: 40px; color: #1c313a; }
+    .card { max-width: 700px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 12px; border: 1px solid #BCD4E3; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+    .header { text-align: center; border-bottom: 2px solid #1f78b4; padding-bottom: 20px; margin-bottom: 30px; }
+    .header h1 { color: #1f78b4; margin: 0; font-size: 28px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .header p { color: #666; margin: 6px 0 0; font-size: 13px; font-family: sans-serif; text-transform: uppercase; }
+    .meta { display: flex; justify-content: space-between; margin-bottom: 30px; }
+    .meta-box { font-size: 14px; font-family: sans-serif; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-family: sans-serif; font-size: 14px; }
+    th { background-color: #1f78b4; color: #ffffff; padding: 12px; text-align: left; }
+    td { padding: 12px; border-bottom: 1px solid #E2DDD3; }
+    .total { text-align: right; font-size: 22px; font-weight: bold; color: #1f78b4; }
+    .footer { text-align: center; margin-top: 40px; border-top: 1px solid #E2DDD3; padding-top: 20px; font-family: sans-serif; font-size: 12px; color: #777; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>Susi Davies Studio</h1>
+      <p>Official Invoice ${invoice.number}</p>
+    </div>
+    <div class="meta">
+      <div class="meta-box">
+        <strong>BILL TO:</strong><br/>
+        ${invoice.clientName}<br/>
+        ${recipient}
+      </div>
+      <div class="meta-box" style="text-align: right;">
+        <strong>Invoice #:</strong> ${invoice.number}<br/>
+        <strong>Issued Date:</strong> ${invoice.issued}<br/>
+        ${invoice.status?.toLowerCase() !== "paid" ? `<strong>Due Date:</strong> ${invoice.due}<br/>` : ""}
+        <strong>Status:</strong> ${invoice.status}
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th style="text-align:center;">Qty</th>
+          <th style="text-align:right;">Rate</th>
+          <th style="text-align:right;">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsHtml}
+      </tbody>
+    </table>
+    <div class="total">Total: CHF ${Number(invoice.total).toFixed(2)}</div>
+    <div class="footer">
+      Susi Davies Studio · Movement, Breathwork &amp; Remedial Therapy · hello@susidavies.com · susidavies.com
+    </div>
+  </div>
+</body>
+</html>
+      `;
+
+      const attachmentBase64 = Buffer.from(attachmentDocumentHtml).toString("base64");
 
       const resendRes = await fetch("https://api.resend.com/emails", {
         method: "POST",
@@ -152,6 +211,12 @@ export async function POST(req: Request) {
           to: [recipient],
           subject: `Invoice ${invoice.number} from Susi Davies Studio`,
           html: emailHtml,
+          attachments: [
+            {
+              filename: `Invoice-${invoice.number}.html`,
+              content: attachmentBase64,
+            },
+          ],
         }),
       });
 
