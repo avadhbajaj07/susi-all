@@ -144,7 +144,7 @@ export default async function SingleBlogPostPage({ params }: Props) {
 
             <span style={{ fontSize: 14, color: "var(--muted)", display: "inline-flex", alignItems: "center", gap: 6 }}>
               <User size={15} />
-              By Susi Davies Studio
+              By Susi Davies
             </span>
           </div>
 

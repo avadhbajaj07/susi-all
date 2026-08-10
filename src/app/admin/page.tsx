@@ -23,6 +23,8 @@ import {
   Printer,
   DollarSign,
   Eye,
+  X,
+  Edit,
   Linkedin,
   UserPlus,
   UserCheck,
@@ -514,6 +516,69 @@ export default function AdminPage() {
     setIsPublishingArticle(false);
   };
 
+  // Edit Article Modal State
+  const [showEditArticleModal, setShowEditArticleModal] = useState(false);
+  const [editArticleId, setEditArticleId] = useState<any>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editCategory, setEditCategory] = useState("Practice Notes");
+  const [editContent, setEditContent] = useState("");
+  const [editImage, setEditImage] = useState("");
+
+  const handleOpenEditArticle = (art: any) => {
+    setEditArticleId(art.id);
+    setEditTitle(art.title || "");
+    setEditCategory(art.category || "Practice Notes");
+    setEditContent(art.content || art.excerpt || "");
+    setEditImage(art.image || "");
+    setShowEditArticleModal(true);
+  };
+
+  const handleSaveEditArticle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editArticleId || !editTitle) return;
+
+    const updatedArt = {
+      title: editTitle,
+      category: editCategory,
+      content: editContent,
+      excerpt: editContent ? editContent.slice(0, 160) : editTitle,
+      image: editImage,
+    };
+
+    setArticles((prev) =>
+      prev.map((a) => (a.id === editArticleId ? { ...a, ...updatedArt } : a))
+    );
+
+    setShowEditArticleModal(false);
+
+    try {
+      await fetch("/api/posts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editArticleId,
+          ...updatedArt,
+        }),
+      });
+    } catch (err) {
+      console.error("Update article error:", err);
+    }
+  };
+
+  const handleDeleteArticle = async (art: any) => {
+    if (!confirm(`Are you sure you want to delete "${art.title}"?`)) return;
+
+    setArticles((prev) => prev.filter((a) => a.id !== art.id));
+
+    try {
+      await fetch(`/api/posts?id=${encodeURIComponent(art.id)}`, {
+        method: "DELETE",
+      });
+    } catch (err) {
+      console.error("Delete article error:", err);
+    }
+  };
+
   const handleAddSubscriber = (e: React.FormEvent) => {
     e.preventDefault();
     if (!subEmail) return;
@@ -714,7 +779,7 @@ export default function AdminPage() {
               }}
             />
             <span style={{ fontSize: 12, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.8, display: "block", marginTop: 4 }}>
-              Studio Admin Panel
+              Susi Davies Admin Panel
             </span>
           </Link>
         </div>
@@ -777,7 +842,7 @@ export default function AdminPage() {
         <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 35 }}>
           <div>
             <span style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.18em", color: "#6B7A70", fontWeight: 700 }}>
-              Susi Davies Studio Dashboard
+              Susi Davies Dashboard
             </span>
             <h2 style={{ fontFamily: "var(--serif)", fontSize: 36, color: "#2691BA", margin: "4px 0 0" }}>
               {activeTab === "overview" && "Studio Overview"}
@@ -1772,9 +1837,23 @@ export default function AdminPage() {
                       </div>
                     </div>
                   </div>
-                  <span style={{ padding: "4px 12px", borderRadius: 100, fontSize: 12, fontWeight: 700, backgroundColor: art.status === "Published" ? "#54BC3318" : art.status.includes("Scheduled") ? "#3498DB18" : "#F39C1218", color: art.status === "Published" ? "#45A027" : art.status.includes("Scheduled") ? "#2980B9" : "#D68910" }}>
-                    {art.status}
-                  </span>
+                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                    <span style={{ padding: "4px 12px", borderRadius: 100, fontSize: 12, fontWeight: 700, backgroundColor: art.status === "Published" ? "#54BC3318" : art.status.includes("Scheduled") ? "#3498DB18" : "#F39C1218", color: art.status === "Published" ? "#45A027" : art.status.includes("Scheduled") ? "#2980B9" : "#D68910" }}>
+                      {art.status}
+                    </span>
+                    <button
+                      onClick={() => handleOpenEditArticle(art)}
+                      style={{ padding: "6px 12px", borderRadius: 8, backgroundColor: "#2691BA", color: "#fff", border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteArticle(art)}
+                      style={{ padding: "6px 12px", borderRadius: 8, backgroundColor: "#E74C3C", color: "#fff", border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -2078,6 +2157,54 @@ export default function AdminPage() {
                   </button>
                   <button type="submit" className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                     <Share2 size={15} /> {artScheduleMode === "schedule" ? `Schedule for ${artScheduleDate || "Later"}` : "Publish & Cross-Post Now"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal 3B: Edit Article Modal */}
+        {showEditArticleModal && (
+          <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ backgroundColor: "#ffffff", padding: "35px", borderRadius: 20, maxWidth: 680, width: "90%", maxHeight: "90vh", overflowY: "auto" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", margin: 0 }}>✏️ Edit Blog Article &amp; Image</h3>
+                <button onClick={() => setShowEditArticleModal(false)} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={20} /></button>
+              </div>
+
+              <form onSubmit={handleSaveEditArticle}>
+                <div className="form-group" style={{ marginBottom: 15 }}>
+                  <label style={{ fontSize: 13, fontWeight: 700, display: "block", marginBottom: 4 }}>Article Title *</label>
+                  <input type="text" className="form-input" required value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="Article Title..." />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 15 }}>
+                  <label style={{ fontSize: 13, fontWeight: 700, display: "block", marginBottom: 4 }}>Category</label>
+                  <select className="form-input" value={editCategory} onChange={(e) => setEditCategory(e.target.value)}>
+                    <option value="Practice Notes">Practice Notes</option>
+                    <option value="Mindful Living">Mindful Living</option>
+                    <option value="Retreat Insights">Retreat Insights</option>
+                    <option value="Remedial Therapy">Remedial Therapy</option>
+                  </select>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 15 }}>
+                  <label style={{ fontSize: 13, fontWeight: 700, display: "block", marginBottom: 4 }}>Featured Image URL (Cloudinary or Web Image)</label>
+                  <input type="text" className="form-input" value={editImage} onChange={(e) => setEditImage(e.target.value)} placeholder="https://res.cloudinary.com/..." />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 20 }}>
+                  <label style={{ fontSize: 13, fontWeight: 700, display: "block", marginBottom: 4 }}>Article Full Body Content *</label>
+                  <textarea className="form-textarea" rows={8} required value={editContent} onChange={(e) => setEditContent(e.target.value)} placeholder="Write your full article body text..."></textarea>
+                </div>
+
+                <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+                  <button type="button" onClick={() => setShowEditArticleModal(false)} style={{ padding: "10px 20px", borderRadius: 20, border: "1px solid #ccc", background: "none", cursor: "pointer" }}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    💾 Save Changes &amp; Update Website
                   </button>
                 </div>
               </form>

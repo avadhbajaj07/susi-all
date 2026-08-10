@@ -107,6 +107,53 @@ export async function insertSupabasePost(post: { title: string; category?: strin
   return null;
 }
 
+export async function updateSupabasePost(id: string | number, data: { title: string; category?: string; content?: string; excerpt?: string; image?: string; date?: string }) {
+  try {
+    const slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const postExcerpt = data.excerpt || (data.content ? data.content.slice(0, 160) : data.title);
+
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${id}`, {
+      method: "PATCH",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+        "Prefer": "return=representation",
+      },
+      body: JSON.stringify({
+        title: data.title,
+        slug,
+        category: data.category,
+        content: data.content,
+        excerpt: postExcerpt,
+        image: data.image,
+        date: data.date,
+      }),
+    });
+
+    return res.ok;
+  } catch (err) {
+    console.error("updateSupabasePost error:", err);
+    return false;
+  }
+}
+
+export async function deleteSupabasePost(id: string | number) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${id}`, {
+      method: "DELETE",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+      },
+    });
+    return res.ok;
+  } catch (err) {
+    console.error("deleteSupabasePost error:", err);
+    return false;
+  }
+}
+
 // Comments API
 export async function fetchPostComments(slug: string) {
   try {
