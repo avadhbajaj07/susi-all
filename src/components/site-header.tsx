@@ -12,6 +12,7 @@ const navLinks = [
   { href: "/private-sessions", label: "Private Sessions" },
   { href: "/yoga-dynamics-app", label: "Yoga Dynamics App" },
   { href: "/online-courses", label: "Online Courses" },
+  { href: "/blog", label: "Blog" },
   { href: "/contact-us", label: "Contact Us" },
 ];
 
@@ -30,7 +31,7 @@ export function SiteHeader() {
         />
       </Link>
 
-      {/* Desktop Navigation Links (No menu icon on desktop!) */}
+      {/* Desktop Navigation Links */}
       <nav className="desktop-nav" aria-label="Main navigation">
         {navLinks.map((item) => {
           const isActive = pathname === item.href;
