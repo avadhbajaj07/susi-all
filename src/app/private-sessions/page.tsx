@@ -93,13 +93,6 @@ export default function PrivateSessionsPage() {
             <p className="body-text" style={{ fontStyle: "italic" }}>
               Every session is adapted to your needs.
             </p>
-            <h2 className="section-heading" style={{ marginTop: 40, fontSize: 32 }}>
-              Location &amp; Booking
-            </h2>
-            <p className="body-text">
-              📍 <strong>Venue:</strong> at BODYTALKS, Alte Landstrasse 32, Thalwil
-            </p>
-            <p className="body-text">• By appointment only</p>
             <p className="body-text" style={{ fontSize: 14, color: "var(--muted)" }}>
               To book a private session, please get in touch directly.
             </p>
