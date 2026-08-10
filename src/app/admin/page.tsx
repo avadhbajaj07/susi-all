@@ -398,6 +398,23 @@ export default function AdminPage() {
     };
     setArticles([newArt, ...articles]);
 
+    try {
+      await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: artTitle,
+          category: artCategory,
+          content: artContent,
+          excerpt: artContent ? artContent.slice(0, 160) : artTitle,
+          image: artImage || "/images/susi davies7.jpg",
+          date: isScheduled ? artScheduleDate : "Aug 10, 2026",
+        }),
+      });
+    } catch (err) {
+      console.error("Save post error:", err);
+    }
+
     if (broadcastToEmail) {
       try {
         const recipients = subscribers.map((s) => s.email).filter(Boolean);
