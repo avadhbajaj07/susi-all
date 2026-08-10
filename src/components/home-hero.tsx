@@ -58,68 +58,6 @@ export function HomeHero() {
         </div>
       </div>
 
-      {/* 4 Feature Glass Cards Bar (Positioned Down Below Hero Stage) */}
-      <div className="susi-glass-cards-section">
-        <div className="susi-hero-glass-cards">
-          {/* Card 1: Holistic Approach */}
-          <div className="susi-glass-card">
-            <div className="susi-card-icon-wrap">
-              <svg width="24" height="24" viewBox="0 0 32 24" fill="none">
-                <path d="M16 2C16 2 12.5 8 12.5 13C12.5 16.5 14 19 16 21C18 19 19.5 16.5 19.5 13C19.5 8 16 2 16 2Z" stroke="#1f78b4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M16 21C13 21 8 19 6 14C4.5 10 6 6 6 6C6 6 9.5 10 12.5 13C14.5 15 15.5 18 16 21Z" stroke="#1f78b4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M16 21C19 21 24 19 26 14C27.5 10 26 6 26 6C26 6 22.5 10 19.5 13C17.5 15 16.5 18 16 21Z" stroke="#1f78b4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <div className="susi-card-text">
-              <strong>Holistic Approach</strong>
-              <span>Mind, Body &amp; Soul</span>
-            </div>
-          </div>
-
-          <div className="susi-card-divider" />
-
-          {/* Card 2: Personalized Guidance */}
-          <div className="susi-glass-card">
-            <div className="susi-card-icon-wrap">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1f78b4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="5" r="2.5" />
-                <path d="M12 9.5v5M7 21a5 5 0 0 1 10 0M5 13.5c2-1.5 5-2 7-2s5 .5 7 2" />
-              </svg>
-            </div>
-            <div className="susi-card-text">
-              <strong>Personalized Guidance</strong>
-              <span>For Lasting Change</span>
-            </div>
-          </div>
-
-          <div className="susi-card-divider" />
-
-          {/* Card 3: For All Levels */}
-          <div className="susi-glass-card">
-            <div className="susi-card-icon-wrap">
-              <Heart size={22} color="#1f78b4" strokeWidth={2} />
-            </div>
-            <div className="susi-card-text">
-              <strong>For All Levels</strong>
-              <span>Beginners to Advanced</span>
-            </div>
-          </div>
-
-          <div className="susi-card-divider" />
-
-          {/* Card 4: In-Person & Online */}
-          <div className="susi-glass-card">
-            <div className="susi-card-icon-wrap">
-              <Globe size={22} color="#1f78b4" strokeWidth={2} />
-            </div>
-            <div className="susi-card-text">
-              <strong>In-Person &amp; Online</strong>
-              <span>Practice Anywhere</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Inspirational Quote Section */}
       <div className="susi-quote-section">
         <div className="susi-quote-container">
