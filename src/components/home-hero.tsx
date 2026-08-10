@@ -10,7 +10,7 @@ export function HomeHero() {
       <div className="susi-hero-stage">
         {/* Responsive Background Image (Desktop & Mobile) */}
         <picture className="susi-hero-bg-container">
-          <source media="(max-width: 768px)" srcSet="/images/hero-mobile.png" />
+          <source media="(max-width: 768px)" srcSet="/images/hero-mobile.jpg" />
           <img
             src="/images/hero-bg.png"
             alt="Susi Davies yoga posture & movement therapy"
@@ -22,7 +22,7 @@ export function HomeHero() {
         <div className="susi-hero-overlay" />
 
         <div className="susi-hero-inner">
-          {/* Left Column: Headline, Roles & CTA */}
+          {/* Left Column: Headline & Roles */}
           <div className="susi-hero-content">
             <p className="susi-hero-eyebrow">
               30+ YEARS OF EXPERIENCE · WORLDWIDE IMPACT
@@ -49,11 +49,6 @@ export function HomeHero() {
               <span>Breathwork Specialist</span> ·{" "}
               <span>Movement Therapist</span> · <span>Mentor &amp; Life Coach</span>
             </p>
-
-            <Link href="/book" className="susi-hero-btn">
-              <span>Start your journey with Susi Davies</span>
-              <ArrowRight size={18} />
-            </Link>
           </div>
         </div>
       </div>
