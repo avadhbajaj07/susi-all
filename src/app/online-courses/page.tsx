@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { MapPin, Calendar, Clock } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 
 export default function OnlineCoursesPage() {
   return (
@@ -176,67 +176,8 @@ export default function OnlineCoursesPage() {
               </a>
             </div>
 
-            {/* Block 2: Deeper Practice (In-Person Workshops at BODYTALKS Thalwil) */}
-            <div className="ym-card ym-card-light" style={{ border: "2px solid var(--blue)" }}>
-              <div>
-                <span className="ym-badge ym-badge-light" style={{ backgroundColor: "var(--blue)", color: "#fff" }}>
-                  📍 In-Person Workshop Series
-                </span>
-                <h2 className="ym-h2 ym-h2-light">Deeper Practice</h2>
-                <p className="ym-sub ym-sub-light">Breathwork · Philosophy · Meditation</p>
-                
-                {/* Location Badge */}
-                <div style={{ backgroundColor: "#F4F9FC", border: "1px solid #BCD4E3", padding: "10px 14px", borderRadius: 10, margin: "10px 0 16px", display: "flex", gap: 10, alignItems: "center", fontSize: 13, color: "var(--blue)", fontWeight: 700 }}>
-                  <MapPin size={18} color="var(--blue)" />
-                  <span>at BODYTALKS, Alte Landstrasse 32, Thalwil</span>
-                </div>
-
-                <p className="ym-desc ym-desc-light">A deeper exploration beyond physical movement. These in-person workshops are designed for students who want to expand their understanding of yoga through mindful practice, self-inquiry, and inner awareness.</p>
-                
-                {/* Upcoming Workshop Dates List */}
-                <div style={{ margin: "16px 0", backgroundColor: "#fff", padding: "16px", borderRadius: 12, border: "1px solid #E2DDD3" }}>
-                  <strong style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--blue)", display: "block", marginBottom: 10 }}>
-                    🗓️ Upcoming Workshop Dates (18:30 – 20:30)
-                  </strong>
-                  
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px dashed #eee", paddingBottom: 6 }}>
-                      <span style={{ fontWeight: 700, color: "var(--ink-title)", fontSize: 14 }}>Thursday, September 10</span>
-                      <span style={{ fontSize: 12, color: "var(--blue)", backgroundColor: "rgba(38,145,186,0.1)", padding: "2px 8px", borderRadius: 100 }}>18:30 – 20:30</span>
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px dashed #eee", paddingBottom: 6 }}>
-                      <span style={{ fontWeight: 700, color: "var(--ink-title)", fontSize: 14 }}>Thursday, October 29</span>
-                      <span style={{ fontSize: 12, color: "var(--blue)", backgroundColor: "rgba(38,145,186,0.1)", padding: "2px 8px", borderRadius: 100 }}>18:30 – 20:30</span>
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontWeight: 700, color: "var(--ink-title)", fontSize: 14 }}>Thursday, December 3</span>
-                      <span style={{ fontSize: 12, color: "var(--blue)", backgroundColor: "rgba(38,145,186,0.1)", padding: "2px 8px", borderRadius: 100 }}>18:30 – 20:30</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="ym-inforow">
-                  <div className="ym-infobox ym-infobox-light">
-                    <div className="ym-infobox-label ym-infobox-label-light">💰 Price</div>
-                    <div className="ym-infobox-val ym-infobox-val-light"><strong>CHF 60.–</strong> per workshop</div>
-                  </div>
-                  <div className="ym-infobox ym-infobox-light">
-                    <div className="ym-infobox-label ym-infobox-label-light">📍 Location</div>
-                    <div className="ym-infobox-val ym-infobox-val-light">BODYTALKS Thalwil</div>
-                  </div>
-                </div>
-              </div>
-              <a
-                className="ym-btn ym-btn-light"
-                href="https://wa.me/41798549752?text=Hello%20Susi%2C%20I%20would%20like%20to%20register%20for%20the%20Deeper%20Practice%20workshop%20at%20BODYTALKS%20Thalwil.%20Could%20you%20please%20confirm%20availability%3F"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Register for Deeper Practice Workshop
-              </a>
-            </div>
-
           </div>{/* end row */}
+
 
           {/* Block 3: Private Teacher Development */}
           <div className="ym-card ym-card-dark" style={{ marginTop: 30 }}>
