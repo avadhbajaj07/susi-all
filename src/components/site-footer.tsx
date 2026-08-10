@@ -4,9 +4,13 @@ import { Facebook, Twitter, Youtube, Instagram, Linkedin } from "lucide-react";
 export function SiteFooter() {
   return (
     <footer className="site-footer">
-      <div className="footer-logo">
-        SUSI<br />DAVIES
-      </div>
+      <Link href="/" aria-label="Susi Davies home" className="footer-logo-wrap">
+        <img
+          src="/images/susi-davies-logo.png"
+          alt="Susi Davies Logo"
+          className="footer-logo-img"
+        />
+      </Link>
       <nav className="footer-nav" aria-label="Footer navigation">
         <Link href="/">Home</Link>
         <Link href="/private-sessions">Private Sessions</Link>

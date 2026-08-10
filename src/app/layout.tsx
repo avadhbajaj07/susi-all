@@ -6,6 +6,7 @@ import "./reference-pages.css";
 export const metadata: Metadata = {
   title: { default: "Susi Davies | Movement, breath & transformation", template: "%s | Susi Davies" },
   description: "Remedial therapist, yoga teacher, breathwork specialist, movement therapist, mentor and life coach.",
+  icons: { icon: "/images/susi-davies-logo.png" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

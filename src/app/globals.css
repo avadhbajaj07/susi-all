@@ -82,25 +82,26 @@ h1 {
   box-shadow: 0 4px 20px rgba(0,0,0,0.12);
 }
 
-.brand-text {
-  font-family: var(--serif);
-  color: #ffffff;
-  font-size: 24px;
-  letter-spacing: 0.14em;
-  font-weight: 600;
-  line-height: 1.05;
-  text-transform: uppercase;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  transition: opacity 0.2s ease;
+.brand-logo-wrap {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
 }
-.brand-text:hover {
-  opacity: 0.9;
+
+.header-logo-img {
+  height: 44px;
+  width: auto;
+  object-fit: contain;
+  background-color: #ffffff;
+  padding: 5px 14px;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
-.brand-text span {
-  font-size: 17px;
-  letter-spacing: 0.16em;
+
+.header-logo-img:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
 }
 
 .desktop-nav {
@@ -797,13 +798,23 @@ h1 {
   text-align: center;
   padding: 65px 24px 30px;
 }
-.footer-logo {
-  font-family: var(--serif);
-  font-size: 26px;
-  letter-spacing: 0.16em;
-  line-height: 1.1;
+.footer-logo-wrap {
+  display: inline-block;
   margin-bottom: 26px;
-  font-weight: 600;
+  text-decoration: none;
+}
+.footer-logo-img {
+  height: 56px;
+  width: auto;
+  object-fit: contain;
+  background-color: #ffffff;
+  padding: 6px 18px;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  transition: transform 0.25s ease;
+}
+.footer-logo-img:hover {
+  transform: translateY(-2px) scale(1.02);
 }
 .footer-nav {
   display: flex;

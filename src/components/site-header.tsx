@@ -22,8 +22,12 @@ export function SiteHeader() {
 
   return (
     <header className="site-header">
-      <Link href="/" className="brand-text" aria-label="Susi Davies home" onClick={close}>
-        SUSI DAVIES
+      <Link href="/" className="brand-logo-wrap" aria-label="Susi Davies home" onClick={close}>
+        <img
+          src="/images/susi-davies-logo.png"
+          alt="Susi Davies Logo"
+          className="header-logo-img"
+        />
       </Link>
 
       {/* Desktop Navigation Links (No menu icon on desktop!) */}

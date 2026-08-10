@@ -432,10 +432,20 @@ export default function AdminPage() {
         }}
       >
         <div style={{ marginBottom: 40, borderBottom: "1px solid rgba(255,255,255,0.15)", paddingBottom: 20 }}>
-          <Link href="/" style={{ textDecoration: "none", color: "#ffffff" }}>
-            <h1 style={{ fontFamily: "var(--serif)", fontSize: 24, letterSpacing: "0.14em", margin: 0, fontWeight: 700 }}>
-              SUSI DAVIES
-            </h1>
+          <Link href="/" style={{ textDecoration: "none", color: "#ffffff", display: "flex", flexDirection: "column", gap: 8 }}>
+            <img
+              src="/images/susi-davies-logo.png"
+              alt="Susi Davies Logo"
+              style={{
+                height: 48,
+                width: "auto",
+                objectFit: "contain",
+                backgroundColor: "#ffffff",
+                padding: "4px 12px",
+                borderRadius: 10,
+                alignSelf: "flex-start",
+              }}
+            />
             <span style={{ fontSize: 12, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.8, display: "block", marginTop: 4 }}>
               Studio Admin Panel
             </span>
