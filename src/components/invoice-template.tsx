@@ -49,28 +49,41 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          padding-bottom: 90px;
+          padding-bottom: 180px; /* Protect bottom Namaste signature footer */
         }
 
-        /* Top Header Overlay spacing */
+        /* Top Right "Invoice" Title printed on top ocean wave background */
+        .inv-top-title-heading {
+          position: absolute;
+          top: 75px;
+          right: 55px;
+          font-family: 'Crimson Pro', Georgia, serif;
+          font-size: 46px;
+          font-weight: 700;
+          color: #1f78b4;
+          letter-spacing: 0.02em;
+          z-index: 5;
+        }
+
+        /* Top Header Spacer */
         .inv-top-spacer {
-          height: 180px;
+          height: 155px;
         }
 
-        /* Main Body Content */
+        /* Main Content Body */
         .inv-content-body {
-          padding: 0 50px 20px;
+          padding: 0 55px;
           position: relative;
           z-index: 2;
           flex: 1;
         }
 
-        /* Bill To & Metadata Grid */
+        /* Bill To & Details Grid */
         .inv-meta-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 30px;
-          margin-bottom: 25px;
+          margin-bottom: 30px;
         }
         .inv-bill-to-label {
           font-family: 'Open Sans', sans-serif;
@@ -83,9 +96,10 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
         }
         .inv-client-name {
           font-family: 'Crimson Pro', serif;
-          font-size: 22px;
+          font-size: 24px;
           font-weight: 700;
           color: #1f78b4;
+          line-height: 1.2;
         }
 
         .inv-details-table {
@@ -108,50 +122,18 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
           color: #1f78b4;
         }
 
-        /* Payment Box */
-        .inv-payment-box {
-          background: rgba(238, 248, 252, 0.85);
-          backdrop-filter: blur(4px);
-          border: 1px solid #BCD4E3;
-          border-radius: 12px;
-          padding: 14px 18px;
-          margin: 0 0 25px auto;
-          max-width: 360px;
-          font-family: 'Open Sans', sans-serif;
-          font-size: 13px;
-          color: #2c424d;
-        }
-        .inv-payment-box .pay-lbl {
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 0.16em;
-          color: #1f78b4;
-          text-transform: uppercase;
-          margin-bottom: 4px;
-        }
-        .inv-payment-box .pay-notice {
-          font-family: 'Crimson Pro', serif;
-          font-size: 15px;
-          font-weight: 700;
-          color: #1c313a;
-          margin-bottom: 3px;
-        }
-        .inv-payment-box .pay-details {
-          font-size: 12px;
-          color: #556b73;
-        }
-
-        /* Items Table */
+        /* Line Items Table */
         .inv-table-items {
           width: 100%;
           border-collapse: collapse;
+          margin-top: 15px;
           margin-bottom: 25px;
         }
         .inv-table-items th {
           background-color: transparent;
           color: #1f78b4;
           font-family: 'Crimson Pro', serif;
-          font-size: 20px;
+          font-size: 22px;
           font-weight: 700;
           padding: 10px 16px;
           border-bottom: 2px solid #1f78b4;
@@ -162,8 +144,8 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
         .inv-table-items th.th-amt { text-align: right; width: 130px; }
 
         .inv-table-items td {
-          padding: 12px 16px;
-          font-size: 15px;
+          padding: 14px 16px;
+          font-size: 16px;
           border-bottom: 1px dashed rgba(31, 120, 180, 0.25);
         }
         .inv-table-items td.td-desc {
@@ -174,7 +156,7 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
         }
         .inv-table-items td.td-qty { text-align: center; color: #1f78b4; font-weight: 700; }
         .inv-table-items td.td-rate { text-align: right; color: #1f78b4; }
-        .inv-table-items td.td-amt { text-align: right; font-weight: 700; color: #1f78b4; font-size: 16px; }
+        .inv-table-items td.td-amt { text-align: right; font-weight: 700; color: #1f78b4; font-size: 17px; }
 
         /* Totals Block */
         .inv-totals-box {
@@ -182,6 +164,7 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
           width: 320px;
           text-align: right;
           font-size: 16px;
+          margin-top: 20px;
         }
         .inv-totals-row {
           display: flex;
@@ -193,7 +176,7 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
           border-top: 2px solid #1f78b4;
           margin-top: 6px;
           padding-top: 10px;
-          font-size: 26px;
+          font-size: 28px;
           font-weight: 700;
           color: #1f78b4;
         }
@@ -218,17 +201,20 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
         }
       `}</style>
 
-      {/* Top Header Spacer (Matches background wave & logo) */}
+      {/* Top Right "Invoice" Heading */}
+      <div className="inv-top-title-heading">Invoice</div>
+
+      {/* Top Header Spacer */}
       <div className="inv-top-spacer" />
 
-      {/* Main Body Content */}
+      {/* Main Content Body */}
       <div className="inv-content-body">
-        {/* Bill To & Metadata */}
+        {/* Bill To & Metadata Grid */}
         <div className="inv-meta-grid">
           <div>
             <div className="inv-bill-to-label">BILL TO</div>
             <div className="inv-client-name">{data.clientName || "Valued Client"}</div>
-            {data.clientEmail && <div style={{ fontSize: 14, color: "#556b73", marginTop: 2 }}>{data.clientEmail}</div>}
+            {data.clientEmail && <div style={{ fontSize: 14, color: "#556b73", marginTop: 4 }}>{data.clientEmail}</div>}
           </div>
 
           <div>
@@ -259,14 +245,7 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
           </div>
         </div>
 
-        {/* Payment Notice Box */}
-        <div className="inv-payment-box">
-          <div className="pay-lbl">PAYMENT INSTRUCTIONS</div>
-          <div className="pay-notice">{data.paymentNotice || "Payment due within 14 days."}</div>
-          <div className="pay-details">{data.paymentMethod || "TWINT (+41 79 854 97 52) or Bank Transfer"}</div>
-        </div>
-
-        {/* Items Table */}
+        {/* Services & Items Table */}
         <table className="inv-table-items">
           <thead>
             <tr>
