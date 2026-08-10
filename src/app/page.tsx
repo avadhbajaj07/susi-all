@@ -7,6 +7,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { TestimonialSlider } from "@/components/testimonial-slider";
 import { MessageCircle } from "lucide-react";
 
+import { HomeHero } from "@/components/home-hero";
+
 export default function Home() {
   const serviceCards = [
     {
@@ -49,16 +51,7 @@ export default function Home() {
       </div>
 
       {/* Hero Section */}
-      <section className="home-hero-bg">
-        <div className="home-hero-content">
-          <p className="eyebrow-light">30+ YEARS OF EXPERIENCE · WORLDWIDE IMPACT</p>
-          <h1>A Complete Path to Transformation</h1>
-          <p>Remedial Therapist · Yoga Teacher · Breathwork Specialist · Movement Therapist · Mentor & Life Coach</p>
-          <Link href="/contact-us" className="btn-pill btn-pill-green">
-            Start your journey with Susi Davies
-          </Link>
-        </div>
-      </section>
+      <HomeHero />
 
       <div className="container">
         {/* Section 1: Image Left, Text Right */}

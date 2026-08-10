@@ -1,0 +1,140 @@
+"use client";
+
+import Link from "next/link";
+import { ArrowRight, Calendar, Heart, Globe } from "lucide-react";
+
+export function HomeHero() {
+  return (
+    <section className="susi-hero-wrapper">
+      {/* Main Hero Background & Layout */}
+      <div className="susi-hero-stage">
+        {/* High resolution studio background image */}
+        <div className="susi-hero-bg-container">
+          <img
+            src="/images/hero-bg.png"
+            alt="Susi Davies yoga posture & movement therapy"
+            className="susi-hero-bg-img"
+          />
+          {/* Subtle lighting overlay gradient */}
+          <div className="susi-hero-overlay" />
+        </div>
+
+        <div className="susi-hero-inner">
+          {/* Left Column: Headline, Roles & CTA */}
+          <div className="susi-hero-content">
+            <p className="susi-hero-eyebrow">
+              30+ YEARS OF EXPERIENCE · WORLDWIDE IMPACT
+            </p>
+
+            {/* Lotus Line Flourish */}
+            <div className="susi-hero-flourish">
+              <span className="susi-flourish-line" />
+              <svg width="26" height="20" viewBox="0 0 32 24" fill="none" className="susi-lotus-icon">
+                <path d="M16 2C16 2 12.5 8 12.5 13C12.5 16.5 14 19 16 21C18 19 19.5 16.5 19.5 13C19.5 8 16 2 16 2Z" stroke="#1f78b4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M16 21C13 21 8 19 6 14C4.5 10 6 6 6 6C6 6 9.5 10 12.5 13C14.5 15 15.5 18 16 21Z" stroke="#1f78b4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M16 21C19 21 24 19 26 14C27.5 10 26 6 26 6C26 6 22.5 10 19.5 13C17.5 15 16.5 18 16 21Z" stroke="#1f78b4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span className="susi-flourish-line" />
+            </div>
+
+            <h1 className="susi-hero-heading">
+              A Complete Path to <br />
+              <span className="susi-hero-heading-italic">Transformation</span>
+            </h1>
+
+            <p className="susi-hero-roles">
+              <span>Remedial Therapist</span> · <span>Yoga Teacher</span> ·{" "}
+              <span>Breathwork Specialist</span> ·{" "}
+              <span>Movement Therapist</span> · <span>Mentor &amp; Life Coach</span>
+            </p>
+
+            <Link href="/book" className="susi-hero-btn">
+              <span>Start your journey with Susi Davies</span>
+              <ArrowRight size={18} />
+            </Link>
+          </div>
+
+          {/* Bottom Floating Frosted Glass Feature Cards Bar */}
+          <div className="susi-hero-glass-cards">
+            {/* Card 1: Holistic Approach */}
+            <div className="susi-glass-card">
+              <div className="susi-card-icon-wrap">
+                <svg width="24" height="24" viewBox="0 0 32 24" fill="none">
+                  <path d="M16 2C16 2 12.5 8 12.5 13C12.5 16.5 14 19 16 21C18 19 19.5 16.5 19.5 13C19.5 8 16 2 16 2Z" stroke="#1f78b4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M16 21C13 21 8 19 6 14C4.5 10 6 6 6 6C6 6 9.5 10 12.5 13C14.5 15 15.5 18 16 21Z" stroke="#1f78b4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M16 21C19 21 24 19 26 14C27.5 10 26 6 26 6C26 6 22.5 10 19.5 13C17.5 15 16.5 18 16 21Z" stroke="#1f78b4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <div className="susi-card-text">
+                <strong>Holistic Approach</strong>
+                <span>Mind, Body &amp; Soul</span>
+              </div>
+            </div>
+
+            <div className="susi-card-divider" />
+
+            {/* Card 2: Personalized Guidance */}
+            <div className="susi-glass-card">
+              <div className="susi-card-icon-wrap">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1f78b4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="5" r="2.5" />
+                  <path d="M12 9.5v5M7 21a5 5 0 0 1 10 0M5 13.5c2-1.5 5-2 7-2s5 .5 7 2" />
+                </svg>
+              </div>
+              <div className="susi-card-text">
+                <strong>Personalized Guidance</strong>
+                <span>For Lasting Change</span>
+              </div>
+            </div>
+
+            <div className="susi-card-divider" />
+
+            {/* Card 3: For All Levels */}
+            <div className="susi-glass-card">
+              <div className="susi-card-icon-wrap">
+                <Heart size={22} color="#1f78b4" strokeWidth={2} />
+              </div>
+              <div className="susi-card-text">
+                <strong>For All Levels</strong>
+                <span>Beginners to Advanced</span>
+              </div>
+            </div>
+
+            <div className="susi-card-divider" />
+
+            {/* Card 4: In-Person & Online */}
+            <div className="susi-glass-card">
+              <div className="susi-card-icon-wrap">
+                <Globe size={22} color="#1f78b4" strokeWidth={2} />
+              </div>
+              <div className="susi-card-text">
+                <strong>In-Person &amp; Online</strong>
+                <span>Practice Anywhere</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Inspirational Quote Section */}
+      <div className="susi-quote-section">
+        <div className="susi-quote-container">
+          <p className="susi-quote-lead">
+            Yoga is not about touching your toes, <br />
+            it&rsquo;s about what you learn on the way down.
+          </p>
+          <div className="susi-quote-line" />
+          <p className="susi-quote-sub">
+            Let&rsquo;s begin your journey of healing, growth and inner transformation.
+          </p>
+
+          <Link href="/book" className="susi-quote-btn">
+            <Calendar size={18} />
+            <span>Start your journey with Susi Davies</span>
+            <ArrowRight size={18} />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
