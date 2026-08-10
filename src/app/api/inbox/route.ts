@@ -28,7 +28,7 @@ let studioInboxMessages = [
   },
   {
     id: "MSG-103",
-    fromName: "Susi Davies Studio",
+    fromName: "Susi Davies",
     fromEmail: "hello@susidavies.com",
     to: "elena@example.ch",
     subject: "Re: Inquiry about 1-on-1 Movement Therapy Session in Thalwil",
@@ -40,7 +40,7 @@ let studioInboxMessages = [
   },
   {
     id: "MSG-104",
-    fromName: "Susi Davies Studio",
+    fromName: "Susi Davies",
     fromEmail: "hello@susidavies.com",
     to: "marcus.weber@swiss-tech.ch",
     subject: "Invoice SD-2026-002 & Greece Retreat Confirmation",
@@ -52,10 +52,10 @@ let studioInboxMessages = [
   },
   {
     id: "MSG-105",
-    fromName: "Susi Davies Studio",
+    fromName: "Susi Davies",
     fromEmail: "hello@susidavies.com",
     to: "avadhbajaj07@gmail.com",
-    subject: "Your Studio Invoice SD-2026-001 & Session Preparation",
+    subject: "Your Invoice SD-2026-001 & Session Preparation",
     body: "Dear Client,\n\nThank you for booking your private breathwork and movement session. Attached is your studio invoice SD-2026-001.\n\nPlease let me know if you have any questions.\n\nNamaste,\nSusi Davies",
     date: "Aug 05, 2026, 09:00",
     read: true,
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
     
     const newMessage = {
       id: `MSG-${Math.floor(1000 + Math.random() * 9000)}`,
-      fromName: body.fromName || "Susi Davies Studio",
+      fromName: body.fromName || "Susi Davies",
       fromEmail: body.fromEmail || "hello@susidavies.com",
       to: body.to || "hello@susidavies.com",
       subject: body.subject || "Studio Email Message",

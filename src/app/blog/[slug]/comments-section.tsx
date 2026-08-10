@@ -43,7 +43,7 @@ export function BlogCommentsSection({ postSlug }: { postSlug: string }) {
 
       const data = await res.json();
       if (data.success) {
-        setStatusMessage("Thank you for your feedback! Your comment has been submitted to Susi Davies Studio and is pending review.");
+        setStatusMessage("Thank you for your feedback! Your comment has been submitted to Susi Davies and is pending review.");
         setAuthorName("");
         setAuthorEmail("");
         setContent("");

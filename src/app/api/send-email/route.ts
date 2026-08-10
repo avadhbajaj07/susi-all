@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // Wrap email body in outstanding Susi Davies Studio template & footer
+    // Wrap email body in outstanding Susi Davies template & footer
     const formattedBodyHtml = `<div style="white-space: pre-line;">${body}</div>`;
     const fullHtml = renderSusiEmailTemplate({
       title: subject,
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        from: `${fromName || "Susi Davies Studio"} <hello@susidavies.com>`,
+        from: `${fromName || "Susi Davies"} <hello@susidavies.com>`,
         to: [recipientEmail],
         subject: subject,
         text: body,

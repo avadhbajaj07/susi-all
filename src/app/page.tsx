@@ -43,7 +43,7 @@ export default function Home() {
     if (!formName || !formEmail || !formMsg || isSubmitting) return;
 
     setIsSubmitting(true);
-    setFormStatus("Sending message to Susi Davies Studio...");
+    setFormStatus("Sending message to Susi Davies...");
 
     try {
       // 1. Post into Studio Inbox for admin.susidavies.com
@@ -71,7 +71,7 @@ export default function Home() {
         }),
       }).catch(() => {});
 
-      setFormStatus("Thank you! Your message has been sent to Susi Davies Studio.");
+      setFormStatus("Thank you! Your message has been sent to Susi Davies.");
       setFormName("");
       setFormEmail("");
       setFormMsg("");
@@ -250,7 +250,7 @@ export default function Home() {
               <span className="eyebrow">Get in touch</span>
               <h2 className="section-heading" style={{ fontSize: 34, marginBottom: 12 }}>Ready to Transform Your Life?</h2>
               <p className="body-text" style={{ fontSize: 15, marginBottom: 24, color: "#6B7A70" }}>
-                Send a message directly to Susi Davies Studio to inquire about private sessions, mentoring, or retreat availability.
+                Send a message directly to Susi Davies to inquire about private sessions, mentoring, or retreat availability.
               </p>
               
               {formStatus && (

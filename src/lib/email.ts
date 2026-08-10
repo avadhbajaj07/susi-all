@@ -12,7 +12,7 @@ export interface SendEmailOptions {
 
 export async function sendEmail({ to, subject, html, from }: SendEmailOptions) {
   try {
-    const sender = from || "Susi Davies Studio <hello@susidavies.com>";
+    const sender = from || "Susi Davies <hello@susidavies.com>";
     const data = await resend.emails.send({
       from: sender,
       to,

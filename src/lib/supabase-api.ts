@@ -36,7 +36,8 @@ export async function fetchSupabasePosts() {
 
 export async function fetchSupabasePostBySlug(slug: string) {
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/posts?slug=eq.${encodeURIComponent(slug)}&select=*`, {
+    // First try exact slug match
+    let res = await fetch(`${SUPABASE_URL}/rest/v1/posts?slug=eq.${encodeURIComponent(slug)}&select=*`, {
       headers: {
         "apikey": SUPABASE_KEY,
         "Authorization": `Bearer ${SUPABASE_KEY}`,
@@ -44,23 +45,39 @@ export async function fetchSupabasePostBySlug(slug: string) {
       cache: "no-store",
     });
 
+    let data: any[] = [];
     if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        const p = data[0];
-        return {
-          id: p.id,
-          title: p.title,
-          slug: p.slug,
-          category: p.category || "Practice Notes",
-          date: p.date || new Date(p.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
-          excerpt: p.excerpt || (typeof p.content === "string" ? p.content.slice(0, 160) + "..." : p.title),
-          content: typeof p.content === "string" ? p.content : p.excerpt || p.title,
-          image: p.image || p.featured_image_path || "/images/susi davies7.jpg",
-          status: p.status || "published",
-          readTime: "5 min read",
-        };
+      data = await res.json();
+    }
+
+    // If exact match fails, try LIKE prefix match (handles timestamp-suffixed slugs like "my-title-1723456789")
+    if (!Array.isArray(data) || data.length === 0) {
+      res = await fetch(`${SUPABASE_URL}/rest/v1/posts?slug=like.${encodeURIComponent(slug + "%")}&select=*&limit=1`, {
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+        },
+        cache: "no-store",
+      });
+      if (res.ok) {
+        data = await res.json();
       }
+    }
+
+    if (Array.isArray(data) && data.length > 0) {
+      const p = data[0];
+      return {
+        id: p.id,
+        title: p.title,
+        slug: p.slug,
+        category: p.category || "Practice Notes",
+        date: p.date || new Date(p.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
+        excerpt: p.excerpt || (typeof p.content === "string" ? p.content.slice(0, 160) + "..." : p.title),
+        content: typeof p.content === "string" ? p.content : p.excerpt || p.title,
+        image: p.image || p.featured_image_path || "/images/susi davies7.jpg",
+        status: p.status || "published",
+        readTime: "5 min read",
+      };
     }
   } catch (err) {
     console.error("fetchSupabasePostBySlug error:", err);

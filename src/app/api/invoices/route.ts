@@ -102,7 +102,7 @@ export async function POST(req: Request) {
         : `<div><strong>Invoice Date:</strong> ${invoice.issued}</div><div><strong>Payment Due Date:</strong> ${invoice.due}</div>`;
 
       const invoiceContentHtml = `
-        <p>Thank you for choosing Susi Davies Studio. Below is your official invoice summary:</p>
+        <p>Thank you for choosing Susi Davies. Below is your official invoice summary:</p>
 
         <div style="background-color: #F8FCFD; padding: 16px 20px; border-radius: 10px; border: 1px solid #E2DDD3; margin-bottom: 24px; font-size: 14px;">
           <div style="margin-bottom: 4px;"><strong>Invoice Number:</strong> ${invoice.number}</div>
@@ -130,7 +130,7 @@ export async function POST(req: Request) {
       `;
 
       const emailHtml = renderSusiEmailTemplate({
-        title: `Invoice ${invoice.number} — Susi Davies Studio`,
+        title: `Invoice ${invoice.number} — Susi Davies`,
         bodyHtml: invoiceContentHtml,
         recipientName: invoice.clientName,
       });
@@ -141,7 +141,7 @@ export async function POST(req: Request) {
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Invoice ${invoice.number} — Susi Davies Studio</title>
+  <title>Invoice ${invoice.number} — Susi Davies</title>
   <style>
     body { font-family: Georgia, 'Times New Roman', serif; background-color: #F8FCFD; padding: 40px; color: #1c313a; }
     .card { max-width: 700px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 12px; border: 1px solid #BCD4E3; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
@@ -160,7 +160,7 @@ export async function POST(req: Request) {
 <body>
   <div class="card">
     <div class="header">
-      <h1>Susi Davies Studio</h1>
+      <h1>Susi Davies</h1>
       <p>Official Invoice ${invoice.number}</p>
     </div>
     <div class="meta">
@@ -191,7 +191,7 @@ export async function POST(req: Request) {
     </table>
     <div class="total">Total: CHF ${Number(invoice.total).toFixed(2)}</div>
     <div class="footer">
-      Susi Davies Studio · Movement, Breathwork &amp; Remedial Therapy · hello@susidavies.com · susidavies.com
+      Susi Davies · Movement, Breathwork &amp; Remedial Therapy · hello@susidavies.com · susidavies.com
     </div>
   </div>
 </body>
@@ -207,9 +207,9 @@ export async function POST(req: Request) {
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          from: "Susi Davies Studio <hello@susidavies.com>",
+          from: "Susi Davies <hello@susidavies.com>",
           to: [recipient],
-          subject: `Invoice ${invoice.number} from Susi Davies Studio`,
+          subject: `Invoice ${invoice.number} from Susi Davies`,
           html: emailHtml,
           attachments: [
             {

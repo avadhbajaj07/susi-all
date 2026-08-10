@@ -116,10 +116,10 @@ const initialInboxMessages = [
   },
   {
     id: "MSG-103",
-    fromName: "Susi Davies Studio",
+    fromName: "Susi Davies",
     fromEmail: "hello@susidavies.com",
     to: "Avadh Bajaj <avadh@example.com>",
-    subject: "Your Studio Invoice SD-2026-001 & Session Preparation",
+    subject: "Your Invoice SD-2026-001 & Session Preparation",
     body: "Dear Avadh,\n\nThank you for booking your private breathwork and movement session. Attached is your studio invoice SD-2026-001.\n\nPlease let me know if you have any questions.\n\nNamaste,\nSusi Davies",
     date: "Aug 05, 2026, 09:00",
     read: true,
@@ -335,11 +335,11 @@ export default function AdminPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fromName: "Susi Davies Studio",
+          fromName: "Susi Davies",
           fromEmail: "hello@susidavies.com",
           to: recipient,
-          subject: `Studio Invoice ${invToDelivery.number}`,
-          body: `Dear ${invToDelivery.clientName || "Client"},\n\nThank you for choosing Susi Davies Studio. Attached is your official invoice ${invToDelivery.number} for CHF ${invToDelivery.total}.\n\nNamaste,\nSusi Davies`,
+          subject: `Invoice ${invToDelivery.number}`,
+          body: `Dear ${invToDelivery.clientName || "Client"},\n\nThank you for choosing Susi Davies. Attached is your official invoice ${invToDelivery.number} for CHF ${invToDelivery.total}.\n\nNamaste,\nSusi Davies`,
           folder: "sent",
           attachments: [{ name: `Invoice-${invToDelivery.number}.pdf`, size: "165 KB" }],
         }),
@@ -488,7 +488,7 @@ export default function AdminPage() {
               to: recipient,
               subject: `New Journal Note: ${currentTitle}`,
               body: `${currentContent}\n\nRead the full article on Susi Davies website: https://susidavies.com/blog`,
-              fromName: "Susi Davies Studio",
+              fromName: "Susi Davies",
             }),
           }).catch(() => {});
         }
@@ -621,7 +621,7 @@ export default function AdminPage() {
           to: composeTo,
           subject: composeSubject,
           body: composeBody,
-          fromName: "Susi Davies Studio",
+          fromName: "Susi Davies",
         }),
       });
 
@@ -636,7 +636,7 @@ export default function AdminPage() {
 
       const newMsg = {
         id: `MSG-${Math.floor(100 + Math.random() * 900)}`,
-        fromName: "Susi Davies Studio",
+        fromName: "Susi Davies",
         fromEmail: "hello@susidavies.com",
         to: composeTo,
         subject: composeSubject,
@@ -651,7 +651,7 @@ export default function AdminPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fromName: "Susi Davies Studio",
+          fromName: "Susi Davies",
           fromEmail: "hello@susidavies.com",
           to: composeTo,
           subject: composeSubject,
@@ -692,7 +692,7 @@ export default function AdminPage() {
           to: recipient,
           subject: `Re: ${selectedMessage.subject}`,
           body: replyText,
-          fromName: "Susi Davies Studio",
+          fromName: "Susi Davies",
         }),
       });
 
@@ -706,7 +706,7 @@ export default function AdminPage() {
 
       const replyMsg = {
         id: `MSG-${Math.floor(100 + Math.random() * 900)}`,
-        fromName: "Susi Davies Studio",
+        fromName: "Susi Davies",
         fromEmail: "hello@susidavies.com",
         to: `${selectedMessage.fromName} <${recipient}>`,
         subject: `Re: ${selectedMessage.subject}`,
@@ -721,7 +721,7 @@ export default function AdminPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fromName: "Susi Davies Studio",
+          fromName: "Susi Davies",
           fromEmail: "hello@susidavies.com",
           to: recipient,
           subject: `Re: ${selectedMessage.subject}`,
@@ -787,7 +787,7 @@ export default function AdminPage() {
         <nav style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
           {[
             { id: "overview", label: "Overview", icon: LayoutDashboard },
-            { id: "inbox", label: "Studio Inbox", icon: Inbox },
+            { id: "inbox", label: "Inbox", icon: Inbox },
             { id: "bookings", label: "Bookings & Clients", icon: Calendar },
             { id: "invoices", label: "Invoice Generator", icon: FileText },
             { id: "email", label: "Email Automation", icon: Mail },
@@ -845,9 +845,9 @@ export default function AdminPage() {
               Susi Davies Dashboard
             </span>
             <h2 style={{ fontFamily: "var(--serif)", fontSize: 36, color: "#2691BA", margin: "4px 0 0" }}>
-              {activeTab === "overview" && "Studio Overview"}
+              {activeTab === "overview" && "Overview"}
               {activeTab === "bookings" && "Bookings & Clients Management"}
-              {activeTab === "invoices" && "Interactive Studio Invoice Builder"}
+              {activeTab === "invoices" && "Invoice Builder"}
               {activeTab === "email" && "Email Automation & Newsletters"}
               {activeTab === "subscribers" && "Subscribers & Consent Directory"}
               {activeTab === "retreats" && "Greece Retreat 2026 Reservations"}
@@ -907,7 +907,7 @@ export default function AdminPage() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, marginBottom: 35 }}>
               {[
                 { label: "Active Bookings", val: bookings.length, icon: Calendar, change: "Ready for new entries", color: "#2691BA" },
-                { label: "Studio Revenue", val: invoices.length > 0 ? `CHF ${invoices.reduce((a, b) => a + (typeof b.total === "number" ? b.total : parseFloat((b.total || "").replace(/[^\d.]/g, "") || 0)), 0).toFixed(2)}` : "CHF 0.00", icon: DollarSign, change: "TWINT & Bank", color: "#54BC33" },
+                { label: "Revenue", val: invoices.length > 0 ? `CHF ${invoices.reduce((a, b) => a + (typeof b.total === "number" ? b.total : parseFloat((b.total || "").replace(/[^\d.]/g, "") || 0)), 0).toFixed(2)}` : "CHF 0.00", icon: DollarSign, change: "TWINT & Bank", color: "#54BC33" },
                 { label: "Active Subscribers", val: activeSubscribersCount, icon: Mail, change: "Managed Directory", color: "#1A6E8F" },
                 { label: "Published Articles", val: articles.length, icon: PenSquare, change: "LinkedIn Auto-Sync", color: "#8E44AD" },
               ].map((card, i) => {
@@ -1365,7 +1365,7 @@ export default function AdminPage() {
                   {/* Service Picker Presets */}
                   <div style={{ marginBottom: 20, backgroundColor: "#FBF9F4", padding: "16px", borderRadius: 12, border: "1px solid #E2DDD3" }}>
                     <span style={{ fontSize: 12, fontWeight: 700, color: "#2691BA", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-                      <Sparkles size={14} /> Add Preset Studio Service
+                      <Sparkles size={14} /> Add Preset Service
                     </span>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                       {studioPresetServices.map((srv, i) => (
@@ -1396,7 +1396,7 @@ export default function AdminPage() {
                       <span style={{ fontSize: 13, fontWeight: 700, color: "#1A252C" }}>Services &amp; Line Items</span>
                       <button
                         type="button"
-                        onClick={() => handleAddItem({ desc: "Custom Studio Service", rate: 150 })}
+                        onClick={() => handleAddItem({ desc: "Custom Service", rate: 150 })}
                         style={{ fontSize: 12, color: "#2691BA", background: "none", border: "none", cursor: "pointer", fontWeight: 700 }}
                       >
                         + Add Custom Service &amp; Price
@@ -1495,7 +1495,7 @@ export default function AdminPage() {
 
             {/* Saved Invoices History Table */}
             <div style={{ marginTop: 40, backgroundColor: "#ffffff", padding: "28px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
-              <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, color: "#2691BA", marginBottom: 20 }}>Saved Studio Invoices &amp; CRM Ledger</h3>
+              <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, color: "#2691BA", marginBottom: 20 }}>Saved Invoices &amp; CRM Ledger</h3>
 
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
                 <thead>
@@ -2019,7 +2019,7 @@ export default function AdminPage() {
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Target Audience Segment</label>
                   <select value={emailSegment} onChange={(e) => setEmailSegment(e.target.value)} className="form-input">
-                    <option value="All Subscribers">All Studio Subscribers</option>
+                    <option value="All Subscribers">All Subscribers</option>
                     <option value="Online Students">Weekly Online Students</option>
                     <option value="Retreat Guests">Greece Retreat Guests</option>
                     <option value="Journal Subscribers">Journal Subscribers</option>
@@ -2147,7 +2147,7 @@ export default function AdminPage() {
                   </label>
                   <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#45A027" }}>
                     <input type="checkbox" checked={broadcastToEmail} onChange={(e) => setBroadcastToEmail(e.target.checked)} />
-                    <Send size={16} /> Broadcast Notification to All Studio Subscribers
+                    <Send size={16} /> Broadcast Notification to All Subscribers
                   </label>
                 </div>
 
@@ -2292,7 +2292,7 @@ export default function AdminPage() {
                     required
                     value={composeSubject}
                     onChange={(e) => setComposeSubject(e.target.value)}
-                    placeholder="e.g. Studio Session Details &amp; Preparation Guidelines"
+                    placeholder="e.g. Session Details &amp; Preparation Guidelines"
                   />
                 </div>
 
@@ -2304,7 +2304,7 @@ export default function AdminPage() {
                     required
                     value={composeBody}
                     onChange={(e) => setComposeBody(e.target.value)}
-                    placeholder="Dear Client,&#10;&#10;Thank you for reaching out to Susi Davies Studio..."
+                    placeholder="Dear Client,&#10;&#10;Thank you for reaching out to Susi Davies..."
                   />
                 </div>
 

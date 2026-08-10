@@ -59,6 +59,6 @@ export async function GET() {
   return NextResponse.json({
     status: "Active",
     endpoint: "https://admin.susidavies.com/api/webhooks/resend-inbound",
-    description: "Resend Inbound Email Webhook Receiver for Susi Davies Studio",
+    description: "Resend Inbound Email Webhook Receiver for Susi Davies",
   });
 }

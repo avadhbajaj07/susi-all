@@ -17,11 +17,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!post) {
     return {
-      title: "Journal Article | Susi Davies Studio",
+      title: "Journal Article | Susi Davies",
     };
   }
 
-  const title = `${post.title} | Susi Davies Studio`;
+  const title = `${post.title} | Susi Davies`;
   const description = post.excerpt || post.content?.slice(0, 160);
   const imageUrl = post.image || "https://susidavies.com/images/susi davies7.jpg";
 
@@ -68,10 +68,10 @@ export default async function SingleBlogPostPage({ params }: Props) {
     },
     "publisher": {
       "@type": "Organization",
-      "name": "Susi Davies Studio",
+      "name": "Susi Davies",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://susidavies.com/images/susi-logo.png"
+        "url": "https://susidavies.com/images/susi-davies-logo-white-official.png"
       }
     },
     "mainEntityOfPage": {
@@ -109,7 +109,7 @@ export default async function SingleBlogPostPage({ params }: Props) {
               borderRadius: 100,
             }}
           >
-            <ArrowLeft size={16} /> Back to All Articles
+            <ArrowLeft size={16} /> Back to Journals
           </Link>
           <h1 style={{ fontSize: 36, lineHeight: 1.2, maxWidth: 900, margin: "0 auto" }}>
             {post.title}
@@ -178,33 +178,7 @@ export default async function SingleBlogPostPage({ params }: Props) {
           {post.content || post.excerpt}
         </article>
 
-        {/* Author Bio Card */}
-        <div
-          style={{
-            backgroundColor: "rgba(38,145,186,0.06)",
-            borderRadius: 20,
-            padding: "30px 35px",
-            display: "flex",
-            gap: 24,
-            alignItems: "center",
-            marginBottom: 70,
-            border: "1px solid rgba(38,145,186,0.15)",
-          }}
-        >
-          <img
-            src="/images/susi-portrait.png"
-            alt="Susi Davies - Certified Life Coach & Yoga Instructor"
-            style={{ width: 85, height: 85, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
-          />
-          <div>
-            <strong style={{ fontSize: 18, color: "var(--blue)", display: "block", marginBottom: 4 }}>
-              Written by Susi Davies
-            </strong>
-            <p className="body-text" style={{ fontSize: 14, color: "var(--muted)", margin: 0 }}>
-              Susi Davies is a certified life coach, movement specialist, and E-RYT 500 yoga teacher with over 30 years of teaching experience in Thalwil, Switzerland.
-            </p>
-          </div>
-        </div>
+
 
         {/* Interactive Reader Feedback & Comments Section */}
         <BlogCommentsSection postSlug={post.slug} />

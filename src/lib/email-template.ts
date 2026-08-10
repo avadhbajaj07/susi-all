@@ -14,7 +14,7 @@ export function renderSusiEmailTemplate({ title, preheader, bodyHtml, recipientN
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title || "Susi Davies Studio"}</title>
+  <title>${title || "Susi Davies"}</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Open+Sans:wght@400;600;700&display=swap');
     body {
