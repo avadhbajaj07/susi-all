@@ -1294,3 +1294,83 @@ h1 {
     gap: 14px;
   }
 }
+
+/* Studio Hero Gallery Bar */
+.susi-hero-gallery-section {
+  background-color: #FAF8F5;
+  border-top: 1px solid #EAE5DC;
+  padding: 60px max(40px, calc((100vw - 1440px) / 2));
+}
+
+.susi-gallery-header {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+.susi-hero-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.susi-gallery-card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  border: 1px solid #EAE5DC;
+  transition: all 0.3s ease;
+}
+
+.susi-gallery-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 15px 40px rgba(31, 120, 180, 0.15);
+  border-color: #1f78b4;
+}
+
+.susi-gallery-img-wrap {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  position: relative;
+  background-color: #F7F3EC;
+}
+
+.susi-gallery-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.5s ease;
+}
+
+.susi-gallery-card:hover .susi-gallery-img {
+  transform: scale(1.06);
+}
+
+.susi-gallery-caption {
+  padding: 16px;
+  text-align: center;
+}
+
+.susi-gallery-caption span {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  color: #1f78b4;
+  letter-spacing: 0.03em;
+}
+
+@media (max-width: 1024px) {
+  .susi-hero-gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .susi-hero-gallery-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
