@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -142,6 +142,23 @@ export default function AdminPage() {
   const [inboxFolder, setInboxFolder] = useState<"inbox" | "sent">("inbox");
   const [replyText, setReplyText] = useState("");
   const [replyAttachments, setReplyAttachments] = useState<{ name: string; size: string }[]>([]);
+
+  useEffect(() => {
+    const fetchInbox = async () => {
+      try {
+        const res = await fetch("/api/inbox");
+        const data = await res.json();
+        if (data.messages && Array.isArray(data.messages)) {
+          setInboxMessages(data.messages);
+        }
+      } catch (err) {
+        console.error("Inbox fetch error:", err);
+      }
+    };
+    fetchInbox();
+    const timer = setInterval(fetchInbox, 10000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Composer Modal State
   const [showComposeModal, setShowComposeModal] = useState(false);

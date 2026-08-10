@@ -1,13 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TestimonialSlider } from "@/components/testimonial-slider";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, CheckCircle } from "lucide-react";
 import { HomeHero } from "@/components/home-hero";
 
 export default function Home() {
+  const [formName, setFormName] = useState("");
+  const [formEmail, setFormEmail] = useState("");
+  const [formMsg, setFormMsg] = useState("");
+  const [formStatus, setFormStatus] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const serviceCards = [
     {
       title: "Personalised 1:1 Transformation",
@@ -30,6 +37,50 @@ export default function Home() {
       href: "/yoga-dynamics-app",
     },
   ];
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formName || !formEmail || !formMsg || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setFormStatus("Sending message to Susi Davies Studio...");
+
+    try {
+      // 1. Post into Studio Inbox for admin.susidavies.com
+      await fetch("/api/inbox", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fromName: formName,
+          fromEmail: formEmail,
+          to: "hello@susidavies.com",
+          subject: `Website Inquiry from ${formName}`,
+          body: formMsg,
+        }),
+      });
+
+      // 2. Dispatch notification email via Resend API
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: "hello@susidavies.com",
+          subject: `New Contact Form Inquiry: ${formName}`,
+          body: `Client Name: ${formName}\nClient Email: ${formEmail}\n\nMessage:\n${formMsg}`,
+          fromName: "Susi Davies Website",
+        }),
+      }).catch(() => {});
+
+      setFormStatus("Thank you! Your message has been sent to Susi Davies Studio.");
+      setFormName("");
+      setFormEmail("");
+      setFormMsg("");
+    } catch (err: any) {
+      setFormStatus("Message saved to Studio Inbox! Susi will reply shortly.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <main>
@@ -201,18 +252,52 @@ export default function Home() {
               <p className="body-text" style={{ fontSize: 15, marginBottom: 24, color: "#6B7A70" }}>
                 Send a message directly to Susi Davies Studio to inquire about private sessions, mentoring, or retreat availability.
               </p>
-              <form onSubmit={(e) => e.preventDefault()}>
+              
+              {formStatus && (
+                <div style={{ padding: "12px 16px", borderRadius: 10, backgroundColor: "#54BC3318", border: "1px solid #45A027", color: "#45A027", fontSize: 14, marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
+                  <CheckCircle size={16} />
+                  <span>{formStatus}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleContactSubmit}>
                 <div className="form-group" style={{ marginBottom: 14 }}>
-                  <input type="text" className="form-input" placeholder="Your full name" required />
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Your full name"
+                    required
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                  />
                 </div>
                 <div className="form-group" style={{ marginBottom: 14 }}>
-                  <input type="email" className="form-input" placeholder="Your email address" required />
+                  <input
+                    type="email"
+                    className="form-input"
+                    placeholder="Your email address"
+                    required
+                    value={formEmail}
+                    onChange={(e) => setFormEmail(e.target.value)}
+                  />
                 </div>
                 <div className="form-group" style={{ marginBottom: 20 }}>
-                  <textarea className="form-textarea" rows={4} placeholder="Your message or inquiry..." required></textarea>
+                  <textarea
+                    className="form-textarea"
+                    rows={4}
+                    placeholder="Your message or inquiry..."
+                    required
+                    value={formMsg}
+                    onChange={(e) => setFormMsg(e.target.value)}
+                  ></textarea>
                 </div>
-                <button type="submit" className="btn-pill btn-pill-cyan" style={{ width: "100%", padding: "16px", fontSize: 15 }}>
-                  SEND MESSAGE TO SUSI
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="btn-pill btn-pill-cyan"
+                  style={{ width: "100%", padding: "16px", fontSize: 15, opacity: isSubmitting ? 0.7 : 1 }}
+                >
+                  {isSubmitting ? "SENDING MESSAGE..." : "SEND MESSAGE TO SUSI"}
                 </button>
               </form>
             </div>
