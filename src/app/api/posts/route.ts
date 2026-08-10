@@ -1,70 +1,26 @@
 import { NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase";
-
-let fallbackPosts = [
-  {
-    id: 1,
-    title: "Movement & Neural Alignment: Moving with Intention",
-    category: "Practice Notes",
-    date: "Aug 06, 2026",
-    excerpt: "True movement intelligence begins when we listen to the body's natural alignment rather than forcing postures. Here are practice observations from 30+ years of teaching.",
-    content: "True movement intelligence begins when we listen to the body's natural alignment rather than forcing postures...",
-    image: "/images/susi davies7.jpg",
-    status: "Published",
-    readTime: "5 min read",
-  },
-  {
-    id: 2,
-    title: "Finding Calm in Motion: The Power of Breathwork",
-    category: "Mindful Living",
-    date: "Jul 28, 2026",
-    excerpt: "Breath is the bridge between the nervous system and conscious awareness. Exploring pranayama techniques to regulate stress and cultivate presence.",
-    content: "Breath is the bridge between the nervous system and conscious awareness...",
-    image: "/images/susi davies3.jpg",
-    status: "Published",
-    readTime: "4 min read",
-  },
-  {
-    id: 3,
-    title: "Reflections from the Peloponnese Sanctuary",
-    category: "Retreat Insights",
-    date: "Jun 15, 2026",
-    excerpt: "Stepping away from daily noise allows us to reconnect with what matters. Thoughts on stillness, nourishing movement, and sea air in Leonidio, Greece.",
-    content: "Stepping away from daily noise allows us to reconnect with what matters...",
-    image: "/images/retreat/susidavies_retreat4.jpg",
-    status: "Published",
-    readTime: "6 min read",
-  },
-];
+import { queryDb } from "@/lib/db";
 
 export async function GET() {
   try {
-    const supabase = getSupabase();
-    if (supabase) {
-      const { data, error } = await supabase
-        .from("posts")
-        .select("*")
-        .order("created_at", { ascending: false });
+    const res = await queryDb(`SELECT * FROM posts ORDER BY created_at DESC;`);
+    const posts = res.rows.map((p: any) => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      category: p.category || "Practice Notes",
+      date: p.date || new Date(p.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
+      excerpt: p.excerpt || (typeof p.content === "string" ? p.content.slice(0, 160) + "..." : p.title),
+      content: typeof p.content === "string" ? p.content : p.excerpt || p.title,
+      image: p.image || p.featured_image_path || "/images/susi davies7.jpg",
+      status: p.status || "published",
+      readTime: "5 min read",
+    }));
 
-      if (!error && data && data.length > 0) {
-        const formatted = data.map((p: any) => ({
-          id: p.id,
-          title: p.title,
-          category: p.category || "Practice Notes",
-          date: p.date || new Date(p.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
-          excerpt: p.excerpt || p.content?.slice(0, 160) + "...",
-          content: p.content,
-          image: p.image || "/images/susi davies7.jpg",
-          status: p.status || "Published",
-          readTime: "5 min read",
-        }));
-        return NextResponse.json({ posts: formatted });
-      }
-    }
-
-    return NextResponse.json({ posts: fallbackPosts });
+    return NextResponse.json({ posts });
   } catch (err: any) {
-    return NextResponse.json({ posts: fallbackPosts });
+    console.error("GET /api/posts database error:", err);
+    return NextResponse.json({ posts: [] }, { status: 500 });
   }
 }
 
@@ -77,36 +33,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
 
-    const newPost = {
-      id: Date.now(),
-      title,
-      category: category || "Practice Notes",
-      date: date || new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
-      excerpt: excerpt || content?.slice(0, 160) || title,
-      content: content || title,
-      image: image || "/images/susi davies7.jpg",
-      status: "Published",
-      readTime: "5 min read",
-    };
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + "-" + Date.now();
+    const postDate = date || new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+    const postExcerpt = excerpt || (content ? content.slice(0, 160) : title);
+    const postContent = content || title;
+    const postImage = image || "/images/susi davies7.jpg";
+    const postCategory = category || "Practice Notes";
 
-    const supabase = getSupabase();
-    if (supabase) {
-      await supabase.from("posts").insert([
-        {
-          title: newPost.title,
-          category: newPost.category,
-          content: newPost.content,
-          excerpt: newPost.excerpt,
-          image: newPost.image,
-          status: "Published",
-        },
-      ]);
-    }
+    const res = await queryDb(
+      `INSERT INTO posts (title, slug, category, date, excerpt, content, image, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;`,
+      [title, slug, postCategory, postDate, postExcerpt, postContent, postImage, "published"]
+    );
 
-    fallbackPosts.unshift(newPost);
+    const savedPost = res.rows[0];
 
-    return NextResponse.json({ success: true, post: newPost });
+    return NextResponse.json({ success: true, post: savedPost });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to save post" }, { status: 500 });
+    console.error("POST /api/posts error:", err);
+    return NextResponse.json({ error: err.message || "Failed to save post to Supabase" }, { status: 500 });
   }
 }

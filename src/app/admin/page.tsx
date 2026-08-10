@@ -160,6 +160,21 @@ export default function AdminPage() {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const res = await fetch("/api/posts");
+        const data = await res.json();
+        if (data.posts && Array.isArray(data.posts) && data.posts.length > 0) {
+          setArticles(data.posts);
+        }
+      } catch (err) {
+        console.error("Posts fetch error:", err);
+      }
+    };
+    fetchPosts();
+  }, []);
+
   // Composer Modal State
   const [showComposeModal, setShowComposeModal] = useState(false);
   const [composeTo, setComposeTo] = useState("");
