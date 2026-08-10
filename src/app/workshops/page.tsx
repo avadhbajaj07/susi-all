@@ -20,22 +20,38 @@ const whatToExpect = [
 ];
 
 export default function WorkshopsPage() {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", date: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
+  const [selectedDates, setSelectedDates] = useState<string[]>([]);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
 
   const set = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
 
+  const toggleDate = (date: string) => {
+    setSelectedDates((prev) =>
+      prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date]
+    );
+  };
+
+  const totalPrice = selectedDates.length * 60;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.date) return;
+    if (!form.name || !form.email || selectedDates.length === 0) return;
     setStatus("sending");
+
+    const datesText = selectedDates.map((d, i) => `  ${i + 1}. ${d} · 18:30 – 20:30 · CHF 60.–`).join("\n");
+    const totalText = `Total: CHF ${totalPrice}.–${selectedDates.length > 1 ? ` (${selectedDates.length} workshops)` : ""}`;
 
     const body = `New Deeper Practice Workshop Registration
 
 Name: ${form.name}
 Email: ${form.email}
 Phone: ${form.phone || "Not provided"}
-Selected Date: ${form.date}
+
+Selected Workshops:
+${datesText}
+
+${totalText}
 
 Message:
 ${form.message || "None"}`;
@@ -54,19 +70,21 @@ ${form.message || "None"}`;
 
       if (res.ok) {
         // Send confirmation to registrant
+        const datesConfirmText = selectedDates.map((d, i) => `  ${i + 1}. ${d} · 18:30 – 20:30`).join("\n");
         fetch("/api/send-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             to: form.email,
-            subject: "Your Deeper Practice Workshop Registration — Susi Davies",
-            body: `Dear ${form.name},\n\nThank you for registering for the Deeper Practice workshop!\n\nSelected Date: ${form.date}\nTime: 18:30 – 20:30\nVenue: at BODYTALKS, Alte Landstrasse 32, Thalwil\n\nSusi will be in touch shortly with all details and payment information (CHF 60.– per workshop, payable by TWINT).\n\nWith warmth,\nSusi Davies`,
+            subject: `Your Deeper Practice Workshop Registration — Susi Davies`,
+            body: `Dear ${form.name},\n\nThank you for registering for the Deeper Practice workshop series!\n\nYour selected dates:\n${datesConfirmText}\n\nTime: 18:30 – 20:30\nVenue: at BODYTALKS, Alte Landstrasse 32, Thalwil\nTotal: CHF ${totalPrice}.– (payable by TWINT)\n\nSusi will be in touch shortly to confirm your spots and share payment details.\n\nWith warmth,\nSusi Davies`,
             fromName: "Susi Davies",
           }),
         }).catch(() => {});
 
         setStatus("success");
-        setForm({ name: "", email: "", phone: "", date: "", message: "" });
+        setForm({ name: "", email: "", phone: "", message: "" });
+        setSelectedDates([]);
       } else {
         setStatus("error");
       }
@@ -251,30 +269,44 @@ ${form.message || "None"}`;
               {/* Select Date */}
               <div className="form-group" style={{ marginBottom: 22 }}>
                 <label style={{ fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                  <Calendar size={14} /> Choose Your Workshop Date *
+                  <Calendar size={14} /> Choose Your Workshop Date(s) * — select as many as you like
                 </label>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  {dates.map((d) => (
-                    <label
-                      key={d.date}
-                      style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 20px", borderRadius: 14, border: `2px solid ${form.date === d.date ? "var(--blue)" : "#E2DDD3"}`, backgroundColor: form.date === d.date ? "rgba(38,145,186,0.05)" : "#FAFAF8", cursor: "pointer", transition: "all 0.2s" }}
-                    >
-                      <input
-                        type="radio"
-                        name="date"
-                        value={d.date}
-                        checked={form.date === d.date}
-                        onChange={() => set("date", d.date)}
-                        style={{ accentColor: "var(--blue)", width: 18, height: 18 }}
-                        required
-                      />
-                      <div>
-                        <strong style={{ fontSize: 15, color: "var(--ink-title)", display: "block" }}>{d.date}</strong>
-                        <span style={{ fontSize: 13, color: "var(--blue)", fontWeight: 600 }}>{d.time} · CHF 60.–</span>
-                      </div>
-                    </label>
-                  ))}
+                  {dates.map((d) => {
+                    const checked = selectedDates.includes(d.date);
+                    return (
+                      <label
+                        key={d.date}
+                        style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 20px", borderRadius: 14, border: `2px solid ${checked ? "var(--blue)" : "#E2DDD3"}`, backgroundColor: checked ? "rgba(38,145,186,0.05)" : "#FAFAF8", cursor: "pointer", transition: "all 0.2s" }}
+                      >
+                        <input
+                          type="checkbox"
+                          value={d.date}
+                          checked={checked}
+                          onChange={() => toggleDate(d.date)}
+                          style={{ accentColor: "var(--blue)", width: 19, height: 19, flexShrink: 0 }}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <strong style={{ fontSize: 15, color: "var(--ink-title)", display: "block" }}>{d.date}</strong>
+                          <span style={{ fontSize: 13, color: "var(--blue)", fontWeight: 600 }}>{d.time} · CHF 60.–</span>
+                        </div>
+                        {checked && (
+                          <span style={{ fontSize: 12, backgroundColor: "var(--blue)", color: "#fff", padding: "3px 10px", borderRadius: 100, fontWeight: 700 }}>✓ Selected</span>
+                        )}
+                      </label>
+                    );
+                  })}
                 </div>
+
+                {/* Live total */}
+                {selectedDates.length > 0 && (
+                  <div style={{ marginTop: 14, padding: "14px 18px", backgroundColor: "rgba(38,145,186,0.06)", border: "1.5px solid var(--blue)", borderRadius: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: 14, color: "var(--blue)", fontWeight: 600 }}>
+                      {selectedDates.length} workshop{selectedDates.length > 1 ? "s" : ""} selected
+                    </span>
+                    <strong style={{ fontSize: 16, color: "var(--blue)" }}>Total: CHF {totalPrice}.–</strong>
+                  </div>
+                )}
               </div>
 
               {/* Name & Email */}
@@ -306,14 +338,14 @@ ${form.message || "None"}`;
               <button
                 type="submit"
                 className="btn-pill btn-pill-cyan"
-                disabled={status === "sending"}
-                style={{ width: "100%", justifyContent: "center", fontSize: 16, padding: "16px 24px", opacity: status === "sending" ? 0.7 : 1 }}
+                disabled={status === "sending" || selectedDates.length === 0}
+                style={{ width: "100%", justifyContent: "center", fontSize: 16, padding: "16px 24px", opacity: (status === "sending" || selectedDates.length === 0) ? 0.5 : 1 }}
               >
-                {status === "sending" ? "Sending Registration…" : "Register for Deeper Practice →"}
+                {status === "sending" ? "Sending Registration…" : selectedDates.length === 0 ? "Select at least one date to register" : `Register for ${selectedDates.length} Workshop${selectedDates.length > 1 ? "s" : ""} — CHF ${totalPrice}.– →`}
               </button>
 
               <p style={{ textAlign: "center", fontSize: 13, color: "var(--muted)", marginTop: 16 }}>
-                CHF 60.– per workshop · Payment via TWINT · Susi confirms within 24 hours
+                CHF 60.– per workshop · All 3 for CHF 180.– · Payment via TWINT · Susi confirms within 24 hours
               </p>
             </form>
           )}
