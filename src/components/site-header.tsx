@@ -12,6 +12,7 @@ const navLinks = [
   { href: "/private-sessions", label: "Private Sessions" },
   { href: "/yoga-dynamics-app", label: "Yoga Dynamics App" },
   { href: "/online-courses", label: "Online Courses" },
+  { href: "/workshops", label: "Workshops" },
   { href: "/blog", label: "Journal" },
   { href: "/contact-us", label: "Contact Us" },
 ];
