@@ -41,10 +41,10 @@ export default function PrivateSessionsPage() {
     if (!form.name || !form.email || !form.sessionType) return;
     setStatus("sending");
 
-    const modeLabel = sessionMode === "in-person" ? "In-Person Session" : "Online Session (Zoom / Video Call)";
+    const modeLabel = sessionMode === "in-person" ? "In-Person Session" : "Online Session (Video Call)";
     const locationLine = sessionMode === "in-person"
       ? `Location: ${form.location || "Client's location / to be confirmed"}`
-      : "Session Format: Online — Zoom / Video Call";
+      : "Session Format: Online — Video Call";
 
     const emailBody = `New Private Session Booking Request
 
@@ -135,7 +135,7 @@ ${form.message || "None"}`;
               </div>
               <div style={{ backgroundColor: "#F4F9FC", border: "1px solid #BCD4E3", padding: "10px 14px", borderRadius: 10, display: "inline-flex", gap: 8, alignItems: "center", fontSize: 13, color: "var(--blue)", fontWeight: 700 }}>
                 <Video size={16} color="var(--blue)" />
-                <span>Online via Zoom</span>
+                <span>Online</span>
               </div>
             </div>
 
@@ -270,7 +270,7 @@ ${form.message || "None"}`;
                   >
                     <Video size={26} color={sessionMode === "online" ? "var(--blue)" : "#9CA3AF"} />
                     <strong style={{ fontSize: 15, color: sessionMode === "online" ? "var(--blue)" : "#6B7280" }}>Online</strong>
-                    <span style={{ fontSize: 12, color: "#9CA3AF" }}>Zoom / Video Call</span>
+                    <span style={{ fontSize: 12, color: "#9CA3AF" }}>Video Call</span>
                   </button>
                 </div>
               </div>
