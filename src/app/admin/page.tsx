@@ -434,13 +434,12 @@ export default function AdminPage() {
         <div style={{ marginBottom: 40, borderBottom: "1px solid rgba(255,255,255,0.15)", paddingBottom: 20 }}>
           <Link href="/" style={{ textDecoration: "none", color: "#ffffff", display: "flex", flexDirection: "column", gap: 8 }}>
             <img
-              src="/images/susi-davies-logo-transparent.png"
+              src="/images/susi-davies-logo-white.png"
               alt="Susi Davies Logo"
               style={{
                 height: 68,
                 width: "auto",
                 objectFit: "contain",
-                filter: "brightness(0) invert(1)",
                 alignSelf: "flex-start",
               }}
             />

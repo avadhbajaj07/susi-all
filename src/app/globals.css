@@ -92,7 +92,6 @@ h1 {
   height: 60px;
   width: auto;
   object-fit: contain;
-  filter: brightness(0) invert(1);
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
@@ -804,7 +803,6 @@ h1 {
   height: 75px;
   width: auto;
   object-fit: contain;
-  filter: brightness(0) invert(1);
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 .footer-logo-img:hover {

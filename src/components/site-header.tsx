@@ -24,7 +24,7 @@ export function SiteHeader() {
     <header className="site-header">
       <Link href="/" className="brand-logo-wrap" aria-label="Susi Davies home" onClick={close}>
         <img
-          src="/images/susi-davies-logo-transparent.png"
+          src="/images/susi-davies-logo-white.png"
           alt="Susi Davies Logo"
           className="header-logo-img"
         />
