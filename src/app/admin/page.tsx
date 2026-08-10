@@ -223,7 +223,7 @@ export default function AdminPage() {
     setInvItems(invItems.filter((_, i) => i !== index));
   };
 
-  const handleSaveInvoice = (e: React.FormEvent) => {
+  const handleSaveInvoice = async (e: React.FormEvent) => {
     e.preventDefault();
     const newInv = {
       id: invNumber,
@@ -237,15 +237,62 @@ export default function AdminPage() {
       dueDate: invDueDate,
       due: invDueDate,
       status: invStatus,
+      emailSent: false,
       paymentNotice: invPaymentNotice,
       paymentMethod: invPaymentMethod,
       items: invItems,
       subtotal: calculatedSubtotal,
       total: calculatedSubtotal,
     };
-    setInvoices([newInv, ...invoices]);
+
+    try {
+      await fetch("/api/invoices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "save", invoice: newInv }),
+      });
+      alert(`✓ Invoice ${invNumber} saved & recorded in Supabase CRM!`);
+    } catch (err) {
+      console.error("Save invoice error:", err);
+    }
+
+    setInvoices([newInv, ...invoices.filter((i) => i.number !== newInv.number)]);
     setActiveInvoice(newInv);
     setInvNumber(`SD-2026-00${invoices.length + 2}`);
+  };
+
+  const handleSendInvoiceEmail = async (invToDelivery: any) => {
+    if (!invToDelivery.clientEmail && !invToDelivery.email) {
+      alert("Please specify a valid client email address.");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/invoices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "send-email", invoice: invToDelivery }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(`Resend Email Error: ${data.error || "Failed to send invoice email"}`);
+        return;
+      }
+
+      // Mark emailSent = true
+      setInvoices(
+        invoices.map((inv) =>
+          inv.number === invToDelivery.number || inv.id === invToDelivery.id
+            ? { ...inv, emailSent: true }
+            : inv
+        )
+      );
+
+      alert(`✓ Invoice ${invToDelivery.number} successfully emailed to ${invToDelivery.clientEmail || invToDelivery.email} via hello@susidavies.com!`);
+    } catch (err: any) {
+      alert(`Network error: ${err.message || "Failed to send invoice"}`);
+    }
   };
 
   // Email Campaign Modal State
@@ -318,7 +365,7 @@ export default function AdminPage() {
     setShowEmailModal(false);
   };
 
-  const handlePublishArticle = (e: React.FormEvent) => {
+  const handlePublishArticle = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!artTitle) return;
     const isScheduled = artScheduleMode === "schedule";
@@ -328,13 +375,31 @@ export default function AdminPage() {
       category: artCategory,
       image: artImage,
       status: isScheduled ? `Scheduled (${artScheduleDate} ${artScheduleTime})` : "Published",
-      date: isScheduled ? artScheduleDate : "Aug 06, 2026",
+      date: isScheduled ? artScheduleDate : "Aug 10, 2026",
       linkedin: postToLinkedin,
       broadcastSent: broadcastToEmail,
     };
     setArticles([newArt, ...articles]);
 
     if (broadcastToEmail) {
+      try {
+        const recipients = subscribers.map((s) => s.email).filter(Boolean);
+        for (const recipient of recipients) {
+          fetch("/api/send-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              to: recipient,
+              subject: `New Journal Note: ${artTitle}`,
+              body: `${artContent}\n\nRead the full article on Susi Davies website: https://susidavies.com/blog`,
+              fromName: "Susi Davies Studio",
+            }),
+          }).catch(() => {});
+        }
+      } catch (err) {
+        console.error("Broadcast error:", err);
+      }
+
       setCampaigns([
         {
           id: `CMP-0${campaigns.length + 1}`,
@@ -353,6 +418,7 @@ export default function AdminPage() {
     setArtContent("");
     setArtImage("");
     setShowArticleModal(false);
+    alert(`✓ Article "${artTitle}" published to website! ${broadcastToEmail ? "Broadcast sent to subscribers via Resend API (hello@susidavies.com)!" : ""}`);
   };
 
   const handleAddSubscriber = (e: React.FormEvent) => {
@@ -1007,7 +1073,7 @@ export default function AdminPage() {
           <div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1.15fr", gap: 30, alignItems: "start" }}>
               
-              {/* Left Column: Interactive Form Panel (Like Dominique Invoice App) */}
+              {/* Left Column: Interactive Form Panel */}
               <div style={{ backgroundColor: "#ffffff", padding: "28px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
                   <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, color: "#2691BA", margin: 0 }}>Invoice Parameters</h3>
@@ -1017,7 +1083,7 @@ export default function AdminPage() {
                     className="btn-pill btn-pill-cyan"
                     style={{ padding: "8px 18px", fontSize: 12 }}
                   >
-                    Save &amp; Record Invoice
+                    Save &amp; Record to CRM
                   </button>
                 </div>
 
@@ -1030,10 +1096,16 @@ export default function AdminPage() {
                         type="text"
                         className="form-input"
                         required
+                        list="client-crm-list"
                         value={invClientName}
                         onChange={(e) => setInvClientName(e.target.value)}
                         placeholder="e.g. Elena Rossi"
                       />
+                      <datalist id="client-crm-list">
+                        {bookings.map((b) => (
+                          <option key={b.id} value={b.client}>{b.client} ({b.email})</option>
+                        ))}
+                      </datalist>
                     </div>
                     <div>
                       <label style={{ fontSize: 12, fontWeight: 700, color: "#2691BA", textTransform: "uppercase", display: "block", marginBottom: 4 }}>Client Email</label>
@@ -1047,8 +1119,8 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  {/* Metadata: Invoice #, Issue Date, Due Date, Status */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
+                  {/* Metadata: Invoice #, Payment Status, Issued Date, Due Date */}
+                  <div style={{ display: "grid", gridTemplateColumns: invStatus === "Paid" ? "1fr 1.2fr 1fr" : "1fr 1.2fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
                     <div>
                       <label style={{ fontSize: 12, fontWeight: 700, color: "#6B7A70", display: "block", marginBottom: 4 }}>Invoice #</label>
                       <input
@@ -1059,6 +1131,18 @@ export default function AdminPage() {
                       />
                     </div>
                     <div>
+                      <label style={{ fontSize: 12, fontWeight: 700, color: "#2691BA", display: "block", marginBottom: 4 }}>Payment Status</label>
+                      <select
+                        className="form-input"
+                        value={invStatus}
+                        onChange={(e) => setInvStatus(e.target.value)}
+                        style={{ fontWeight: 700, color: invStatus === "Paid" ? "#45A027" : "#D68910" }}
+                      >
+                        <option value="Due">Due / Pending Payment</option>
+                        <option value="Paid">Paid</option>
+                      </select>
+                    </div>
+                    <div>
                       <label style={{ fontSize: 12, fontWeight: 700, color: "#6B7A70", display: "block", marginBottom: 4 }}>Issued Date</label>
                       <input
                         type="text"
@@ -1067,15 +1151,18 @@ export default function AdminPage() {
                         onChange={(e) => setInvIssueDate(e.target.value)}
                       />
                     </div>
-                    <div>
-                      <label style={{ fontSize: 12, fontWeight: 700, color: "#6B7A70", display: "block", marginBottom: 4 }}>Due Date</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={invDueDate}
-                        onChange={(e) => setInvDueDate(e.target.value)}
-                      />
-                    </div>
+                    {invStatus !== "Paid" && (
+                      <div>
+                        <label style={{ fontSize: 12, fontWeight: 700, color: "#D68910", display: "block", marginBottom: 4 }}>Payment Due Date</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={invDueDate}
+                          onChange={(e) => setInvDueDate(e.target.value)}
+                          placeholder="e.g. 24 Aug 2026"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Payment Info */}
@@ -1120,13 +1207,13 @@ export default function AdminPage() {
                   {/* Line Items Table */}
                   <div style={{ marginBottom: 25 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: "#1A252C" }}>Line Items</span>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "#1A252C" }}>Services &amp; Line Items</span>
                       <button
                         type="button"
-                        onClick={() => handleAddItem()}
+                        onClick={() => handleAddItem({ desc: "Custom Studio Service", rate: 150 })}
                         style={{ fontSize: 12, color: "#2691BA", background: "none", border: "none", cursor: "pointer", fontWeight: 700 }}
                       >
-                        + Add Custom Line Item
+                        + Add Custom Service &amp; Price
                       </button>
                     </div>
 
@@ -1137,7 +1224,7 @@ export default function AdminPage() {
                           className="form-input"
                           value={item.desc}
                           onChange={(e) => handleUpdateItem(idx, { desc: e.target.value })}
-                          placeholder="Description"
+                          placeholder="Service Name / Description"
                           style={{ fontSize: 13 }}
                         />
                         <input
@@ -1153,7 +1240,7 @@ export default function AdminPage() {
                           className="form-input"
                           value={item.rate}
                           onChange={(e) => handleUpdateItem(idx, { rate: Number(e.target.value) })}
-                          placeholder="Rate"
+                          placeholder="Price (CHF)"
                           style={{ fontSize: 13, textAlign: "right" }}
                         />
                         <div style={{ fontSize: 13, fontWeight: 700, textAlign: "right", color: "#1f78b4" }}>
@@ -1184,13 +1271,22 @@ export default function AdminPage() {
                   <span style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "#6B7A70" }}>
                     Live Invoice Preview
                   </span>
-                  <button
-                    onClick={() => window.print()}
-                    className="btn-pill btn-pill-cyan"
-                    style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 20px", fontSize: 13 }}
-                  >
-                    <Printer size={15} /> Print / Save PDF
-                  </button>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <button
+                      onClick={() => handleSendInvoiceEmail({ number: invNumber, issued: invIssueDate, due: invDueDate, status: invStatus, clientName: invClientName, clientEmail: invClientEmail, paymentNotice: invPaymentNotice, items: invItems, total: calculatedSubtotal })}
+                      className="btn-pill btn-pill-cyan"
+                      style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", fontSize: 12 }}
+                    >
+                      <Send size={14} /> Send Email (hello@susidavies.com)
+                    </button>
+                    <button
+                      onClick={() => window.print()}
+                      className="btn-pill"
+                      style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", fontSize: 12, border: "1px solid #2691BA", color: "#2691BA", background: "#fff" }}
+                    >
+                      <Printer size={14} /> Print / Save PDF
+                    </button>
+                  </div>
                 </div>
 
                 <SusiInvoiceTemplate
@@ -1213,48 +1309,91 @@ export default function AdminPage() {
 
             {/* Saved Invoices History Table */}
             <div style={{ marginTop: 40, backgroundColor: "#ffffff", padding: "28px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
-              <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, color: "#2691BA", marginBottom: 20 }}>Saved Studio Invoices</h3>
+              <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, color: "#2691BA", marginBottom: 20 }}>Saved Studio Invoices &amp; CRM Ledger</h3>
 
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
                 <thead>
                   <tr style={{ borderBottom: "2px solid #E2DDD3", textAlign: "left", color: "#6B7A70", fontSize: 12, textTransform: "uppercase" }}>
                     <th style={{ padding: "10px" }}>Invoice #</th>
-                    <th style={{ padding: "10px" }}>Client</th>
-                    <th style={{ padding: "10px" }}>Date</th>
-                    <th style={{ padding: "10px" }}>Total</th>
-                    <th style={{ padding: "10px" }}>Status</th>
-                    <th style={{ padding: "10px" }}>Action</th>
+                    <th style={{ padding: "10px" }}>Client Details</th>
+                    <th style={{ padding: "10px" }}>Date &amp; Due Date</th>
+                    <th style={{ padding: "10px" }}>Total (CHF)</th>
+                    <th style={{ padding: "10px" }}>Payment Status</th>
+                    <th style={{ padding: "10px" }}>Email Status</th>
+                    <th style={{ padding: "10px" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {invoices.map((inv) => (
-                    <tr key={inv.id} style={{ borderBottom: "1px solid #F0ECE1" }}>
-                      <td style={{ padding: "12px 10px", fontWeight: 700, color: "#2691BA" }}>{inv.number || inv.id}</td>
-                      <td style={{ padding: "12px 10px", fontWeight: 600 }}>{inv.clientName || inv.client}</td>
-                      <td style={{ padding: "12px 10px", color: "#6B7A70" }}>{inv.issued || inv.date}</td>
-                      <td style={{ padding: "12px 10px", fontWeight: 700 }}>
-                        CHF {typeof inv.total === "number" ? inv.total.toFixed(2) : inv.total}
-                      </td>
-                      <td style={{ padding: "12px 10px" }}>
-                        <span style={{ padding: "3px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: inv.status.includes("paid") ? "#54BC3318" : "#F39C1218", color: inv.status.includes("paid") ? "#45A027" : "#D68910" }}>
-                          {inv.status}
-                        </span>
-                      </td>
-                      <td style={{ padding: "12px 10px" }}>
-                        <button
-                          onClick={() => {
-                            setInvNumber(inv.number || inv.id);
-                            setInvClientName(inv.clientName || inv.client);
-                            setInvClientEmail(inv.clientEmail || inv.email || "");
-                            setInvItems(inv.items || []);
-                          }}
-                          style={{ background: "none", border: "none", color: "#2691BA", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontWeight: 600, fontSize: 13 }}
-                        >
-                          <Eye size={15} /> Edit / Load
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {invoices.map((inv) => {
+                    const isPaid = inv.status?.toLowerCase() === "paid";
+                    return (
+                      <tr key={inv.id || inv.number} style={{ borderBottom: "1px solid #F0ECE1" }}>
+                        <td style={{ padding: "12px 10px", fontWeight: 700, color: "#2691BA" }}>{inv.number || inv.id}</td>
+                        <td style={{ padding: "12px 10px" }}>
+                          <strong style={{ display: "block", color: "#1A252C" }}>{inv.clientName || inv.client}</strong>
+                          <span style={{ fontSize: 12, color: "#888" }}>{inv.clientEmail || inv.email || "No email"}</span>
+                        </td>
+                        <td style={{ padding: "12px 10px", fontSize: 13, color: "#555" }}>
+                          <div><strong>Issued:</strong> {inv.issued || inv.date}</div>
+                          {!isPaid && (
+                            <div style={{ color: "#D68910", fontWeight: 600 }}><strong>Due:</strong> {inv.due || inv.dueDate || "N/A"}</div>
+                          )}
+                        </td>
+                        <td style={{ padding: "12px 10px", fontWeight: 700, fontSize: 15, color: "#1f78b4" }}>
+                          CHF {typeof inv.total === "number" ? inv.total.toFixed(2) : inv.total}
+                        </td>
+                        <td style={{ padding: "12px 10px" }}>
+                          <button
+                            onClick={() => {
+                              const newStatus = isPaid ? "Due" : "Paid";
+                              setInvoices(invoices.map((i) => (i.id === inv.id || i.number === inv.number ? { ...i, status: newStatus } : i)));
+                            }}
+                            style={{
+                              padding: "4px 12px",
+                              borderRadius: 100,
+                              fontSize: 11,
+                              fontWeight: 700,
+                              border: "none",
+                              cursor: "pointer",
+                              backgroundColor: isPaid ? "#54BC3318" : "#F39C1218",
+                              color: isPaid ? "#45A027" : "#D68910",
+                            }}
+                          >
+                            {isPaid ? "✓ PAID" : "⏳ DUE"}
+                          </button>
+                        </td>
+                        <td style={{ padding: "12px 10px" }}>
+                          <span style={{ padding: "3px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: inv.emailSent ? "#54BC3318" : "#95A5A618", color: inv.emailSent ? "#45A027" : "#7F8C8D" }}>
+                            {inv.emailSent ? "Email Sent ✓" : "Not Sent ✗"}
+                          </span>
+                        </td>
+                        <td style={{ padding: "12px 10px" }}>
+                          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                            <button
+                              onClick={() => handleSendInvoiceEmail(inv)}
+                              style={{ padding: "6px 12px", borderRadius: 12, backgroundColor: "#2691BA", color: "#fff", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}
+                            >
+                              <Send size={13} /> Email Client
+                            </button>
+                            <button
+                              onClick={() => {
+                                setInvNumber(inv.number || inv.id);
+                                setInvClientName(inv.clientName || inv.client);
+                                setInvClientEmail(inv.clientEmail || inv.email || "");
+                                setInvStatus(inv.status || "Due");
+                                setInvIssueDate(inv.issued || inv.date || "");
+                                setInvDueDate(inv.due || inv.dueDate || "");
+                                if (inv.items) setInvItems(inv.items);
+                              }}
+                              style={{ background: "none", border: "1px solid #ccc", padding: "5px 10px", borderRadius: 8, color: "#333", cursor: "pointer", fontSize: 12 }}
+                            >
+                              Edit / Load
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

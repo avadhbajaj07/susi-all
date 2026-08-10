@@ -374,17 +374,19 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
                   <td className="val">{data.number || "SD-2026-001"}</td>
                 </tr>
                 <tr>
-                  <td className="lbl">Issued</td>
+                  <td className="lbl">Issued Date</td>
                   <td className="val">{data.issued || "05 Jun 2026"}</td>
                 </tr>
+                {data.status?.toLowerCase() !== "paid" && (
+                  <tr>
+                    <td className="lbl">Due Date</td>
+                    <td className="val">{data.due || "19 Jun 2026"}</td>
+                  </tr>
+                )}
                 <tr>
-                  <td className="lbl">Due</td>
-                  <td className="val">{data.due || "19 Jun 2026"}</td>
-                </tr>
-                <tr>
-                  <td className="lbl">Status</td>
-                  <td className="val" style={{ textTransform: "lowercase", color: data.status === "paid" ? "#45A027" : "#1a252c" }}>
-                    {data.status || "draft"}
+                  <td className="lbl">Payment Status</td>
+                  <td className="val" style={{ textTransform: "uppercase", fontWeight: 700, color: data.status?.toLowerCase() === "paid" ? "#45A027" : "#D68910" }}>
+                    {data.status || "DUE"}
                   </td>
                 </tr>
               </tbody>
