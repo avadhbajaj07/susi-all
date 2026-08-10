@@ -75,7 +75,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 max(30px, calc((100vw - 1240px) / 2));
+  padding: 0 max(40px, calc((100vw - 1440px) / 2));
   position: sticky;
   top: 0;
   z-index: 100;
@@ -281,24 +281,24 @@ h1 {
 
 /* Layout Containers & Alternating Section Grid */
 .container {
-  max-width: 1120px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 90px 24px;
+  padding: 110px 40px;
 }
 
 .container-narrow {
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 80px 24px;
+  padding: 100px 40px;
 }
 
 /* 2-Column Grid Layout */
 .grid-2col, .grid-2col-alt {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 60px;
+  gap: 80px;
   align-items: center;
-  margin-bottom: 90px;
+  margin-bottom: 120px;
 }
 
 .grid-2col .col-media, .grid-2col .col-content,
@@ -342,7 +342,7 @@ h1 {
 /* Form Card Styling */
 .contact-form-card {
   background: #ffffff;
-  padding: 45px 40px;
+  padding: 50px 45px;
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-soft);
   border: 1px solid var(--border);
@@ -357,17 +357,17 @@ h1 {
 }
 .badge-overlay-card {
   position: absolute;
-  bottom: 30px;
-  right: -25px;
+  bottom: 35px;
+  right: -20px;
   background-color: var(--blue);
   color: #ffffff;
-  padding: 22px 26px;
-  border-radius: 16px;
-  max-width: 230px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+  padding: 24px 28px;
+  border-radius: 18px;
+  max-width: 250px;
+  box-shadow: 0 14px 35px rgba(0,0,0,0.18);
   font-family: var(--sans);
-  font-size: 14px;
-  line-height: 1.55;
+  font-size: 15px;
+  line-height: 1.6;
   font-weight: 500;
   z-index: 10;
 }
@@ -379,59 +379,59 @@ h1 {
   text-transform: uppercase;
   color: var(--muted);
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   display: block;
 }
 
 .body-text {
   font-family: var(--sans);
-  font-size: 17px;
-  line-height: 29px;
+  font-size: 18px;
+  line-height: 1.8;
   color: var(--ink-body);
   font-weight: 400;
-  margin-bottom: 22px;
+  margin-bottom: 26px;
 }
 
 .bullet-list {
   list-style: none;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 .bullet-list li {
-  font-size: 17px;
-  line-height: 29px;
+  font-size: 18px;
+  line-height: 1.8;
   color: var(--ink-body);
-  padding: 6px 0;
+  padding: 8px 0;
   position: relative;
-  padding-left: 24px;
+  padding-left: 28px;
 }
 .bullet-list li::before {
   content: "•";
   color: var(--blue);
   position: absolute;
   left: 0;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
 }
 
 /* Service Cards 4-Grid */
 .space-reconnect {
   text-align: center;
-  padding: 80px 0;
+  padding: 100px 0 60px;
 }
 .space-reconnect h2 {
   font-size: clamp(36px, 4.5vw, 57px);
   line-height: clamp(40px, 4.5vw, 57px);
-  margin-bottom: 45px;
+  margin-bottom: 55px;
 }
 .service-cards-4grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  gap: 30px;
 }
 .service-card-item {
   background-color: #ffffff;
-  border-radius: 18px;
-  padding: 38px 24px;
+  border-radius: 20px;
+  padding: 44px 28px;
   text-align: center;
   box-shadow: var(--shadow-soft);
   display: flex;
