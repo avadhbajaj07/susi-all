@@ -4,7 +4,7 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { TestimonialSlider } from "@/components/testimonial-slider";
-import { MessageCircle, ArrowRight } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { HomeHero } from "@/components/home-hero";
 
 export default function Home() {
@@ -78,6 +78,8 @@ export default function Home() {
           </div>
         </section>
 
+        <div className="section-divider-line" />
+
         {/* Block 2: Cloudinary Image 2 (susi2) — Text Left, Image Right */}
         <section className="grid-2col-alt">
           <div className="col-media">
@@ -109,6 +111,8 @@ export default function Home() {
           </div>
         </section>
 
+        <div className="section-divider-line" />
+
         {/* Space To Reconnect - 4 Cards Grid */}
         <section className="space-reconnect">
           <h2>A Space To Reconnect</h2>
@@ -129,8 +133,10 @@ export default function Home() {
           </div>
         </section>
 
+        <div className="section-divider-line" />
+
         {/* Block 3: Cloudinary Image 3 (susi1) — Image Left, Text Right */}
-        <section className="grid-2col" style={{ marginTop: 100 }}>
+        <section className="grid-2col">
           <div className="col-media">
             <div className="image-card-rounded">
               <img

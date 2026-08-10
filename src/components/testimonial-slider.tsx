@@ -53,11 +53,11 @@ export function TestimonialSlider() {
   return (
     <section className="testimonials-section">
       <span className="eyebrow">Testimonials</span>
-      <h2 style={{ fontSize: 42, marginBottom: 35 }}>What People Say</h2>
+      <h2 style={{ fontSize: 36, marginBottom: 28 }}>What People Say</h2>
       
       <div className="testimonial-slider-container">
         <button
-          className="slider-arrow arrow-left"
+          className="slider-arrow arrow-left desktop-arrow"
           onClick={prevSlide}
           aria-label="Previous Testimonial"
         >
@@ -71,11 +71,29 @@ export function TestimonialSlider() {
         </div>
 
         <button
-          className="slider-arrow arrow-right"
+          className="slider-arrow arrow-right desktop-arrow"
           onClick={nextSlide}
           aria-label="Next Testimonial"
         >
           <ChevronRight size={24} />
+        </button>
+      </div>
+
+      {/* Mobile-only Arrow Controls Row */}
+      <div className="mobile-arrows-row">
+        <button
+          className="slider-arrow"
+          onClick={prevSlide}
+          aria-label="Previous Testimonial"
+        >
+          <ChevronLeft size={22} />
+        </button>
+        <button
+          className="slider-arrow"
+          onClick={nextSlide}
+          aria-label="Next Testimonial"
+        >
+          <ChevronRight size={22} />
         </button>
       </div>
 
