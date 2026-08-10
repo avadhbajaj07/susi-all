@@ -437,7 +437,7 @@ export default function AdminPage() {
               src="/images/susi-davies-logo-transparent.png"
               alt="Susi Davies Logo"
               style={{
-                height: 48,
+                height: 68,
                 width: "auto",
                 objectFit: "contain",
                 filter: "brightness(0) invert(1)",

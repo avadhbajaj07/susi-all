@@ -70,7 +70,7 @@ h1 {
 
 /* Header Navigation */
 .site-header {
-  height: 85px;
+  height: 95px;
   background-color: var(--blue);
   display: flex;
   align-items: center;
@@ -89,7 +89,7 @@ h1 {
 }
 
 .header-logo-img {
-  height: 40px;
+  height: 60px;
   width: auto;
   object-fit: contain;
   filter: brightness(0) invert(1);
@@ -801,7 +801,7 @@ h1 {
   text-decoration: none;
 }
 .footer-logo-img {
-  height: 52px;
+  height: 75px;
   width: auto;
   object-fit: contain;
   filter: brightness(0) invert(1);
@@ -937,7 +937,10 @@ h1 {
 @media (max-width: 958px) {
   .site-header {
     padding: 0 20px;
-    height: 75px;
+    height: 85px;
+  }
+  .header-logo-img {
+    height: 52px;
   }
   .desktop-nav {
     display: none !important;
