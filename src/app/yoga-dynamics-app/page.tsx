@@ -3,8 +3,11 @@
 import Image from "next/image";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { Download, ExternalLink } from "lucide-react";
 
 export default function YogaDynamicsAppPage() {
+  const appStoreUrl = "https://apps.apple.com/ch/app/yoga-lifestyle/id1659410021?l=en-GB";
+
   return (
     <main>
       <SiteHeader />
@@ -22,9 +25,28 @@ export default function YogaDynamicsAppPage() {
         <section className="grid-2col">
           <div className="col-content">
             <h2 className="section-heading">Your Pocket Guide to Wellness</h2>
-            <p className="body-text" style={{ marginBottom: 32 }}>
-              Welcome to the Yoga Dynamic App, your ultimate companion for wellness, balance, and personal growth. Whether you&apos;re a seasoned yogi or just starting your journey, our app offers a comprehensive platform to support your physical, mental, and emotional well-being. Created by Susi Davies, a certified life coach and yoga instructor, the Yoga Dynamic App combines her years of expertise with cutting-edge technology to provide you with an immersive and transformative experience.
+            <p className="body-text" style={{ marginBottom: 24 }}>
+              Welcome to the Yoga Dynamics App, your ultimate companion for wellness, balance, and personal growth. Whether you&apos;re a seasoned yogi or just starting your journey, our app offers a comprehensive platform to support your physical, mental, and emotional well-being. Created by Susi Davies, a certified life coach and yoga instructor, the Yoga Dynamics App combines her years of expertise with cutting-edge technology to provide you with an immersive and transformative experience.
             </p>
+
+            {/* Prominent App Store Download CTA Card */}
+            <div style={{ backgroundColor: "rgba(38,145,186,0.08)", border: "1.5px solid var(--blue)", borderRadius: 20, padding: "24px 28px", marginBottom: 35 }}>
+              <strong style={{ fontSize: 18, color: "var(--blue)", display: "block", marginBottom: 6 }}>
+                📱 Download Yoga Dynamics on iOS App Store
+              </strong>
+              <p className="body-text" style={{ fontSize: 14, marginBottom: 18, color: "var(--ink-body)" }}>
+                Get instant access to Susi&apos;s guided yoga classes, breathwork routines, meditation practices, and daily inspirations directly on your iPhone or iPad.
+              </p>
+              <a
+                href={appStoreUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-pill btn-pill-cyan"
+                style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "14px 28px", fontSize: 14, fontWeight: 700 }}
+              >
+                <Download size={18} /> GET ON APPLE APP STORE <ExternalLink size={16} />
+              </a>
+            </div>
 
             <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
               <h3 style={{ fontSize: 22, marginBottom: 10, color: "var(--blue)" }}>Yoga Classes</h3>
@@ -71,7 +93,7 @@ export default function YogaDynamicsAppPage() {
           </div>
 
           <div className="col-media">
-            <div className="phone-mockups-wrapper" style={{ position: "sticky", top: 110 }}>
+            <div className="phone-mockups-wrapper" style={{ position: "sticky", top: 110, textAlign: "center" }}>
               <Image
                 src="/images/imgi_7_mobile.png"
                 alt="Susi Davies App Screen Mockups"
@@ -79,11 +101,22 @@ export default function YogaDynamicsAppPage() {
                 height={580}
                 priority
               />
+              <div style={{ marginTop: 20 }}>
+                <a
+                  href={appStoreUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-pill btn-pill-cyan"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+                >
+                  <Download size={16} /> DOWNLOAD APP NOW
+                </a>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Section 2 (Alternating): Buddha Statue Image Left, Contact Form Right */}
+        {/* Section 2: Contact Form */}
         <section className="grid-2col" style={{ marginTop: 90 }}>
           <div className="col-media">
             <div className="image-card-rounded">

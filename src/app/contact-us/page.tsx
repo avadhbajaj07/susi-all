@@ -4,7 +4,7 @@ import Image from "next/image";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { site } from "@/lib/site";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 
 export default function ContactPage() {
   return (
@@ -68,17 +68,11 @@ export default function ContactPage() {
                     {site.email}
                   </a>
                 </div>
-                <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
+                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                   <Phone size={18} color="var(--blue)" />
                   <a href={`tel:${site.phone}`} style={{ fontSize: 15, color: "var(--ink-body)", fontWeight: 500 }}>
                     {site.phone}
                   </a>
-                </div>
-                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                  <MapPin size={18} color="var(--blue)" />
-                  <span style={{ fontSize: 15, color: "var(--muted)" }}>
-                    {site.address}
-                  </span>
                 </div>
               </div>
             </div>

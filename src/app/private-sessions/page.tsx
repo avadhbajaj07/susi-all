@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { MapPin } from "lucide-react";
 
 export default function PrivateSessionsPage() {
   return (
@@ -20,12 +21,10 @@ export default function PrivateSessionsPage() {
         <section className="grid-2col-alt">
           <div className="col-media">
             <div className="image-card-rounded">
-              <Image
-                src="/images/susi davies6.jpg"
-                alt="Susi Davies leg stretch pose"
-                width={500}
-                height={650}
-                priority
+              <img
+                src="https://res.cloudinary.com/dm4jfxbcs/image/upload/v1786343531/susi2_v8c5c9.jpg"
+                alt="Susi Davies Standing Alignment Pose"
+                style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
               />
             </div>
           </div>
@@ -36,6 +35,13 @@ export default function PrivateSessionsPage() {
             <p className="body-text" style={{ fontStyle: "italic", fontSize: 18, color: "var(--ink-body)" }}>
               Personal guidance. Tailored support. Real transformation.
             </p>
+            
+            {/* Venue Location Badge */}
+            <div style={{ backgroundColor: "#F4F9FC", border: "1px solid #BCD4E3", padding: "10px 14px", borderRadius: 10, marginBottom: 20, display: "inline-flex", gap: 10, alignItems: "center", fontSize: 13, color: "var(--blue)", fontWeight: 700 }}>
+              <MapPin size={18} color="var(--blue)" />
+              <span>at BODYTALKS, Alte Landstrasse 32, Thalwil</span>
+            </div>
+
             <p className="body-text">
               With over 30 years of experience, Susi Davies offers private sessions designed entirely around you—your body, your needs, and your life situation.
             </p>
@@ -65,14 +71,13 @@ export default function PrivateSessionsPage() {
         </section>
 
         {/* Section 2: Image Left, Text Right */}
-        <section className="grid-2col">
+        <section className="grid-2col" style={{ marginTop: 70 }}>
           <div className="col-media">
             <div className="image-card-rounded">
-              <Image
-                src="/images/susi davies9.jpg"
+              <img
+                src="https://res.cloudinary.com/dm4jfxbcs/image/upload/v1786343531/susi3_euqaqm.jpg"
                 alt="Susi Davies seated yoga pose"
-                width={500}
-                height={540}
+                style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
               />
             </div>
           </div>
@@ -89,26 +94,18 @@ export default function PrivateSessionsPage() {
               Every session is adapted to your needs.
             </p>
             <h2 className="section-heading" style={{ marginTop: 40, fontSize: 32 }}>
-              Available
+              Location &amp; Booking
             </h2>
+            <p className="body-text">
+              📍 <strong>Venue:</strong> at BODYTALKS, Alte Landstrasse 32, Thalwil
+            </p>
             <p className="body-text">• By appointment only</p>
             <p className="body-text" style={{ fontSize: 14, color: "var(--muted)" }}>
-              To book a session, please get in touch directly.
+              To book a private session, please get in touch directly.
             </p>
           </div>
         </section>
       </div>
-
-      {/* Full Width Middle Split Image Banner Block */}
-      <section className="fullwidth-banner-splits">
-        <Image
-          src="/images/susi davies5.jpg"
-          alt="Susi Davies middle splits posture"
-          fill
-          style={{ objectFit: "cover", objectPosition: "center 30%" }}
-          sizes="100vw"
-        />
-      </section>
 
       <SiteFooter />
     </main>
