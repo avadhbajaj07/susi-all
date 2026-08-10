@@ -397,32 +397,46 @@ export default function AdminPage() {
     setShowEmailModal(false);
   };
 
+  const [isPublishingArticle, setIsPublishingArticle] = useState(false);
+
   const handlePublishArticle = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!artTitle) return;
+    if (!artTitle || isPublishingArticle) return;
+
+    setIsPublishingArticle(true);
+    // Instantly close modal so user cannot double-click
+    setShowArticleModal(false);
+
     const isScheduled = artScheduleMode === "schedule";
+    const currentTitle = artTitle;
+    const currentCategory = artCategory;
+    const currentContent = artContent;
+    const currentImage = artImage;
+
     const newArt = {
-      id: articles.length + 1,
-      title: artTitle,
-      category: artCategory,
-      image: artImage,
+      id: Date.now(),
+      title: currentTitle,
+      category: currentCategory,
+      image: currentImage,
       status: isScheduled ? `Scheduled (${artScheduleDate} ${artScheduleTime})` : "Published",
       date: isScheduled ? artScheduleDate : "Aug 10, 2026",
       linkedin: postToLinkedin,
       broadcastSent: broadcastToEmail,
     };
-    setArticles([newArt, ...articles]);
+
+    // Filter out duplicates by title before prepending
+    setArticles((prev) => [newArt, ...prev.filter((a) => a.title?.trim().toLowerCase() !== currentTitle.trim().toLowerCase())]);
 
     try {
       await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: artTitle,
-          category: artCategory,
-          content: artContent,
-          excerpt: artContent ? artContent.slice(0, 160) : artTitle,
-          image: artImage || "/images/susi davies7.jpg",
+          title: currentTitle,
+          category: currentCategory,
+          content: currentContent,
+          excerpt: currentContent ? currentContent.slice(0, 160) : currentTitle,
+          image: currentImage || "/images/susi davies7.jpg",
           date: isScheduled ? artScheduleDate : "Aug 10, 2026",
         }),
       });
@@ -439,8 +453,8 @@ export default function AdminPage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               to: recipient,
-              subject: `New Journal Note: ${artTitle}`,
-              body: `${artContent}\n\nRead the full article on Susi Davies website: https://susidavies.com/blog`,
+              subject: `New Journal Note: ${currentTitle}`,
+              body: `${currentContent}\n\nRead the full article on Susi Davies website: https://susidavies.com/blog`,
               fromName: "Susi Davies Studio",
             }),
           }).catch(() => {});
@@ -449,25 +463,24 @@ export default function AdminPage() {
         console.error("Broadcast error:", err);
       }
 
-      setCampaigns([
+      setCampaigns((prev) => [
         {
-          id: `CMP-0${campaigns.length + 1}`,
-          subject: `${isScheduled ? "[Scheduled] " : ""}New Journal Note: ${artTitle}`,
+          id: `CMP-0${prev.length + 1}`,
+          subject: `${isScheduled ? "[Scheduled] " : ""}New Journal Note: ${currentTitle}`,
           segment: "All Subscribers",
           status: isScheduled ? `Scheduled (${artScheduleDate})` : "Sent",
           sentDate: isScheduled ? artScheduleDate : "Today",
           opens: isScheduled ? "0%" : "100%",
           clicks: isScheduled ? "0%" : "50%",
         },
-        ...campaigns,
+        ...prev,
       ]);
     }
 
     setArtTitle("");
     setArtContent("");
     setArtImage("");
-    setShowArticleModal(false);
-    alert(`✓ Article "${artTitle}" published to website! ${broadcastToEmail ? "Broadcast sent to subscribers via Resend API (hello@susidavies.com)!" : ""}`);
+    setIsPublishingArticle(false);
   };
 
   const handleAddSubscriber = (e: React.FormEvent) => {

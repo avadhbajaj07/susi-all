@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { Download, ExternalLink, Smartphone } from "lucide-react";
+import { ExternalLink, Smartphone } from "lucide-react";
 
 export default function YogaDynamicsAppPage() {
   const appStoreUrl = "https://apps.apple.com/ch/app/yoga-lifestyle/id1659410021?l=en-GB";
@@ -12,40 +12,16 @@ export default function YogaDynamicsAppPage() {
     <main>
       <SiteHeader />
 
-      {/* Hero Banner with Direct App Store Button */}
+      {/* Hero Banner */}
       <section className="page-banner">
-        <div style={{ textAlign: "center" }}>
-          <h1 style={{ marginBottom: 16 }}>Yoga Dynamics App</h1>
-          <div style={{ marginTop: 12 }}>
-            <a
-              href={appStoreUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-pill"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "16px 34px",
-                fontSize: 15,
-                fontWeight: 700,
-                backgroundColor: "#ffffff",
-                color: "#1f78b4",
-                borderRadius: 100,
-                textDecoration: "none",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-                transition: "transform 0.2s ease",
-              }}
-            >
-              <Smartphone size={20} color="#1f78b4" /> GET THE APP ON APPLE APP STORE <ExternalLink size={16} color="#1f78b4" />
-            </a>
-          </div>
+        <div>
+          <h1>Yoga Dynamics App</h1>
         </div>
         <span className="page-banner-arrow">⌄</span>
       </section>
 
       <div className="container">
-        {/* Section 1: Intro & 4 Features + Mockups */}
+        {/* Section 1: Intro & Features + Mockups */}
         <section className="grid-2col">
           <div className="col-content">
             <h2 className="section-heading">Your Pocket Guide to Wellness</h2>
@@ -53,10 +29,10 @@ export default function YogaDynamicsAppPage() {
               Welcome to the Yoga Dynamics App, your ultimate companion for wellness, balance, and personal growth. Whether you&apos;re a seasoned yogi or just starting your journey, our app offers a comprehensive platform to support your physical, mental, and emotional well-being. Created by Susi Davies, a certified life coach and yoga instructor, the Yoga Dynamics App combines her years of expertise with cutting-edge technology to provide you with an immersive and transformative experience.
             </p>
 
-            {/* Prominent App Store Download CTA Card */}
+            {/* SINGLE Official App Store Download Link Button on Page */}
             <div style={{ backgroundColor: "rgba(38,145,186,0.08)", border: "2px solid var(--blue)", borderRadius: 20, padding: "26px 30px", marginBottom: 35 }}>
               <strong style={{ fontSize: 19, color: "var(--blue)", display: "block", marginBottom: 8 }}>
-                📱 Download Yoga Dynamics on iOS App Store
+                📱 Get Susi Davies App on the iOS App Store
               </strong>
               <p className="body-text" style={{ fontSize: 14, marginBottom: 20, color: "var(--ink-body)" }}>
                 Get instant access to Susi&apos;s guided yoga classes, breathwork routines, meditation practices, and daily inspirations directly on your iPhone or iPad.
@@ -66,9 +42,9 @@ export default function YogaDynamicsAppPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-pill btn-pill-cyan"
-                style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "15px 30px", fontSize: 15, fontWeight: 700 }}
+                style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "15px 32px", fontSize: 15, fontWeight: 700 }}
               >
-                <Download size={18} /> OPEN APPLE APP STORE <ExternalLink size={16} />
+                <Smartphone size={18} /> DOWNLOAD ON APPLE APP STORE <ExternalLink size={16} />
               </a>
             </div>
 
@@ -125,17 +101,6 @@ export default function YogaDynamicsAppPage() {
                 height={580}
                 priority
               />
-              <div style={{ marginTop: 24 }}>
-                <a
-                  href={appStoreUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-pill btn-pill-cyan"
-                  style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 28px" }}
-                >
-                  <Download size={16} /> DOWNLOAD APP ON APP STORE
-                </a>
-              </div>
             </div>
           </div>
         </section>
