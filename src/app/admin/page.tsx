@@ -280,6 +280,23 @@ export default function AdminPage() {
         return;
       }
 
+      const recipient = invToDelivery.clientEmail || invToDelivery.email;
+
+      // Persist sent invoice into Sent Messages inbox
+      fetch("/api/inbox", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fromName: "Susi Davies Studio",
+          fromEmail: "hello@susidavies.com",
+          to: recipient,
+          subject: `Studio Invoice ${invToDelivery.number}`,
+          body: `Dear ${invToDelivery.clientName || "Client"},\n\nThank you for choosing Susi Davies Studio. Attached is your official invoice ${invToDelivery.number} for CHF ${invToDelivery.total}.\n\nNamaste,\nSusi Davies`,
+          folder: "sent",
+          attachments: [{ name: `Invoice-${invToDelivery.number}.pdf`, size: "165 KB" }],
+        }),
+      }).catch(() => {});
+
       // Mark emailSent = true
       setInvoices(
         invoices.map((inv) =>
@@ -489,6 +506,20 @@ export default function AdminPage() {
         attachments: composeAttachments,
       };
 
+      fetch("/api/inbox", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fromName: "Susi Davies Studio",
+          fromEmail: "hello@susidavies.com",
+          to: composeTo,
+          subject: composeSubject,
+          body: composeBody,
+          folder: "sent",
+          attachments: composeAttachments,
+        }),
+      }).catch(() => {});
+
       setInboxMessages([newMsg, ...inboxMessages]);
       setSelectedMessage(newMsg);
       setComposeTo("");
@@ -544,6 +575,20 @@ export default function AdminPage() {
         folder: "sent",
         attachments: replyAttachments,
       };
+
+      fetch("/api/inbox", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fromName: "Susi Davies Studio",
+          fromEmail: "hello@susidavies.com",
+          to: recipient,
+          subject: `Re: ${selectedMessage.subject}`,
+          body: replyText,
+          folder: "sent",
+          attachments: replyAttachments,
+        }),
+      }).catch(() => {});
 
       setInboxMessages([replyMsg, ...inboxMessages]);
       setReplyText("");
