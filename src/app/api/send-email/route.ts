@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { renderSusiEmailTemplate } from "@/lib/email-template";
 
 export async function POST(req: Request) {
   try {
@@ -16,12 +17,22 @@ export async function POST(req: Request) {
 
     // Clean email recipient if format is "Name <email@domain.com>"
     let recipientEmail = to.trim();
+    let recipientName = "";
     if (recipientEmail.includes("<") && recipientEmail.includes(">")) {
-      const match = recipientEmail.match(/<([^>]+)>/);
+      const match = recipientEmail.match(/(.*?)\s*<([^>]+)>/);
       if (match) {
-        recipientEmail = match[1];
+        recipientName = match[1].replace(/"/g, "").trim();
+        recipientEmail = match[2].trim();
       }
     }
+
+    // Wrap email body in outstanding Susi Davies Studio template & footer
+    const formattedBodyHtml = `<div style="white-space: pre-line;">${body}</div>`;
+    const fullHtml = renderSusiEmailTemplate({
+      title: subject,
+      bodyHtml: formattedBodyHtml,
+      recipientName,
+    });
 
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -34,20 +45,7 @@ export async function POST(req: Request) {
         to: [recipientEmail],
         subject: subject,
         text: body,
-        html: `
-          <div style="font-family: 'Open Sans', Helvetica, Arial, sans-serif; line-height: 1.7; color: #2C3E50; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #E2DDD3; border-radius: 12px;">
-            <div style="text-align: center; padding-bottom: 16px; border-bottom: 2px solid #1f78b4; margin-bottom: 24px;">
-              <h2 style="color: #1f78b4; margin: 0; font-family: Georgia, serif;">Susi Davies Studio</h2>
-              <span style="font-size: 12px; color: #6B7A70; text-transform: uppercase; letter-spacing: 0.1em;">Movement · Breathwork · Remedial Therapy</span>
-            </div>
-            <div style="font-size: 15px; white-space: pre-line;">
-              ${body}
-            </div>
-            <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; font-size: 12px; color: #888; text-align: center;">
-              Sent via Susi Davies Studio (<a href="https://susidavies.com" style="color: #1f78b4; text-decoration: none;">susidavies.com</a>)
-            </div>
-          </div>
-        `,
+        html: fullHtml,
       }),
     });
 

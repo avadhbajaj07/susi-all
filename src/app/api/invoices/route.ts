@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
+import { renderSusiEmailTemplate } from "@/lib/email-template";
 
 // In-memory invoice fallback store in case Supabase credentials are unavailable locally
 let fallbackInvoices = [
@@ -100,50 +101,45 @@ export async function POST(req: Request) {
         ? `<div><strong>Invoice Date:</strong> ${invoice.issued}</div>`
         : `<div><strong>Invoice Date:</strong> ${invoice.issued}</div><div><strong>Payment Due Date:</strong> ${invoice.due}</div>`;
 
-      const emailHtml = `
-        <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto; padding: 25px; border: 1px solid #E2DDD3; border-radius: 12px; color: #2C3E50;">
-          <div style="text-align: center; padding-bottom: 15px; border-bottom: 2px solid #1f78b4; margin-bottom: 20px;">
-            <h2 style="color: #1f78b4; margin: 0;">Susi Davies Studio</h2>
-            <span style="font-size: 12px; color: #666; text-transform: uppercase;">Official Studio Invoice ${invoice.number}</span>
-          </div>
+      const invoiceContentHtml = `
+        <p>Thank you for choosing Susi Davies Studio. Below is your official invoice summary:</p>
 
-          <p>Dear <strong>${invoice.clientName}</strong>,</p>
-          <p>Thank you for choosing Susi Davies Studio. Below is your invoice summary:</p>
+        <div style="background-color: #F8FCFD; padding: 16px 20px; border-radius: 10px; border: 1px solid #E2DDD3; margin-bottom: 24px; font-size: 14px;">
+          <div style="margin-bottom: 4px;"><strong>Invoice Number:</strong> ${invoice.number}</div>
+          ${dateHtml}
+          <div style="margin-top: 4px;"><strong>Payment Status:</strong> <span style="color: ${invoice.status?.toLowerCase() === "paid" ? "#45A027" : "#D68910"}; font-weight: bold; text-transform: uppercase;">${invoice.status}</span></div>
+        </div>
 
-          <div style="background-color: #F8FCFD; padding: 15px; borderRadius: 8px; margin-bottom: 20px; font-size: 14px;">
-            <div><strong>Invoice Number:</strong> ${invoice.number}</div>
-            ${dateHtml}
-            <div><strong>Payment Status:</strong> <span style="color: ${invoice.status?.toLowerCase() === "paid" ? "#45A027" : "#D68910"}; font-weight: bold; text-transform: uppercase;">${invoice.status}</span></div>
-          </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 14px;">
+          <thead>
+            <tr style="background-color: #1f78b4; color: #ffffff;">
+              <th style="padding: 12px; text-align: left;">Service Description</th>
+              <th style="padding: 12px; text-align: center;">Qty</th>
+              <th style="padding: 12px; text-align: right;">Rate</th>
+              <th style="padding: 12px; text-align: right;">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+        </table>
 
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
-            <thead>
-              <tr style="background-color: #1f78b4; color: #ffffff;">
-                <th style="padding: 10px; text-align: left;">Service Description</th>
-                <th style="padding: 10px; text-align: center;">Qty</th>
-                <th style="padding: 10px; text-align: right;">Rate</th>
-                <th style="padding: 10px; text-align: right;">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${itemsHtml}
-            </tbody>
-          </table>
+        <div style="text-align: right; font-size: 20px; font-weight: bold; color: #1f78b4; margin-bottom: 25px;">
+          Total: CHF ${Number(invoice.total).toFixed(2)}
+        </div>
 
-          <div style="text-align: right; font-size: 18px; font-weight: bold; color: #1f78b4; margin-bottom: 25px;">
-            Total: CHF ${Number(invoice.total).toFixed(2)}
-          </div>
-
-          <div style="background-color: #EEF8FC; padding: 14px; border-radius: 8px; font-size: 13px; margin-bottom: 25px;">
-            <strong>Payment Method:</strong> TWINT (+41 79 854 97 52) or Bank Transfer.<br/>
-            ${invoice.paymentNotice || ""}
-          </div>
-
-          <div style="text-align: center; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #888;">
-            Susi Davies Studio · Thalwil, Switzerland · <a href="https://susidavies.com" style="color: #1f78b4;">susidavies.com</a>
-          </div>
+        <div style="background-color: #EEF8FC; padding: 16px; border-radius: 10px; font-size: 13px; margin-bottom: 25px; border: 1px solid #C5E3F3;">
+          <strong style="color: #1f78b4; text-transform: uppercase; font-size: 11px; letter-spacing: 0.1em; display: block; margin-bottom: 4px;">Payment Instructions</strong>
+          <strong>Payment Method:</strong> TWINT (+41 79 854 97 52) or Bank Transfer.<br/>
+          ${invoice.paymentNotice || ""}
         </div>
       `;
+
+      const emailHtml = renderSusiEmailTemplate({
+        title: `Invoice ${invoice.number} — Susi Davies Studio`,
+        bodyHtml: invoiceContentHtml,
+        recipientName: invoice.clientName,
+      });
 
       const resendRes = await fetch("https://api.resend.com/emails", {
         method: "POST",
