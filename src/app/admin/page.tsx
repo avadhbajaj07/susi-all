@@ -2169,31 +2169,6 @@ export default function AdminPage() {
           <div style={{ backgroundColor: "#ffffff", padding: "35px", borderRadius: 18, border: "1px solid #E2DDD3", maxWidth: 850 }}>
             <h3 style={{ fontFamily: "var(--serif)", fontSize: 26, color: "#2691BA", marginBottom: 25 }}>API Keys &amp; Integrations Setup</h3>
 
-            {/* Supabase status */}
-            <div style={{ marginBottom: 30, padding: 20, borderRadius: 14, backgroundColor: "rgba(84,188,51,0.06)", border: "1px solid rgba(84,188,51,0.2)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                <CheckCircle2 size={22} color="#54BC33" />
-                <strong style={{ fontSize: 16, color: "#45A027" }}>Supabase Connection Active</strong>
-              </div>
-              <p style={{ fontSize: 13, color: "#6B7A70", margin: 0 }}>
-                URL: <code>https://bszyzttyashekzqmehxg.supabase.co</code>
-              </p>
-            </div>
-
-            {/* Resend API Key status */}
-            <div style={{ marginBottom: 30, padding: 20, borderRadius: 14, backgroundColor: "rgba(84,188,51,0.06)", border: "1px solid rgba(84,188,51,0.2)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                <CheckCircle2 size={22} color="#54BC33" />
-                <strong style={{ fontSize: 16, color: "#45A027" }}>Resend Email API Connected &amp; Verified</strong>
-              </div>
-              <p style={{ fontSize: 13, color: "#6B7A70", margin: "0 0 10px" }}>
-                API Key: <code>re_*****</code> (Configured in Vercel &amp; .env)
-              </p>
-              <span style={{ fontSize: 12, color: "#45A027", fontWeight: 600 }}>
-                ✓ Automated newsletters, booking confirmations, and post broadcasts ready
-              </span>
-            </div>
-
             {/* Blotato API Key Input & Account Selector */}
             <div style={{ marginBottom: 30, padding: 25, borderRadius: 16, backgroundColor: "#FBF9F4", border: "1px solid #E2DDD3" }}>
               <label style={{ fontSize: 15, fontWeight: 700, color: "#1A252C", display: "block", marginBottom: 8 }}>

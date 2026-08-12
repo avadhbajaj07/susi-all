@@ -41,12 +41,44 @@ export default function BookPage() {
   const [selectedSession, setSelectedSession] = useState("private-yoga");
   const [timeSlot, setTimeSlot] = useState("morning");
   const [submitted, setSubmitted] = useState(false);
+  const [clientName, setClientName] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
+  const [clientNotes, setClientNotes] = useState("");
+  const [bookingDate, setBookingDate] = useState("2026-08-15");
 
   const activeSession = sessionTypes.find((s) => s.id === selectedSession) || sessionTypes[0];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
+
+    try {
+      // Send notification email via Resend to hello@susidavies.com
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: "hello@susidavies.com",
+          subject: `New Booking Request: ${activeSession.title} - ${clientName}`,
+          body: `New session booking request received on susidavies.com:\n\nClient Name: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nSession: ${activeSession.title} (${activeSession.price})\nDate: ${bookingDate}\nTime Slot: ${timeSlot}\n\nClient Notes:\n${clientNotes || "None"}`,
+          fromName: "Susi Davies Booking System",
+        }),
+      });
+
+      // Save client contact into Supabase database
+      await fetch("/api/subscribers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: clientName,
+          email: clientEmail,
+          segment: activeSession.title,
+        }),
+      }).catch(() => {});
+    } catch (err) {
+      console.error("Booking email dispatch error:", err);
+    }
   };
 
   return (
@@ -144,7 +176,8 @@ export default function BookPage() {
                           type="date"
                           className="form-input"
                           required
-                          defaultValue="2026-08-15"
+                          value={bookingDate}
+                          onChange={(e) => setBookingDate(e.target.value)}
                         />
                       </div>
                       <select
@@ -168,19 +201,42 @@ export default function BookPage() {
                       3. Your Information
                     </label>
                     <div className="form-group">
-                      <input type="text" className="form-input" placeholder="Your full name" required />
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="Your full name"
+                        required
+                        value={clientName}
+                        onChange={(e) => setClientName(e.target.value)}
+                      />
                     </div>
                     <div className="form-group">
-                      <input type="email" className="form-input" placeholder="Your email address" required />
+                      <input
+                        type="email"
+                        className="form-input"
+                        placeholder="Your email address"
+                        required
+                        value={clientEmail}
+                        onChange={(e) => setClientEmail(e.target.value)}
+                      />
                     </div>
                     <div className="form-group">
-                      <input type="tel" className="form-input" placeholder="Phone number (WhatsApp)" required />
+                      <input
+                        type="tel"
+                        className="form-input"
+                        placeholder="Phone number (WhatsApp)"
+                        required
+                        value={clientPhone}
+                        onChange={(e) => setClientPhone(e.target.value)}
+                      />
                     </div>
                     <div className="form-group">
                       <textarea
                         className="form-textarea"
                         rows={3}
                         placeholder="Any notes, injury considerations, or specific goals for Susi..."
+                        value={clientNotes}
+                        onChange={(e) => setClientNotes(e.target.value)}
                       ></textarea>
                     </div>
                   </div>
