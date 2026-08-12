@@ -23,13 +23,10 @@ export default function ContactPage() {
         <section className="grid-2col">
           <div className="col-media">
             <div className="image-card-rounded">
-              <Image
-                src="/images/susi davies14.jpg"
+              <img
+                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527174/susi-davies12.jpg"
                 alt="Susi Davies Contact"
-                width={500}
-                height={620}
-                style={{ width: "100%", height: "auto", objectFit: "contain" }}
-                priority
+                style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
               />
             </div>
           </div>

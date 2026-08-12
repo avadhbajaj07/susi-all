@@ -109,12 +109,10 @@ export default function YogaDynamicsAppPage() {
         <section className="grid-2col" style={{ marginTop: 90 }}>
           <div className="col-media">
             <div className="image-card-rounded">
-              <Image
-                src="/images/susi davies4.jpg"
-                alt="Buddha Statue on Bamboo Mat"
-                width={500}
-                height={620}
-                style={{ width: "100%", height: "auto", objectFit: "contain" }}
+              <img
+                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies14.jpg"
+                alt="Susi Davies Practice"
+                style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
               />
             </div>
           </div>

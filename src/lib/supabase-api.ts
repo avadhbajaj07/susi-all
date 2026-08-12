@@ -22,7 +22,7 @@ export async function fetchSupabasePosts() {
           date: p.date || new Date(p.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
           excerpt: p.excerpt || (typeof p.content === "string" ? p.content.slice(0, 160) + "..." : p.title),
           content: typeof p.content === "string" ? p.content : p.excerpt || p.title,
-          image: p.image || p.featured_image_path || "/images/susi davies7.jpg",
+          image: p.image || p.featured_image_path || "https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies15.jpg",
           status: p.status || "published",
           readTime: "5 min read",
         }));
@@ -74,7 +74,7 @@ export async function fetchSupabasePostBySlug(slug: string) {
         date: p.date || new Date(p.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
         excerpt: p.excerpt || (typeof p.content === "string" ? p.content.slice(0, 160) + "..." : p.title),
         content: typeof p.content === "string" ? p.content : p.excerpt || p.title,
-        image: p.image || p.featured_image_path || "/images/susi davies7.jpg",
+        image: p.image || p.featured_image_path || "https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies15.jpg",
         status: p.status || "published",
         readTime: "5 min read",
       };
@@ -91,7 +91,7 @@ export async function insertSupabasePost(post: { title: string; category?: strin
     const postDate = post.date || new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
     const postExcerpt = post.excerpt || (post.content ? post.content.slice(0, 160) : post.title);
     const postContent = post.content || post.title;
-    const postImage = post.image || "/images/susi davies7.jpg";
+    const postImage = post.image || "https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies15.jpg";
     const postCategory = post.category || "Practice Notes";
 
     const res = await fetch(`${SUPABASE_URL}/rest/v1/posts`, {

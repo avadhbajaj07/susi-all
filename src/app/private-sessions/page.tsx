@@ -113,8 +113,8 @@ ${form.message || "None"}`;
           <div className="col-media">
             <div className="image-card-rounded">
               <img
-                src="https://res.cloudinary.com/dm4jfxbcs/image/upload/v1786343531/susi2_v8c5c9.jpg"
-                alt="Susi Davies Standing Alignment Pose"
+                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527173/susi-davies4.jpg"
+                alt="Susi Davies Private Sessions"
                 style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
               />
             </div>
@@ -172,8 +172,8 @@ ${form.message || "None"}`;
           <div className="col-media">
             <div className="image-card-rounded">
               <img
-                src="https://res.cloudinary.com/dm4jfxbcs/image/upload/v1786343531/susi3_euqaqm.jpg"
-                alt="Susi Davies seated yoga pose"
+                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527173/susi-davies5.jpg"
+                alt="Susi Davies Focus Pose"
                 style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
               />
             </div>

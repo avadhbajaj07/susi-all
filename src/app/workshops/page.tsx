@@ -118,7 +118,7 @@ ${form.message || "None"}`;
           <div className="col-media">
             <div className="image-card-rounded">
               <img
-                src="/images/susi davies7.jpg"
+                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527174/susi-davies11.jpg"
                 alt="Susi Davies guiding a deeper practice workshop"
                 style={{ width: "100%", height: "580px", objectFit: "cover", borderRadius: 20, display: "block" }}
               />

@@ -23,13 +23,10 @@ export default function OnlineCoursesPage() {
         <section className="grid-2col" style={{ marginBottom: 50 }}>
           <div className="col-media">
             <div className="image-card-rounded">
-              <Image
-                src="/images/susi davies3.jpg"
+              <img
+                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies16.jpg"
                 alt="Practice with Susi Davies online"
-                width={500}
-                height={550}
-                style={{ width: "100%", height: "auto", objectFit: "contain" }}
-                priority
+                style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
               />
             </div>
           </div>
@@ -69,12 +66,10 @@ export default function OnlineCoursesPage() {
           <div className="grid-2col">
             <div className="col-media">
               <div className="image-card-rounded">
-                <Image
-                  src="/images/coaching4.jpg"
+                <img
+                  src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies17.jpg"
                   alt="Susi Davies yoga posture"
-                  width={500}
-                  height={620}
-                  style={{ width: "100%", height: "auto", objectFit: "contain" }}
+                  style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
                 />
               </div>
             </div>

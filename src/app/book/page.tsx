@@ -195,13 +195,10 @@ export default function BookPage() {
             {/* Right: Susi Photo & Session Info Card */}
             <div className="col-media">
               <div className="image-card-rounded" style={{ marginBottom: 30 }}>
-                <Image
-                  src="/images/susi davies5.jpg"
+                <img
+                  src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527174/susi-davies13.jpg"
                   alt="Susi Davies yoga posture stretch"
-                  width={500}
-                  height={620}
-                  style={{ width: "100%", height: "auto", objectFit: "contain" }}
-                  priority
+                  style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
                 />
               </div>
 

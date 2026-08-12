@@ -86,7 +86,7 @@ export default function JournalPage() {
                   <Link href={`/blog/${slug}`} style={{ textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", height: "100%" }}>
                     <div className="image-card-rounded" style={{ borderRadius: "18px 18px 0 0", boxShadow: "none" }}>
                       <img
-                        src={post.image || "/images/susi davies7.jpg"}
+                        src={post.image || "https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies15.jpg"}
                         alt={post.title}
                         style={{ width: "100%", height: "240px", objectFit: "cover", display: "block" }}
                       />

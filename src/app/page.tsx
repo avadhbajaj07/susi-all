@@ -103,13 +103,13 @@ export default function Home() {
       <HomeHero />
 
       <div className="container">
-        {/* Block 1: Cloudinary Image 1 (susi3) — Image Left, Text Right */}
+        {/* Block 1: Susi Image 1 — Image Left, Text Right */}
         <section className="grid-2col">
           <div className="col-media">
             <div className="image-card-rounded">
               <img
-                src="https://res.cloudinary.com/dm4jfxbcs/image/upload/v1786343531/susi3_euqaqm.jpg"
-                alt="Susi Davies Mudra Balance Pose"
+                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527173/susi-davies1.jpg"
+                alt="Susi Davies Yoga & Movement Practice"
                 style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px" }}
               />
             </div>
@@ -131,14 +131,14 @@ export default function Home() {
 
         <div className="section-divider-line" />
 
-        {/* Block 2: Cloudinary Image 2 (susi2) — Text Left, Image Right */}
+        {/* Block 2: Main Susi Portrait Image (susi-davies10.jpg) — Text Left, Image Right */}
         <section className="grid-2col-alt">
           <div className="col-media">
             <div className="badge-overlay-container">
               <div className="image-card-rounded">
                 <img
-                  src="https://res.cloudinary.com/dm4jfxbcs/image/upload/v1786343531/susi2_v8c5c9.jpg"
-                  alt="Susi Davies Standing Alignment Pose"
+                  src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527174/susi-davies10.jpg"
+                  alt="Susi Davies Main Portrait"
                   style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px" }}
                 />
               </div>
@@ -186,13 +186,13 @@ export default function Home() {
 
         <div className="section-divider-line" />
 
-        {/* Block 3: Cloudinary Image 3 (susi1) — Image Left, Text Right */}
+        {/* Block 3: Susi Image 2 — Image Left, Text Right */}
         <section className="grid-2col">
           <div className="col-media">
             <div className="image-card-rounded">
               <img
-                src="https://res.cloudinary.com/dm4jfxbcs/image/upload/v1786343531/susi1_rzoeqo.jpg"
-                alt="Susi Davies Bound Somatic Stretch"
+                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527173/susi-davies2.jpg"
+                alt="Susi Davies Somatic Stretch & Balance"
                 style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px" }}
               />
             </div>
@@ -233,14 +233,14 @@ export default function Home() {
       {/* Testimonials Slider */}
       <TestimonialSlider />
 
-      {/* Block 4: Cloudinary Image 4 (susi4) — Image Left, Contact Form Right */}
+      {/* Block 4: Susi Image 3 — Image Left, Contact Form Right */}
       <div className="container-narrow">
         <section className="grid-2col">
           <div className="col-media">
             <div className="image-card-rounded">
               <img
-                src="https://res.cloudinary.com/dm4jfxbcs/image/upload/v1786343530/susi4_day7ig.jpg"
-                alt="Susi Davies Reclined Restorative Pose"
+                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527173/susi-davies3.jpg"
+                alt="Susi Davies Restorative Practice"
                 style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px" }}
               />
             </div>

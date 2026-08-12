@@ -6,11 +6,11 @@ import { ImageSlider } from "@/components/image-slider";
 import { Check } from "lucide-react";
 
 const coachingImages = [
-  { src: "/images/coaching4.jpg", alt: "Susi Davies stretching posture", caption: "Movement Articulation & Flexibility" },
-  { src: "/images/coaching5.jpg", alt: "Susi Davies yoga posture", caption: "Precision & Alignment Guidance" },
-  { src: "/images/susi davies2.jpg", alt: "Susi Davies in snow", caption: "Resilience & Breathwork Training" },
-  { src: "/images/susi davies3.jpg", alt: "Susi Davies on rocks by water", caption: "Mindfulness & Inner Calm" },
-  { src: "/images/susi davies4.jpg", alt: "Susi Davies SUP partner yoga", caption: "Balance & Core Integration" },
+  { src: "https://res.cloudinary.com/qtah71h2/image/upload/v1786527174/susi-davies11.jpg", alt: "Susi Davies stretching posture", caption: "Movement Articulation & Flexibility" },
+  { src: "https://res.cloudinary.com/qtah71h2/image/upload/v1786527174/susi-davies12.jpg", alt: "Susi Davies yoga posture", caption: "Precision & Alignment Guidance" },
+  { src: "https://res.cloudinary.com/qtah71h2/image/upload/v1786527174/susi-davies13.jpg", alt: "Susi Davies breathwork session", caption: "Resilience & Breathwork Training" },
+  { src: "https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies14.jpg", alt: "Susi Davies mindfulness posture", caption: "Mindfulness & Inner Calm" },
+  { src: "https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies15.jpg", alt: "Susi Davies core integration", caption: "Balance & Core Integration" },
 ];
 
 export default function CoachingMentoringPage() {
@@ -31,12 +31,10 @@ export default function CoachingMentoringPage() {
         <section className="grid-2col-alt">
           <div className="col-media">
             <div className="image-card-rounded">
-              <Image
-                src="/images/coaching1.jpg"
-                alt="Susi Davies riding camel"
-                width={500}
-                height={580}
-                priority
+              <img
+                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527174/susi-davies6.jpg"
+                alt="Susi Davies Coaching & Mentoring"
+                style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px" }}
               />
             </div>
           </div>
@@ -60,11 +58,10 @@ export default function CoachingMentoringPage() {
         <section className="grid-2col">
           <div className="col-media">
             <div className="image-card-rounded">
-              <Image
-                src="/images/coaching2.jpg"
-                alt="Susi Davies sitting on stone temple"
-                width={500}
-                height={480}
+              <img
+                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527174/susi-davies8.jpg"
+                alt="Susi Davies Personal Evolution Guidance"
+                style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px" }}
               />
             </div>
           </div>
@@ -84,11 +81,10 @@ export default function CoachingMentoringPage() {
         <section className="grid-2col-alt">
           <div className="col-media">
             <div className="image-card-rounded">
-              <Image
-                src="/images/coaching3.jpg"
-                alt="Buddha Head and You Are Amazing mug"
-                width={500}
-                height={480}
+              <img
+                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527174/susi-davies9.jpg"
+                alt="Susi Davies Deep Dive Learning"
+                style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px" }}
               />
             </div>
           </div>

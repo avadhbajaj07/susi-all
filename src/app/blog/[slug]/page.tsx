@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = `${post.title} | Susi Davies`;
   const description = post.excerpt || post.content?.slice(0, 160);
-  const imageUrl = post.image || "https://susidavies.com/images/susi davies7.jpg";
+  const imageUrl = post.image || "https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies15.jpg";
 
   return {
     title,
