@@ -74,59 +74,70 @@ export default function JournalPage() {
 
         {/* Dynamic Journal Posts Grid */}
         <section style={{ marginBottom: 90 }}>
-          <div className="service-cards-4grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 30 }}>
-            {posts.map((post) => {
-              const slug = post.slug || post.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-              return (
-                <article
-                  key={post.id}
-                  className="service-card-item"
-                  style={{ textAlign: "left", padding: 0, overflow: "hidden", cursor: "pointer", display: "flex", flexDirection: "column" }}
-                >
-                  <Link href={`/blog/${slug}`} style={{ textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", height: "100%" }}>
-                    <div className="image-card-rounded" style={{ borderRadius: "18px 18px 0 0", boxShadow: "none" }}>
-                      <img
-                        src={post.image || "https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies15.jpg"}
-                        alt={post.title}
-                        style={{ width: "100%", height: "240px", objectFit: "cover", display: "block" }}
-                      />
-                    </div>
-                    <div style={{ padding: "25px 22px", display: "flex", flexDirection: "column", flex: 1, justifyContent: "space-between" }}>
-                      <div>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                          <span className="ym-badge ym-badge-light" style={{ margin: 0 }}>
-                            <Tag size={11} style={{ marginRight: 5, verticalAlign: "middle" }} />
-                            {post.category || "Practice Notes"}
-                          </span>
-                          <span style={{ fontSize: 12, color: "var(--muted)" }}>{post.readTime || "5 min read"}</span>
+          {posts.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "60px 20px", backgroundColor: "#ffffff", borderRadius: 20, border: "1px dashed #E2DDD3", maxWidth: 640, margin: "0 auto" }}>
+              <p style={{ fontSize: 18, color: "var(--blue)", fontFamily: "var(--serif)", marginBottom: 8 }}>
+                No Journal Articles Published Yet
+              </p>
+              <p style={{ fontSize: 14, color: "var(--muted)", margin: 0 }}>
+                Check back soon for Susi&apos;s practice notes, retreat reflections, and movement guidance.
+              </p>
+            </div>
+          ) : (
+            <div className="service-cards-4grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 30 }}>
+              {posts.map((post) => {
+                const slug = post.slug || post.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+                return (
+                  <article
+                    key={post.id}
+                    className="service-card-item"
+                    style={{ textAlign: "left", padding: 0, overflow: "hidden", cursor: "pointer", display: "flex", flexDirection: "column" }}
+                  >
+                    <Link href={`/blog/${slug}`} style={{ textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", height: "100%" }}>
+                      <div className="image-card-rounded" style={{ borderRadius: "18px 18px 0 0", boxShadow: "none" }}>
+                        <img
+                          src={post.image || "https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies15.jpg"}
+                          alt={post.title}
+                          style={{ width: "100%", height: "240px", objectFit: "cover", display: "block" }}
+                        />
+                      </div>
+                      <div style={{ padding: "25px 22px", display: "flex", flexDirection: "column", flex: 1, justifyContent: "space-between" }}>
+                        <div>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                            <span className="ym-badge ym-badge-light" style={{ margin: 0 }}>
+                              <Tag size={11} style={{ marginRight: 5, verticalAlign: "middle" }} />
+                              {post.category || "Practice Notes"}
+                            </span>
+                            <span style={{ fontSize: 12, color: "var(--muted)" }}>{post.readTime || "5 min read"}</span>
+                          </div>
+
+                          <h3 style={{ fontSize: 20, color: "var(--blue)", margin: "10px 0 12px", lineHeight: 1.35 }}>
+                            {post.title}
+                          </h3>
+
+                          <p className="body-text" style={{ fontSize: 15, lineHeight: "26px", color: "var(--muted)", marginBottom: 22 }}>
+                            {post.excerpt || post.content?.slice(0, 150) + "..."}
+                          </p>
                         </div>
 
-                        <h3 style={{ fontSize: 20, color: "var(--blue)", margin: "10px 0 12px", lineHeight: 1.35 }}>
-                          {post.title}
-                        </h3>
-
-                        <p className="body-text" style={{ fontSize: 15, lineHeight: "26px", color: "var(--muted)", marginBottom: 22 }}>
-                          {post.excerpt || post.content?.slice(0, 150) + "..."}
-                        </p>
+                        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ fontSize: 13, color: "var(--muted)", display: "flex", alignItems: "center", gap: 5 }}>
+                            <Calendar size={14} />
+                            {post.date}
+                          </span>
+                          <span
+                            style={{ fontSize: 13, fontWeight: 700, color: "var(--blue)", display: "inline-flex", alignItems: "center", gap: 4 }}
+                          >
+                            Read Article <ArrowUpRight size={15} />
+                          </span>
+                        </div>
                       </div>
-
-                      <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: 13, color: "var(--muted)", display: "flex", alignItems: "center", gap: 5 }}>
-                          <Calendar size={14} />
-                          {post.date}
-                        </span>
-                        <span
-                          style={{ fontSize: 13, fontWeight: 700, color: "var(--blue)", display: "inline-flex", alignItems: "center", gap: 4 }}
-                        >
-                          Read Article <ArrowUpRight size={15} />
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                </article>
-              );
-            })}
-          </div>
+                    </Link>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         {/* Journal Subscription Card */}

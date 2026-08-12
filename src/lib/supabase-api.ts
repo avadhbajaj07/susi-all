@@ -13,7 +13,7 @@ export async function fetchSupabasePosts() {
 
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
+      if (Array.isArray(data)) {
         return data.map((p: any) => ({
           id: p.id,
           title: p.title,
