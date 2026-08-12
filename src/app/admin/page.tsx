@@ -77,34 +77,71 @@ export default function AdminPage() {
   ]);
   const [isLoadingBlotatoAccounts, setIsLoadingBlotatoAccounts] = useState(false);
 
-  const handleFetchBlotatoAccounts = async () => {
+  useEffect(() => {
+    const savedKey = localStorage.getItem("blotato_api_key");
+    if (savedKey) {
+      setBlotatoKey(savedKey);
+      fetchBlotatoAccountsWithKey(savedKey);
+    }
+  }, []);
+
+  const fetchBlotatoAccountsWithKey = async (key: string) => {
+    if (!key) return;
     setIsLoadingBlotatoAccounts(true);
     try {
       const res = await fetch("/api/social/accounts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ apiKey: blotatoKey }),
+        body: JSON.stringify({ apiKey: key }),
       });
       const data = await res.json();
       if (data.accounts && Array.isArray(data.accounts)) {
+        const savedSelectedJson = localStorage.getItem("blotato_selected_accounts");
+        const savedSelectedIds = savedSelectedJson ? JSON.parse(savedSelectedJson) : [];
+
         setBlotatoAccounts(
           data.accounts.map((a: any) => ({
             ...a,
-            selected: a.isSusiAccount || a.name.toLowerCase().includes("susi"),
+            selected: savedSelectedIds.length > 0
+              ? savedSelectedIds.includes(a.id)
+              : (a.isSusiAccount || a.name.toLowerCase().includes("susi")),
           }))
         );
-        alert(`✓ Successfully loaded ${data.accounts.length} connected Blotato accounts!\n\nSelect your Susi Davies accounts below.`);
       }
     } catch (err: any) {
-      alert(`Fetch error: ${err.message || "Failed to fetch accounts"}`);
+      console.error("Fetch Blotato accounts error:", err);
     }
     setIsLoadingBlotatoAccounts(false);
   };
 
+  const handleFetchBlotatoAccounts = async () => {
+    if (!blotatoKey) {
+      alert("Please enter your Blotato API key first.");
+      return;
+    }
+    localStorage.setItem("blotato_api_key", blotatoKey);
+    await fetchBlotatoAccountsWithKey(blotatoKey);
+    alert(`✓ Successfully loaded connected Blotato accounts!\n\nSelect your Susi Davies accounts below.`);
+  };
+
+  const handleSaveBlotatoConfig = () => {
+    if (!blotatoKey) {
+      alert("Please enter your Blotato API key.");
+      return;
+    }
+    localStorage.setItem("blotato_api_key", blotatoKey);
+    const selectedIds = blotatoAccounts.filter((a) => a.selected).map((a) => a.id);
+    localStorage.setItem("blotato_selected_accounts", JSON.stringify(selectedIds));
+    alert(`✓ Social API Configuration Saved!\n\nAPI Key saved and ${selectedIds.length} Susi Davies accounts targeted for auto-posting.`);
+  };
+
   const toggleBlotatoAccountSelection = (id: string) => {
-    setBlotatoAccounts((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, selected: !a.selected } : a))
-    );
+    setBlotatoAccounts((prev) => {
+      const updated = prev.map((a) => (a.id === id ? { ...a, selected: !a.selected } : a));
+      const selectedIds = updated.filter((a) => a.selected).map((a) => a.id);
+      localStorage.setItem("blotato_selected_accounts", JSON.stringify(selectedIds));
+      return updated;
+    });
   };
 
   // Studio Inbox & Email Composer State
@@ -2225,7 +2262,7 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <button onClick={() => alert("✓ Blotato API Configuration & Selected Social Accounts Saved Successfully!")} className="btn-pill btn-pill-cyan" style={{ cursor: "pointer" }}>
+            <button onClick={handleSaveBlotatoConfig} className="btn-pill btn-pill-cyan" style={{ cursor: "pointer" }}>
               SAVE SOCIAL API CONFIGURATION
             </button>
           </div>
