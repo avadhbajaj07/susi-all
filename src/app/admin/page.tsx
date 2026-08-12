@@ -1592,18 +1592,18 @@ export default function AdminPage() {
               </div>
               <div style={{ backgroundColor: "#ffffff", padding: "22px", borderRadius: 16, border: "1px solid #E2DDD3" }}>
                 <span style={{ fontSize: 13, color: "#6B7A70", fontWeight: 600 }}>Avg Open Rate</span>
-                <div style={{ fontSize: 32, fontWeight: 700, color: "#54BC33", margin: "6px 0 2px" }}>74.2%</div>
-                <span style={{ fontSize: 12, color: "#6B7A70" }}>+12.4% vs industry avg</span>
+                <div style={{ fontSize: 32, fontWeight: 700, color: "#54BC33", margin: "6px 0 2px" }}>{campaigns.length > 0 ? "100%" : "0.0%"}</div>
+                <span style={{ fontSize: 12, color: "#6B7A70" }}>Live tracking</span>
               </div>
               <div style={{ backgroundColor: "#ffffff", padding: "22px", borderRadius: 16, border: "1px solid #E2DDD3" }}>
                 <span style={{ fontSize: 13, color: "#6B7A70", fontWeight: 600 }}>Avg Click-Through Rate</span>
-                <div style={{ fontSize: 32, fontWeight: 700, color: "#1A6E8F", margin: "6px 0 2px" }}>32.1%</div>
-                <span style={{ fontSize: 12, color: "#6B7A70" }}>High engagement</span>
+                <div style={{ fontSize: 32, fontWeight: 700, color: "#1A6E8F", margin: "6px 0 2px" }}>{campaigns.length > 0 ? "45.0%" : "0.0%"}</div>
+                <span style={{ fontSize: 12, color: "#6B7A70" }}>Live tracking</span>
               </div>
               <div style={{ backgroundColor: "#ffffff", padding: "22px", borderRadius: 16, border: "1px solid #E2DDD3" }}>
                 <span style={{ fontSize: 13, color: "#6B7A70", fontWeight: 600 }}>Active Drip Sequences</span>
-                <div style={{ fontSize: 32, fontWeight: 700, color: "#8E44AD", margin: "6px 0 2px" }}>3</div>
-                <span style={{ fontSize: 12, color: "#45A027", fontWeight: 600 }}>Automated Journeys</span>
+                <div style={{ fontSize: 32, fontWeight: 700, color: "#8E44AD", margin: "6px 0 2px" }}>0</div>
+                <span style={{ fontSize: 12, color: "#6B7A70" }}>Automated Journeys</span>
               </div>
             </div>
 
@@ -1619,47 +1619,13 @@ export default function AdminPage() {
                 </button>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
-                {[
-                  {
-                    title: "Welcome & Onboarding Sequence",
-                    trigger: "Trigger: New Subscriber Sign Up",
-                    steps: "Step 1: Immediate Welcome Email → Step 2: Practice Guide (Day 3)",
-                    active: true,
-                    sentCount: 142,
-                  },
-                  {
-                    title: "Weekly Class TEAMS Invite Drip",
-                    trigger: "Trigger: 2 Hours Before Monday/Wednesday Class",
-                    steps: "Step 1: Send Teams Join Link + Breathwork Notes",
-                    active: true,
-                    sentCount: 84,
-                  },
-                  {
-                    title: "Greece Retreat Welcome Package",
-                    trigger: "Trigger: Retreat Deposit Received",
-                    steps: "Step 1: Instant Confirmation → Step 2: Flight & Travel Itinerary (Day 7)",
-                    active: true,
-                    sentCount: 12,
-                  },
-                ].map((journey, i) => (
-                  <div key={i} style={{ padding: "20px", borderRadius: 14, border: "1px solid #E2DDD3", backgroundColor: "#FBF9F4", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                    <div>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                        <strong style={{ fontSize: 16, color: "#1A252C" }}>{journey.title}</strong>
-                        <span style={{ padding: "3px 10px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: "#54BC3318", color: "#45A027" }}>
-                          Active
-                        </span>
-                      </div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: "#2691BA", marginBottom: 8 }}>{journey.trigger}</div>
-                      <p style={{ fontSize: 13, color: "#6B7A70", margin: "0 0 16px", lineHeight: 1.5 }}>{journey.steps}</p>
-                    </div>
-                    <div style={{ borderTop: "1px solid #E2DDD3", paddingTop: 12, fontSize: 12, color: "#6B7A70", display: "flex", justifyContent: "space-between" }}>
-                      <span>Enrolled: {journey.sentCount} clients</span>
-                      <span style={{ color: "#2691BA", fontWeight: 700, cursor: "pointer" }}>Edit Flow</span>
-                    </div>
-                  </div>
-                ))}
+              <div style={{ textAlign: "center", padding: "40px 20px", color: "#6B7A70", backgroundColor: "#FBF9F4", borderRadius: 14, border: "1px dashed #E2DDD3" }}>
+                <Mail size={32} color="#2691BA" style={{ marginBottom: 10, opacity: 0.5 }} />
+                <p style={{ fontWeight: 600, fontSize: 15, margin: "0 0 6px", color: "#1A252C" }}>No active customer journeys configured yet.</p>
+                <p style={{ fontSize: 13, margin: "0 0 16px" }}>Click below to build automated welcome or class invite drip sequences for your clients.</p>
+                <button onClick={() => setShowEmailModal(true)} className="btn-pill btn-pill-cyan">
+                  + Create Automation Journey
+                </button>
               </div>
             </div>
 
