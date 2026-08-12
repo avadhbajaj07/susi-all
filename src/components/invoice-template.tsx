@@ -73,13 +73,12 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
 
         /* Main Content Body bounded above the bottom Namaste & contact wave footer */
         .inv-content-body {
-          padding: 0 50px 170px 50px; /* 170px bottom padding protects footer graphic */
+          padding: 0 50px 220px 50px; /* 220px bottom padding protects footer graphic */
           position: relative;
           z-index: 2;
           flex: 1;
           display: flex;
           flex-direction: column;
-          justify: space-between;
           box-sizing: border-box;
         }
 
@@ -88,7 +87,7 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 24px;
-          margin-bottom: 24px;
+          margin-bottom: 20px;
         }
         .inv-bill-to-label {
           font-family: 'Open Sans', sans-serif;
@@ -132,15 +131,15 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
           width: 100%;
           border-collapse: collapse;
           margin-top: 10px;
-          margin-bottom: 20px;
+          margin-bottom: 15px;
         }
         .inv-table-items th {
           background-color: transparent;
           color: #1f78b4;
           font-family: 'Crimson Pro', serif;
-          font-size: 20px;
+          font-size: 18px;
           font-weight: 700;
-          padding: 8px 12px;
+          padding: 6px 10px;
           border-bottom: 2px solid #1f78b4;
         }
         .inv-table-items th.th-desc { text-align: left; }
@@ -149,19 +148,19 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
         .inv-table-items th.th-amt { text-align: right; width: 120px; }
 
         .inv-table-items td {
-          padding: 10px 12px;
-          font-size: 15px;
+          padding: 8px 10px;
+          font-size: 14px;
           border-bottom: 1px dashed rgba(31, 120, 180, 0.22);
         }
         .inv-table-items td.td-desc {
           font-family: 'Open Sans', sans-serif;
-          font-size: 13.5px;
+          font-size: 13px;
           color: #2c3e50;
           font-weight: 600;
         }
         .inv-table-items td.td-qty { text-align: center; color: #1f78b4; font-weight: 700; }
         .inv-table-items td.td-rate { text-align: right; color: #1f78b4; }
-        .inv-table-items td.td-amt { text-align: right; font-weight: 700; color: #1f78b4; font-size: 16px; }
+        .inv-table-items td.td-amt { text-align: right; font-weight: 700; color: #1f78b4; font-size: 15px; }
 
         /* Totals & Payment Notes Container */
         .inv-bottom-container {
@@ -169,42 +168,42 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
           justify-content: space-between;
           align-items: flex-start;
           gap: 20px;
-          margin-top: auto;
-          padding-top: 10px;
+          margin-top: 15px;
+          padding-top: 5px;
         }
         .inv-payment-notes {
           flex: 1;
           font-family: 'Open Sans', sans-serif;
-          font-size: 12px;
+          font-size: 11.5px;
           color: #4a6068;
-          line-height: 1.5;
-          background-color: rgba(31, 120, 180, 0.04);
+          line-height: 1.45;
+          background-color: rgba(31, 120, 180, 0.05);
           border-left: 3px solid #1f78b4;
-          padding: 10px 14px;
+          padding: 8px 12px;
           border-radius: 0 8px 8px 0;
         }
         .inv-payment-notes strong {
           color: #1f78b4;
           display: block;
-          margin-bottom: 3px;
+          margin-bottom: 2px;
         }
 
         .inv-totals-box {
-          width: 280px;
+          width: 250px;
           text-align: right;
-          font-size: 15px;
+          font-size: 14px;
         }
         .inv-totals-row {
           display: flex;
           justify-content: space-between;
-          padding: 3px 0;
+          padding: 2px 0;
           color: #556b73;
         }
         .inv-totals-row.grand-total {
           border-top: 2px solid #1f78b4;
           margin-top: 4px;
-          padding-top: 8px;
-          font-size: 24px;
+          padding-top: 6px;
+          font-size: 22px;
           font-weight: 700;
           color: #1f78b4;
         }
@@ -221,8 +220,7 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
             height: 297mm !important;
             margin: 0 !important;
             padding: 0 !important;
-            background: #ffffff !important;
-            overflow: hidden !important;
+            background-color: #ffffff !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }

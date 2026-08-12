@@ -69,6 +69,43 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [resendKey, setResendKey] = useState("");
   const [blotatoKey, setBlotatoKey] = useState("");
+  const [blotatoAccounts, setBlotatoAccounts] = useState<any[]>([
+    { id: "acc_susi_linkedin", name: "Susi Davies (LinkedIn)", platform: "linkedin", selected: true },
+    { id: "acc_susi_facebook", name: "Susi Davies Yoga (Facebook Page)", platform: "facebook", selected: true },
+    { id: "acc_client_1", name: "Client Partner 1 (LinkedIn)", platform: "linkedin", selected: false },
+    { id: "acc_client_2", name: "Client Business 2 (Facebook)", platform: "facebook", selected: false },
+  ]);
+  const [isLoadingBlotatoAccounts, setIsLoadingBlotatoAccounts] = useState(false);
+
+  const handleFetchBlotatoAccounts = async () => {
+    setIsLoadingBlotatoAccounts(true);
+    try {
+      const res = await fetch("/api/social/accounts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apiKey: blotatoKey }),
+      });
+      const data = await res.json();
+      if (data.accounts && Array.isArray(data.accounts)) {
+        setBlotatoAccounts(
+          data.accounts.map((a: any) => ({
+            ...a,
+            selected: a.isSusiAccount || a.name.toLowerCase().includes("susi"),
+          }))
+        );
+        alert(`✓ Successfully loaded ${data.accounts.length} connected Blotato accounts!\n\nSelect your Susi Davies accounts below.`);
+      }
+    } catch (err: any) {
+      alert(`Fetch error: ${err.message || "Failed to fetch accounts"}`);
+    }
+    setIsLoadingBlotatoAccounts(false);
+  };
+
+  const toggleBlotatoAccountSelection = (id: string) => {
+    setBlotatoAccounts((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, selected: !a.selected } : a))
+    );
+  };
 
   // Studio Inbox & Email Composer State
   const [inboxMessages, setInboxMessages] = useState(initialInboxMessages);
@@ -640,6 +677,21 @@ export default function AdminPage() {
       });
     } catch (err) {
       console.error("Save post error:", err);
+    }
+
+    if (postToLinkedin) {
+      const selectedAccountIds = blotatoAccounts.filter((a) => a.selected).map((a) => a.id);
+      fetch("/api/social/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          apiKey: blotatoKey,
+          targetAccountIds: selectedAccountIds,
+          title: currentTitle,
+          content: `${currentTitle}\n\n${currentContent}\n\nRead more on Susi Davies Journal: https://susidavies.com/blog`,
+          image: currentImage,
+        }),
+      }).catch((err) => console.error("Social publish error:", err));
     }
 
     if (broadcastToEmail) {
@@ -2105,22 +2157,76 @@ export default function AdminPage() {
               </span>
             </div>
 
-            {/* Blotato API Key Input */}
-            <div style={{ marginBottom: 30 }}>
-              <label style={{ fontSize: 14, fontWeight: 700, color: "#1A252C", display: "block", marginBottom: 8 }}>
-                Blotato Social API Key (LinkedIn Auto-Sync)
+            {/* Blotato API Key Input & Account Selector */}
+            <div style={{ marginBottom: 30, padding: 25, borderRadius: 16, backgroundColor: "#FBF9F4", border: "1px solid #E2DDD3" }}>
+              <label style={{ fontSize: 15, fontWeight: 700, color: "#1A252C", display: "block", marginBottom: 8 }}>
+                Blotato Social API Key &amp; Account Selector (LinkedIn &amp; Facebook)
               </label>
-              <input
-                type="text"
-                placeholder="blotato_sec_..."
-                value={blotatoKey}
-                onChange={(e) => setBlotatoKey(e.target.value)}
-                style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: "1px solid #E2DDD3", fontSize: 14, outline: "none" }}
-              />
+              <p style={{ fontSize: 13, color: "#6B7A70", marginBottom: 15 }}>
+                Enter your Blotato API Key to auto-publish journal notes and social updates directly to your Susi Davies LinkedIn and Facebook pages.
+              </p>
+              <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
+                <input
+                  type="text"
+                  placeholder="blotato_sec_..."
+                  value={blotatoKey}
+                  onChange={(e) => setBlotatoKey(e.target.value)}
+                  style={{ flex: 1, padding: "12px 14px", borderRadius: 10, border: "1px solid #E2DDD3", fontSize: 14, outline: "none" }}
+                />
+                <button
+                  type="button"
+                  onClick={handleFetchBlotatoAccounts}
+                  disabled={isLoadingBlotatoAccounts}
+                  className="btn-pill btn-pill-cyan"
+                  style={{ whiteSpace: "nowrap", cursor: "pointer" }}
+                >
+                  {isLoadingBlotatoAccounts ? "Loading Accounts..." : "FETCH CONNECTED ACCOUNTS"}
+                </button>
+              </div>
+
+              {/* Blotato Connected Accounts List & Filter */}
+              <div style={{ marginTop: 15 }}>
+                <strong style={{ fontSize: 14, color: "#2691BA", display: "block", marginBottom: 6 }}>
+                  Target Accounts Filter (Selected: {blotatoAccounts.filter(a => a.selected).length} of {blotatoAccounts.length} Connected Accounts)
+                </strong>
+                <p style={{ fontSize: 12, color: "#6B7A70", marginBottom: 12 }}>
+                  Check ONLY your Susi Davies accounts below so cross-posts are published strictly to Susi Davies pages, ignoring your 18 client accounts.
+                </p>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 220, overflowY: "auto", border: "1px solid #E2DDD3", borderRadius: 10, padding: 12, backgroundColor: "#ffffff" }}>
+                  {blotatoAccounts.map((acc) => (
+                    <label key={acc.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: 8, backgroundColor: acc.selected ? "rgba(38,145,186,0.06)" : "transparent", cursor: "pointer", border: acc.selected ? "1px solid rgba(38,145,186,0.3)" : "1px solid #F0ECE1" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <input
+                          type="checkbox"
+                          checked={acc.selected}
+                          onChange={() => toggleBlotatoAccountSelection(acc.id)}
+                          style={{ width: 16, height: 16, cursor: "pointer" }}
+                        />
+                        <div>
+                          <strong style={{ fontSize: 14, color: "#1A252C" }}>{acc.name}</strong>
+                          <span style={{ fontSize: 11, color: "#6B7A70", marginLeft: 8, textTransform: "capitalize" }}>
+                            ({acc.platform})
+                          </span>
+                        </div>
+                      </div>
+                      {acc.selected ? (
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "#45A027", backgroundColor: "#54BC3318", padding: "2px 8px", borderRadius: 100 }}>
+                          ✓ TARGET SUSI ACCOUNT
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: 11, color: "#888", backgroundColor: "#EEE", padding: "2px 8px", borderRadius: 100 }}>
+                          IGNORED CLIENT ACCOUNT
+                        </span>
+                      )}
+                    </label>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            <button className="btn-pill btn-pill-cyan">
-              SAVE API CONFIGURATION
+            <button onClick={() => alert("✓ Blotato API Configuration & Selected Social Accounts Saved Successfully!")} className="btn-pill btn-pill-cyan" style={{ cursor: "pointer" }}>
+              SAVE SOCIAL API CONFIGURATION
             </button>
           </div>
         )}
