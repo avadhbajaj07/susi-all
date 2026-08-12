@@ -307,6 +307,7 @@ export default function AdminPage() {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [emailSubject, setEmailSubject] = useState("");
   const [emailSegment, setEmailSegment] = useState("All Subscribers");
+  const [customRecipients, setCustomRecipients] = useState("");
   const [emailBody, setEmailBody] = useState("");
 
   // New Article Modal State
@@ -363,51 +364,60 @@ export default function AdminPage() {
 
     setIsSendingBroadcast(true);
 
-    // 1. Fetch fresh live subscribers from backend API
-    let liveSubs = subscribers;
-    try {
-      const res = await fetch("/api/subscribers");
-      const data = await res.json();
-      if (data.subscribers && Array.isArray(data.subscribers)) {
-        liveSubs = data.subscribers;
-        setSubscribers(data.subscribers);
+    let targetEmails: string[] = [];
+
+    // If user provided specific custom recipient emails, use those first
+    if (customRecipients && customRecipients.trim()) {
+      targetEmails = customRecipients
+        .split(/[,;\n]+/)
+        .map((em) => em.trim())
+        .filter((em) => em.length > 3 && em.includes("@"));
+    }
+
+    // Otherwise, fetch live subscribers from database
+    if (targetEmails.length === 0) {
+      let liveSubs = subscribers;
+      try {
+        const res = await fetch("/api/subscribers");
+        const data = await res.json();
+        if (data.subscribers && Array.isArray(data.subscribers)) {
+          liveSubs = data.subscribers;
+          setSubscribers(data.subscribers);
+        }
+      } catch (err) {
+        console.error("Error fetching live subscribers:", err);
       }
-    } catch (err) {
-      console.error("Error fetching live subscribers:", err);
+
+      let activeSubs = liveSubs.filter((s: any) => s.status === "Subscribed" || !s.status);
+      if (emailSegment && emailSegment !== "All Subscribers") {
+        activeSubs = activeSubs.filter((s: any) =>
+          (s.tags && Array.isArray(s.tags) && s.tags.includes(emailSegment)) ||
+          (s.segment && s.segment === emailSegment)
+        );
+      }
+
+      targetEmails = activeSubs.map((s: any) => s.email).filter(Boolean);
+
+      if (targetEmails.length === 0 && liveSubs.length > 0) {
+        targetEmails = liveSubs.map((s: any) => s.email).filter(Boolean);
+      }
+
+      if (!targetEmails.includes("hello@susidavies.com")) {
+        targetEmails.push("hello@susidavies.com");
+      }
     }
 
-    // 2. Gather active target emails
-    let activeSubs = liveSubs.filter((s: any) => s.status === "Subscribed" || !s.status);
-    if (emailSegment && emailSegment !== "All Subscribers") {
-      activeSubs = activeSubs.filter((s: any) =>
-        (s.tags && Array.isArray(s.tags) && s.tags.includes(emailSegment)) ||
-        (s.segment && s.segment === emailSegment)
-      );
-    }
-
-    let targetEmails = activeSubs.map((s: any) => s.email).filter(Boolean);
-
-    // Fallback: If segment filter produced 0 emails, fallback to all liveSubs emails
-    if (targetEmails.length === 0 && liveSubs.length > 0) {
-      targetEmails = liveSubs.map((s: any) => s.email).filter(Boolean);
-    }
-
-    // Always include studio address hello@susidavies.com so Susi receives a copy
-    if (!targetEmails.includes("hello@susidavies.com")) {
-      targetEmails.push("hello@susidavies.com");
-    }
-
-    // 3. Dispatch real emails via /api/send-email to every recipient
+    // Dispatch real emails via /api/send-email
     let sentCount = 0;
-    const errors: string[] = [];
+    const logDetails: string[] = [];
 
-    for (const email of targetEmails) {
+    for (const recipient of targetEmails) {
       try {
         const res = await fetch("/api/send-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            to: email,
+            to: recipient,
             subject: emailSubject,
             body: emailBody,
             fromName: "Susi Davies",
@@ -417,19 +427,20 @@ export default function AdminPage() {
         const resData = await res.json();
         if (res.ok) {
           sentCount++;
+          logDetails.push(`✓ ${recipient} (Sent successfully)`);
         } else {
-          errors.push(`${email}: ${resData.error || "Delivery failed"}`);
+          logDetails.push(`✗ ${recipient} (${resData.error || "Delivery failed"})`);
         }
       } catch (err: any) {
-        errors.push(`${email}: ${err.message || "Network error"}`);
+        logDetails.push(`✗ ${recipient} (${err.message || "Network error"})`);
       }
     }
 
-    // 4. Record sent campaign item in campaigns table
+    // Record sent campaign in state
     const newCmp = {
       id: `CMP-0${campaigns.length + 1}`,
       subject: emailSubject,
-      segment: emailSegment || "All Subscribers",
+      segment: customRecipients ? "Custom Email List" : emailSegment || "All Subscribers",
       status: "Sent",
       sentDate: "Today",
       opens: "100%",
@@ -437,17 +448,14 @@ export default function AdminPage() {
     };
     setCampaigns([newCmp, ...campaigns]);
 
-    // 5. Clean up modal and notify user
+    // Reset state & close modal
     setEmailSubject("");
     setEmailBody("");
+    setCustomRecipients("");
     setIsSendingBroadcast(false);
     setShowEmailModal(false);
 
-    if (errors.length > 0) {
-      alert(`Sent broadcast to ${sentCount}/${targetEmails.length} recipient(s).\n\nDetails:\n${errors.join("\n")}`);
-    } else {
-      alert(`✓ Email Broadcast "${emailSubject}" successfully sent to all ${targetEmails.length} recipient(s):\n\n${targetEmails.join("\n")}`);
-    }
+    alert(`Broadcast Delivery Summary (${sentCount}/${targetEmails.length} Delivered):\n\n${logDetails.join("\n")}`);
   };
 
   const [isPublishingArticle, setIsPublishingArticle] = useState(false);
@@ -2031,11 +2039,27 @@ export default function AdminPage() {
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Target Audience Segment</label>
                   <select value={emailSegment} onChange={(e) => setEmailSegment(e.target.value)} className="form-input">
-                    <option value="All Subscribers">All Subscribers</option>
+                    <option value="All Subscribers">All Subscribers ({subscribers.length} Saved Contacts)</option>
                     <option value="Online Students">Weekly Online Students</option>
                     <option value="Retreat Guests">Greece Retreat Guests</option>
                     <option value="Journal Subscribers">Journal Subscribers</option>
                   </select>
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>
+                    Specific Recipient Email(s) (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={customRecipients}
+                    onChange={(e) => setCustomRecipients(e.target.value)}
+                    placeholder="e.g. client1@example.com, client2@example.com (Leave blank to use selected segment)"
+                  />
+                  <span style={{ fontSize: 11, color: "#6B7A70", marginTop: 4, display: "block" }}>
+                    Type specific recipient emails separated by commas to test or send directly to individual clients.
+                  </span>
                 </div>
 
                 <div style={{ marginBottom: 16 }}>
