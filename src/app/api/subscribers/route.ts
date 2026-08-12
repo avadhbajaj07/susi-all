@@ -12,7 +12,7 @@ export async function GET() {
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (!error && data && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         const formatted = data.map((c: any) => ({
           id: c.id,
           name: c.full_name || c.email.split("@")[0],
