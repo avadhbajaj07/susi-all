@@ -9,10 +9,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields: to, subject, body" }, { status: 400 });
     }
 
-    const apiKey = process.env.RESEND_API_KEY;
+    const apiKey = process.env.RESEND_API_KEY || process.env.NEXT_PUBLIC_RESEND_API_KEY;
 
     if (!apiKey) {
-      return NextResponse.json({ error: "RESEND_API_KEY environment variable is not configured" }, { status: 500 });
+      return NextResponse.json({ error: "RESEND_API_KEY is not configured in environment variables." }, { status: 500 });
     }
 
     // Clean email recipient if format is "Name <email@domain.com>"

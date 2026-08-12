@@ -125,6 +125,21 @@ export default function AdminPage() {
     fetchComments();
   }, []);
 
+  useEffect(() => {
+    const fetchSubscribers = async () => {
+      try {
+        const res = await fetch("/api/subscribers");
+        const data = await res.json();
+        if (data.subscribers && Array.isArray(data.subscribers)) {
+          setSubscribers(data.subscribers);
+        }
+      } catch (err) {
+        console.error("Subscribers fetch error:", err);
+      }
+    };
+    fetchSubscribers();
+  }, []);
+
   const handleModerateComment = async (id: number | string, newStatus: "approved" | "rejected") => {
     setAdminComments((prev) => prev.map((c) => (c.id === id ? { ...c, status: newStatus } : c)));
     try {
@@ -348,8 +363,21 @@ export default function AdminPage() {
 
     setIsSendingBroadcast(true);
 
-    // 1. Gather active subscriber email addresses
-    let activeSubs = subscribers.filter((s: any) => s.status === "Subscribed" || !s.status);
+    // 1. Fetch fresh live subscribers from backend API
+    let liveSubs = subscribers;
+    try {
+      const res = await fetch("/api/subscribers");
+      const data = await res.json();
+      if (data.subscribers && Array.isArray(data.subscribers)) {
+        liveSubs = data.subscribers;
+        setSubscribers(data.subscribers);
+      }
+    } catch (err) {
+      console.error("Error fetching live subscribers:", err);
+    }
+
+    // 2. Gather active target emails
+    let activeSubs = liveSubs.filter((s: any) => s.status === "Subscribed" || !s.status);
     if (emailSegment && emailSegment !== "All Subscribers") {
       activeSubs = activeSubs.filter((s: any) =>
         (s.tags && Array.isArray(s.tags) && s.tags.includes(emailSegment)) ||
@@ -359,9 +387,9 @@ export default function AdminPage() {
 
     let targetEmails = activeSubs.map((s: any) => s.email).filter(Boolean);
 
-    // Fallback: If targetEmails is empty, collect all available emails from subscribers state
-    if (targetEmails.length === 0 && subscribers.length > 0) {
-      targetEmails = subscribers.map((s: any) => s.email).filter(Boolean);
+    // Fallback: If segment filter produced 0 emails, fallback to all liveSubs emails
+    if (targetEmails.length === 0 && liveSubs.length > 0) {
+      targetEmails = liveSubs.map((s: any) => s.email).filter(Boolean);
     }
 
     // Always include studio address hello@susidavies.com so Susi receives a copy
@@ -369,8 +397,10 @@ export default function AdminPage() {
       targetEmails.push("hello@susidavies.com");
     }
 
-    // 2. Dispatch real emails via /api/send-email
+    // 3. Dispatch real emails via /api/send-email to every recipient
     let sentCount = 0;
+    const errors: string[] = [];
+
     for (const email of targetEmails) {
       try {
         const res = await fetch("/api/send-email", {
@@ -383,25 +413,17 @@ export default function AdminPage() {
             fromName: "Susi Davies",
           }),
         });
-        if (res.ok) sentCount++;
-      } catch (err) {
-        console.error(`Failed to send email broadcast to ${email}:`, err);
+
+        const resData = await res.json();
+        if (res.ok) {
+          sentCount++;
+        } else {
+          errors.push(`${email}: ${resData.error || "Delivery failed"}`);
+        }
+      } catch (err: any) {
+        errors.push(`${email}: ${err.message || "Network error"}`);
       }
     }
-
-    // 3. Persist sent broadcast into Sent Messages inbox
-    fetch("/api/inbox", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fromName: "Susi Davies Broadcast",
-        fromEmail: "hello@susidavies.com",
-        to: targetEmails.join(", "),
-        subject: `[Broadcast] ${emailSubject}`,
-        body: emailBody,
-        folder: "sent",
-      }),
-    }).catch(() => {});
 
     // 4. Record sent campaign item in campaigns table
     const newCmp = {
@@ -421,7 +443,11 @@ export default function AdminPage() {
     setIsSendingBroadcast(false);
     setShowEmailModal(false);
 
-    alert(`✓ Email Broadcast "${emailSubject}" successfully sent to ${targetEmails.length} recipient(s) (${targetEmails.join(", ")}) via hello@susidavies.com!`);
+    if (errors.length > 0) {
+      alert(`Sent broadcast to ${sentCount}/${targetEmails.length} recipient(s).\n\nDetails:\n${errors.join("\n")}`);
+    } else {
+      alert(`✓ Email Broadcast "${emailSubject}" successfully sent to all ${targetEmails.length} recipient(s):\n\n${targetEmails.join("\n")}`);
+    }
   };
 
   const [isPublishingArticle, setIsPublishingArticle] = useState(false);
@@ -573,31 +599,57 @@ export default function AdminPage() {
     }
   };
 
-  const handleAddSubscriber = (e: React.FormEvent) => {
+  const handleAddSubscriber = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subEmail) return;
+    const cleanEmail = subEmail.trim().toLowerCase();
+    const cleanName = subName || cleanEmail.split("@")[0];
+
     const newSub = {
-      id: `SUB-${Math.floor(100 + Math.random() * 900)}`,
-      name: subName || subEmail.split("@")[0],
-      email: subEmail,
+      id: `SUB-${Date.now()}`,
+      name: cleanName,
+      email: cleanEmail,
       segment: subSegment,
-      date: new Date().toISOString().split("T")[0],
+      date: new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
       status: "Subscribed",
     };
-    setSubscribers([newSub, ...subscribers]);
+
+    setSubscribers((prev) => [newSub, ...prev.filter((s) => s.email !== cleanEmail)]);
     setSubName("");
     setSubEmail("");
     setShowSubModal(false);
+
+    try {
+      await fetch("/api/subscribers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: cleanName, email: cleanEmail, segment: subSegment }),
+      });
+    } catch (err) {
+      console.error("Save subscriber error:", err);
+    }
   };
 
-  const toggleSubscriberStatus = (id: string) => {
+  const toggleSubscriberStatus = async (id: string) => {
+    const sub = subscribers.find((s) => s.id === id || s.email === id);
+    if (!sub) return;
+    const newStatus = sub.status === "Subscribed" ? "Unsubscribed" : "Subscribed";
+
     setSubscribers(
       subscribers.map((s) =>
-        s.id === id
-          ? { ...s, status: s.status === "Subscribed" ? "Unsubscribed" : "Subscribed" }
-          : s
+        s.id === id || s.email === id ? { ...s, status: newStatus } : s
       )
     );
+
+    try {
+      await fetch("/api/subscribers", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: sub.email, status: newStatus }),
+      });
+    } catch (err) {
+      console.error("Toggle subscriber status error:", err);
+    }
   };
 
   const handleSendComposeEmail = async (e: React.FormEvent) => {
