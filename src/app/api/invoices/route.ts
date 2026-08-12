@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { renderSusiEmailTemplate } from "@/lib/email-template";
+import { generateInvoicePdfBuffer } from "@/lib/pdf-generator";
 
 // In-memory invoice fallback store in case Supabase credentials are unavailable locally
 let fallbackInvoices: any[] = [];
@@ -28,15 +29,22 @@ export async function GET() {
           status: inv.status || "Due",
           total: Number(inv.total || 0),
           emailSent: inv.email_sent || false,
-          items: inv.items ? inv.items.map((it: any) => ({ desc: it.description, qty: Number(it.quantity), rate: Number(it.unit_price), amount: Number(it.quantity) * Number(it.unit_price) })) : []
+          paymentNotice: "Payment due within 14 days via TWINT (+41 79 854 97 52) or IBAN.",
+          items: inv.items?.map((it: any) => ({
+            desc: it.description,
+            qty: Number(it.quantity || 1),
+            rate: Number(it.unit_price || 0),
+            amount: Number(it.amount || 0),
+          })) || [{ desc: "Studio Session", qty: 1, rate: Number(inv.total || 0), amount: Number(inv.total || 0) }],
         }));
         return NextResponse.json({ invoices: formatted });
       }
     }
-    return NextResponse.json({ invoices: fallbackInvoices });
   } catch (err) {
-    return NextResponse.json({ invoices: fallbackInvoices });
+    console.error("GET /api/invoices error:", err);
   }
+
+  return NextResponse.json({ invoices: fallbackInvoices });
 }
 
 export async function POST(req: Request) {
@@ -44,39 +52,45 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { action, invoice } = body;
 
-    // Action 1: Send Invoice via Resend Email API
-    if (action === "send-email") {
+    // Action 1: Send Invoice via Resend Email with Official PDF Attachment
+    if (action === "send-email" && invoice) {
       const apiKey = process.env.RESEND_API_KEY;
       if (!apiKey) {
         return NextResponse.json({ error: "RESEND_API_KEY environment variable is missing" }, { status: 500 });
       }
-      const recipient = invoice.clientEmail || invoice.email;
+      const recipient = invoice.clientEmail || invoice.client || invoice.email;
 
       if (!recipient) {
-        return NextResponse.json({ error: "Missing client email address" }, { status: 400 });
+        return NextResponse.json({ error: "Recipient email address is missing." }, { status: 400 });
       }
 
-      // Format items table for HTML email
-      const itemsHtml = invoice.items.map((it: any) => `
-        <tr>
-          <td style="padding: 10px; border-bottom: 1px solid #eee;">${it.desc}</td>
-          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${it.qty}</td>
-          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">CHF ${Number(it.rate).toFixed(2)}</td>
-          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold;">CHF ${(Number(it.qty) * Number(it.rate)).toFixed(2)}</td>
-        </tr>
-      `).join("");
-
-      const dateHtml = invoice.status?.toLowerCase() === "paid" 
-        ? `<div><strong>Invoice Date:</strong> ${invoice.issued}</div>`
-        : `<div><strong>Invoice Date:</strong> ${invoice.issued}</div><div><strong>Payment Due Date:</strong> ${invoice.due}</div>`;
+      // Render Email HTML Body Content
+      const itemsHtml = (invoice.items || [])
+        .map(
+          (it: any) => `
+          <tr>
+            <td style="padding: 10px 12px; border-bottom: 1px dashed #E2DDD3; text-align: left;">${it.desc}</td>
+            <td style="padding: 10px 12px; border-bottom: 1px dashed #E2DDD3; text-align: center;">${it.qty}</td>
+            <td style="padding: 10px 12px; border-bottom: 1px dashed #E2DDD3; text-align: right;">CHF ${(Number(it.rate) || 0).toFixed(2)}</td>
+            <td style="padding: 10px 12px; border-bottom: 1px dashed #E2DDD3; text-align: right; font-weight: bold;">CHF ${(Number(it.amount) || 0).toFixed(2)}</td>
+          </tr>`
+        )
+        .join("");
 
       const invoiceContentHtml = `
-        <p>Thank you for choosing Susi Davies. Below is your official invoice summary:</p>
+        <p style="font-size: 16px; color: #2c3e50; line-height: 1.6; margin-bottom: 20px;">
+          Dear ${invoice.clientName || "Valued Client"},
+        </p>
+        <p style="font-size: 15px; color: #2c3e50; line-height: 1.6; margin-bottom: 25px;">
+          Thank you for choosing Susi Davies. Please find attached your official invoice <strong>#${invoice.number}</strong> for <strong>CHF ${Number(invoice.total).toFixed(2)}</strong>.
+        </p>
 
-        <div style="background-color: #F8FCFD; padding: 16px 20px; border-radius: 10px; border: 1px solid #E2DDD3; margin-bottom: 24px; font-size: 14px;">
-          <div style="margin-bottom: 4px;"><strong>Invoice Number:</strong> ${invoice.number}</div>
-          ${dateHtml}
-          <div style="margin-top: 4px;"><strong>Payment Status:</strong> <span style="color: ${invoice.status?.toLowerCase() === "paid" ? "#45A027" : "#D68910"}; font-weight: bold; text-transform: uppercase;">${invoice.status}</span></div>
+        <div style="background-color: #F4F9FC; border-left: 4px solid #1f78b4; padding: 18px 20px; border-radius: 0 10px 10px 0; margin-bottom: 25px;">
+          <h3 style="margin: 0 0 10px 0; color: #1f78b4; font-size: 16px;">Invoice Summary</h3>
+          <p style="margin: 3px 0; font-size: 14px;"><strong>Invoice Number:</strong> ${invoice.number}</p>
+          <p style="margin: 3px 0; font-size: 14px;"><strong>Issue Date:</strong> ${invoice.issued}</p>
+          ${invoice.status?.toLowerCase() !== "paid" ? `<p style="margin: 3px 0; font-size: 14px; color: #D68910;"><strong>Due Date:</strong> ${invoice.due}</p>` : ""}
+          <p style="margin: 3px 0; font-size: 14px;"><strong>Status:</strong> <span style="text-transform: uppercase; font-weight: bold; color: ${invoice.status?.toLowerCase() === "paid" ? "#45A027" : "#D68910"};">${invoice.status}</span></p>
         </div>
 
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 14px;">
@@ -92,10 +106,6 @@ export async function POST(req: Request) {
             ${itemsHtml}
           </tbody>
         </table>
-
-        <div style="text-align: right; font-size: 20px; font-weight: bold; color: #1f78b4; margin-bottom: 25px;">
-          Total: CHF ${Number(invoice.total).toFixed(2)}
-        </div>
       `;
 
       const emailHtml = renderSusiEmailTemplate({
@@ -104,70 +114,27 @@ export async function POST(req: Request) {
         recipientName: invoice.clientName,
       });
 
-      // Build standalone printable HTML attachment document for the client
-      const attachmentDocumentHtml = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <title>Invoice ${invoice.number} — Susi Davies</title>
-  <style>
-    body { font-family: Georgia, 'Times New Roman', serif; background-color: #F8FCFD; padding: 40px; color: #1c313a; }
-    .card { max-width: 700px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 12px; border: 1px solid #BCD4E3; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
-    .header { text-align: center; border-bottom: 2px solid #1f78b4; padding-bottom: 20px; margin-bottom: 30px; }
-    .header h1 { color: #1f78b4; margin: 0; font-size: 28px; letter-spacing: 0.08em; text-transform: uppercase; }
-    .header p { color: #666; margin: 6px 0 0; font-size: 13px; font-family: sans-serif; text-transform: uppercase; }
-    .meta { display: flex; justify-content: space-between; margin-bottom: 30px; }
-    .meta-box { font-size: 14px; font-family: sans-serif; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-family: sans-serif; font-size: 14px; }
-    th { background-color: #1f78b4; color: #ffffff; padding: 12px; text-align: left; }
-    td { padding: 12px; border-bottom: 1px solid #E2DDD3; }
-    .total { text-align: right; font-size: 22px; font-weight: bold; color: #1f78b4; }
-    .footer { text-align: center; margin-top: 40px; border-top: 1px solid #E2DDD3; padding-top: 20px; font-family: sans-serif; font-size: 12px; color: #777; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="header">
-      <h1>Susi Davies</h1>
-      <p>Official Invoice ${invoice.number}</p>
-    </div>
-    <div class="meta">
-      <div class="meta-box">
-        <strong>BILL TO:</strong><br/>
-        ${invoice.clientName}<br/>
-        ${recipient}
-      </div>
-      <div class="meta-box" style="text-align: right;">
-        <strong>Invoice #:</strong> ${invoice.number}<br/>
-        <strong>Issued Date:</strong> ${invoice.issued}<br/>
-        ${invoice.status?.toLowerCase() !== "paid" ? `<strong>Due Date:</strong> ${invoice.due}<br/>` : ""}
-        <strong>Status:</strong> ${invoice.status}
-      </div>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Description</th>
-          <th style="text-align:center;">Qty</th>
-          <th style="text-align:right;">Rate</th>
-          <th style="text-align:right;">Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${itemsHtml}
-      </tbody>
-    </table>
-    <div class="total">Total: CHF ${Number(invoice.total).toFixed(2)}</div>
-    <div class="footer">
-      Susi Davies · Movement, Breathwork &amp; Remedial Therapy · hello@susidavies.com · susidavies.com
-    </div>
-  </div>
-</body>
-</html>
-      `;
+      // Generate Genuine PDF Buffer
+      const pdfBuffer = await generateInvoicePdfBuffer({
+        number: invoice.number || "SD-2026-001",
+        issued: invoice.issued || "",
+        due: invoice.due || "",
+        status: invoice.status || "DUE",
+        clientName: invoice.clientName || "Valued Client",
+        clientEmail: recipient,
+        paymentNotice: invoice.paymentNotice || "Payment due within 14 days via TWINT (+41 79 854 97 52) or bank transfer.",
+        paymentMethod: invoice.paymentMethod || "TWINT (+41 79 854 97 52)",
+        items: (invoice.items || []).map((it: any) => ({
+          desc: it.desc || "Studio Session",
+          qty: Number(it.qty || 1),
+          rate: Number(it.rate || 0),
+          amount: Number(it.amount || (it.qty * it.rate) || 0),
+        })),
+        subtotal: Number(invoice.total || 0),
+        total: Number(invoice.total || 0),
+      });
 
-      const attachmentBase64 = Buffer.from(attachmentDocumentHtml).toString("base64");
+      const pdfBase64 = pdfBuffer.toString("base64");
 
       const resendRes = await fetch("https://api.resend.com/emails", {
         method: "POST",
@@ -182,8 +149,8 @@ export async function POST(req: Request) {
           html: emailHtml,
           attachments: [
             {
-              filename: `Invoice-${invoice.number}.html`,
-              content: attachmentBase64,
+              filename: `Invoice-${invoice.number}.pdf`,
+              content: pdfBase64,
             },
           ],
         }),
