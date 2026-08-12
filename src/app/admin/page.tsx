@@ -443,8 +443,8 @@ export default function AdminPage() {
       segment: customRecipients ? "Custom Email List" : emailSegment || "All Subscribers",
       status: "Sent",
       sentDate: "Today",
-      opens: "100%",
-      clicks: "45%",
+      opens: "0%",
+      clicks: "0%",
     };
     setCampaigns([newCmp, ...campaigns]);
 
