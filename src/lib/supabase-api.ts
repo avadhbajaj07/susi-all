@@ -285,6 +285,9 @@ export async function fetchSupabaseContacts() {
 
 export async function insertSupabaseContact(data: { name?: string; email: string; segment?: string }) {
   try {
+    const cleanEmail = data.email.trim().toLowerCase();
+    const cleanName = data.name || cleanEmail.split("@")[0];
+
     const res = await fetch(`${SUPABASE_URL}/rest/v1/contacts`, {
       method: "POST",
       headers: {
@@ -294,8 +297,8 @@ export async function insertSupabaseContact(data: { name?: string; email: string
         "Prefer": "resolution=merge-duplicates,return=representation",
       },
       body: JSON.stringify({
-        full_name: data.name || data.email.split("@")[0],
-        email: data.email.trim().toLowerCase(),
+        full_name: cleanName,
+        email: cleanEmail,
         source: data.segment || "Journal Subscribers",
         consent_marketing: true,
       }),
@@ -303,7 +306,26 @@ export async function insertSupabaseContact(data: { name?: string; email: string
 
     if (res.ok) {
       const resData = await res.json();
-      return Array.isArray(resData) ? resData[0] : resData;
+      const contact = Array.isArray(resData) ? resData[0] : resData;
+
+      if (contact && contact.id) {
+        await fetch(`${SUPABASE_URL}/rest/v1/newsletter_subscribers`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates",
+          },
+          body: JSON.stringify({
+            contact_id: contact.id,
+            status: "subscribed",
+            confirmed_at: new Date().toISOString(),
+          }),
+        }).catch(() => {});
+      }
+
+      return contact;
     }
   } catch (err) {
     console.error("insertSupabaseContact error:", err);
