@@ -253,3 +253,94 @@ export async function updateCommentStatus(id: number | string, status: "approved
     return false;
   }
 }
+
+export async function fetchSupabaseContacts() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/contacts?select=*&order=created_at.desc`, {
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+      },
+      cache: "no-store",
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        return data.map((c: any) => ({
+          id: c.id,
+          name: c.full_name || (c.email ? c.email.split("@")[0] : "Subscriber"),
+          email: c.email,
+          segment: c.source || "Journal Subscribers",
+          date: c.created_at ? new Date(c.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }) : "Aug 2026",
+          status: c.consent_marketing === false ? "Unsubscribed" : "Subscribed",
+        }));
+      }
+    }
+  } catch (err) {
+    console.error("fetchSupabaseContacts error:", err);
+  }
+  return [];
+}
+
+export async function insertSupabaseContact(data: { name?: string; email: string; segment?: string }) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/contacts`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+        "Prefer": "resolution=merge-duplicates,return=representation",
+      },
+      body: JSON.stringify({
+        full_name: data.name || data.email.split("@")[0],
+        email: data.email.trim().toLowerCase(),
+        source: data.segment || "Journal Subscribers",
+        consent_marketing: true,
+      }),
+    });
+
+    if (res.ok) {
+      const resData = await res.json();
+      return Array.isArray(resData) ? resData[0] : resData;
+    }
+  } catch (err) {
+    console.error("insertSupabaseContact error:", err);
+  }
+  return null;
+}
+
+export async function updateSupabaseContactStatus(email: string, status: string) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/contacts?email=eq.${encodeURIComponent(email)}`, {
+      method: "PATCH",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ consent_marketing: status === "Subscribed" }),
+    });
+    return res.ok;
+  } catch (err) {
+    console.error("updateSupabaseContactStatus error:", err);
+    return false;
+  }
+}
+
+export async function deleteSupabaseContact(email: string) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/contacts?email=eq.${encodeURIComponent(email)}`, {
+      method: "DELETE",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+      },
+    });
+    return res.ok;
+  } catch (err) {
+    console.error("deleteSupabaseContact error:", err);
+    return false;
+  }
+}
