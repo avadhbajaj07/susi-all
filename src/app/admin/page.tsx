@@ -2219,7 +2219,7 @@ export default function AdminPage() {
 
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>
-                    Broadcast Banner Image (Optional)
+                    Add Image to Email (Optional)
                   </label>
                   <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                     <input
@@ -2245,30 +2245,35 @@ export default function AdminPage() {
                           setIsUploadingEmailImage(false);
                         }
                       }}
-                      style={{ fontSize: 13 }}
+                      style={{ fontSize: 13, cursor: "pointer" }}
                     />
                     {isUploadingEmailImage && (
-                      <span style={{ fontSize: 12, color: "#2691BA", fontWeight: 600 }}>⏳ Uploading to CDN...</span>
+                      <span style={{ fontSize: 13, color: "#2691BA", fontWeight: 600 }}>⏳ Uploading image...</span>
                     )}
                   </div>
 
                   {emailImage && (
-                    <div style={{ marginTop: 10, position: "relative", width: 160, height: 95, borderRadius: 8, overflow: "hidden", border: "1px solid #2691BA" }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={emailImage} alt="Banner Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      <button
-                        type="button"
-                        onClick={() => setEmailImage("")}
-                        style={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,0.7)", color: "#fff", border: "none", borderRadius: "50%", width: 22, height: 22, cursor: "pointer", fontSize: 12, fontWeight: 700 }}
-                      >
-                        ✕
-                      </button>
+                    <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 14 }}>
+                      <div style={{ position: "relative", width: 140, height: 90, borderRadius: 10, overflow: "hidden", border: "2px solid #2691BA", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={emailImage} alt="Banner Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <button
+                          type="button"
+                          onClick={() => setEmailImage("")}
+                          style={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,0.75)", color: "#fff", border: "none", borderRadius: "50%", width: 22, height: 22, cursor: "pointer", fontSize: 12, fontWeight: 700 }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <div>
+                        <span style={{ fontSize: 13, color: "#45A027", fontWeight: 700, display: "block" }}>
+                          ✓ Image Attached Successfully!
+                        </span>
+                        <span style={{ fontSize: 12, color: "#666", display: "block", marginTop: 2 }}>
+                          This photo will be displayed at the top of your email.
+                        </span>
+                      </div>
                     </div>
-                  )}
-                  {emailImage && (
-                    <span style={{ fontSize: 11, color: "#45A027", fontWeight: 600, display: "block", marginTop: 4 }}>
-                      ✓ Image uploaded &amp; hosted at public CDN!
-                    </span>
                   )}
                 </div>
 
