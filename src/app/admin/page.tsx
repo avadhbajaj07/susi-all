@@ -772,35 +772,64 @@ export default function AdminPage() {
 
     if (broadcastToEmail) {
       try {
-        const recipients = subscribers.map((s) => s.email).filter(Boolean);
-        for (const recipient of recipients) {
-          fetch("/api/send-email", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              to: recipient,
-              subject: `New Journal Note: ${currentTitle}`,
-              body: `${currentContent}\n\nRead the full article on Susi Davies website: https://susidavies.com/blog`,
-              fromName: "Susi Davies",
-            }),
-          }).catch(() => {});
+        let liveSubs = subscribers;
+        try {
+          const res = await fetch("/api/subscribers");
+          const data = await res.json();
+          if (data.subscribers && Array.isArray(data.subscribers)) {
+            liveSubs = data.subscribers;
+            setSubscribers(data.subscribers);
+          }
+        } catch (err) {
+          console.error("Error fetching live subscribers:", err);
         }
+
+        const activeSubs = liveSubs.filter((s: any) => s.status === "Subscribed" || !s.status);
+        let targetEmails = activeSubs.map((s: any) => s.email).filter(Boolean);
+
+        if (!targetEmails.includes("hello@susidavies.com")) {
+          targetEmails.push("hello@susidavies.com");
+        }
+
+        const DAILY_LIMIT = 100;
+        const totalRecipients = targetEmails.length;
+        const todayBatch = targetEmails.slice(0, DAILY_LIMIT);
+
+        let sentCount = 0;
+        for (const recipient of todayBatch) {
+          try {
+            const res = await fetch("/api/send-email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                to: recipient,
+                subject: `New Journal Note: ${currentTitle}`,
+                body: `${currentContent}\n\nRead the full article on Susi Davies website: https://susidavies.com/blog`,
+                fromName: "Susi Davies",
+                imageUrl: currentImage,
+              }),
+            });
+            if (res.ok) sentCount++;
+          } catch (err) {
+            console.error("Email send error:", err);
+          }
+        }
+
+        setCampaigns((prev) => [
+          {
+            id: `CMP-0${prev.length + 1}`,
+            subject: `${isScheduled ? "[Scheduled] " : ""}New Journal Note: ${currentTitle}`,
+            segment: `All Subscribers (${totalRecipients})`,
+            status: totalRecipients > DAILY_LIMIT ? `Batch 1 Sent (${sentCount}/${todayBatch.length})` : "Sent",
+            sentDate: isScheduled ? artScheduleDate : "Today",
+            opens: "0%",
+            clicks: "0%",
+          },
+          ...prev,
+        ]);
       } catch (err) {
         console.error("Broadcast error:", err);
       }
-
-      setCampaigns((prev) => [
-        {
-          id: `CMP-0${prev.length + 1}`,
-          subject: `${isScheduled ? "[Scheduled] " : ""}New Journal Note: ${currentTitle}`,
-          segment: "All Subscribers",
-          status: isScheduled ? `Scheduled (${artScheduleDate})` : "Sent",
-          sentDate: isScheduled ? artScheduleDate : "Today",
-          opens: isScheduled ? "0%" : "100%",
-          clicks: isScheduled ? "0%" : "50%",
-        },
-        ...prev,
-      ]);
     }
 
     setArtTitle("");
