@@ -256,7 +256,7 @@ export async function updateCommentStatus(id: number | string, status: "approved
 
 export async function fetchSupabaseContacts() {
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/contacts?select=*&order=created_at.desc`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/contacts?select=*&limit=5000&order=created_at.desc`, {
       headers: {
         "apikey": SUPABASE_KEY,
         "Authorization": `Bearer ${SUPABASE_KEY}`,

@@ -591,44 +591,49 @@ export default function AdminPage() {
     setIsSendingBroadcast(true);
 
     let targetEmails: string[] = [];
+    let liveSubs = subscribers;
 
-    if (customRecipients && customRecipients.trim()) {
-      targetEmails = customRecipients
-        .split(/[,;\n]+/)
-        .map((em) => em.trim())
-        .filter((em) => em.length > 3 && em.includes("@"));
+    try {
+      const res = await fetch("/api/subscribers");
+      const data = await res.json();
+      if (data.subscribers && Array.isArray(data.subscribers)) {
+        liveSubs = data.subscribers;
+        setSubscribers(data.subscribers);
+      }
+    } catch (err) {
+      console.error("Error fetching live subscribers:", err);
     }
 
-    if (targetEmails.length === 0) {
-      let liveSubs = subscribers;
-      try {
-        const res = await fetch("/api/subscribers");
-        const data = await res.json();
-        if (data.subscribers && Array.isArray(data.subscribers)) {
-          liveSubs = data.subscribers;
-          setSubscribers(data.subscribers);
+    let activeSubs = liveSubs.filter((s: any) => s.status === "Subscribed" || !s.status);
+    if (emailSegment && emailSegment !== "All Subscribers") {
+      activeSubs = activeSubs.filter((s: any) =>
+        (s.tags && Array.isArray(s.tags) && s.tags.includes(emailSegment)) ||
+        (s.segment && s.segment === emailSegment)
+      );
+    }
+
+    targetEmails = activeSubs.map((s: any) => s.email).filter(Boolean);
+
+    // Merge any extra custom recipients entered in the text box
+    if (customRecipients && customRecipients.trim()) {
+      const customList = customRecipients
+        .split(/[,;\n]+/)
+        .map((em) => em.trim().toLowerCase())
+        .filter((em) => em.length > 3 && em.includes("@"));
+
+      for (const customEm of customList) {
+        if (!targetEmails.includes(customEm)) {
+          targetEmails.push(customEm);
         }
-      } catch (err) {
-        console.error("Error fetching live subscribers:", err);
       }
+    }
 
-      let activeSubs = liveSubs.filter((s: any) => s.status === "Subscribed" || !s.status);
-      if (emailSegment && emailSegment !== "All Subscribers") {
-        activeSubs = activeSubs.filter((s: any) =>
-          (s.tags && Array.isArray(s.tags) && s.tags.includes(emailSegment)) ||
-          (s.segment && s.segment === emailSegment)
-        );
-      }
+    if (targetEmails.length === 0 && liveSubs.length > 0) {
+      targetEmails = liveSubs.map((s: any) => s.email).filter(Boolean);
+    }
 
-      targetEmails = activeSubs.map((s: any) => s.email).filter(Boolean);
-
-      if (targetEmails.length === 0 && liveSubs.length > 0) {
-        targetEmails = liveSubs.map((s: any) => s.email).filter(Boolean);
-      }
-
-      if (!targetEmails.includes("hello@susidavies.com")) {
-        targetEmails.push("hello@susidavies.com");
-      }
+    if (!targetEmails.includes("hello@susidavies.com")) {
+      targetEmails.push("hello@susidavies.com");
     }
 
     // AUTOMATED 100/DAY BATCH SCHEDULER
@@ -2215,17 +2220,17 @@ export default function AdminPage() {
 
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>
-                    Specific Recipient Email(s) (Optional)
+                    Additional Recipient Email(s) (Optional)
                   </label>
                   <input
                     type="text"
                     className="form-input"
                     value={customRecipients}
                     onChange={(e) => setCustomRecipients(e.target.value)}
-                    placeholder="e.g. client1@example.com, client2@example.com (Leave blank to use selected segment)"
+                    placeholder="e.g. additional@example.com (Leave BLANK to send to segment)"
                   />
                   <span style={{ fontSize: 11, color: "#6B7A70", marginTop: 4, display: "block" }}>
-                    Type specific recipient emails separated by commas to test or send directly to individual clients.
+                    Leave blank to send to your selected audience segment ({subscribers.length} contacts). Any extra emails typed here will be added to your broadcast.
                   </span>
                 </div>
 
