@@ -424,6 +424,7 @@ export default function AdminPage() {
   const [customRecipients, setCustomRecipients] = useState("");
   const [emailBody, setEmailBody] = useState("");
   const [emailImage, setEmailImage] = useState("");
+  const [isUploadingEmailImage, setIsUploadingEmailImage] = useState(false);
 
   // New Article Modal State
   const [showArticleModal, setShowArticleModal] = useState(false);
@@ -2195,31 +2196,50 @@ export default function AdminPage() {
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => {
+                      onChange={async (e) => {
                         const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setEmailImage(reader.result as string);
-                          };
-                          reader.readAsDataURL(file);
+                        if (!file) return;
+                        setIsUploadingEmailImage(true);
+                        try {
+                          const fd = new FormData();
+                          fd.append("file", file);
+                          const res = await fetch("/api/upload-image", { method: "POST", body: fd });
+                          const data = await res.json();
+                          if (res.ok && data.url) {
+                            setEmailImage(data.url);
+                          } else {
+                            alert(`Upload failed: ${data.error || "Could not upload image"}`);
+                          }
+                        } catch (err: any) {
+                          alert(`Upload error: ${err.message}`);
+                        } finally {
+                          setIsUploadingEmailImage(false);
                         }
                       }}
                       style={{ fontSize: 13 }}
                     />
+                    {isUploadingEmailImage && (
+                      <span style={{ fontSize: 12, color: "#2691BA", fontWeight: 600 }}>⏳ Uploading to CDN...</span>
+                    )}
                   </div>
+
                   {emailImage && (
-                    <div style={{ marginTop: 10, position: "relative", width: 140, height: 90, borderRadius: 8, overflow: "hidden", border: "1px solid #2691BA" }}>
+                    <div style={{ marginTop: 10, position: "relative", width: 160, height: 95, borderRadius: 8, overflow: "hidden", border: "1px solid #2691BA" }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={emailImage} alt="Banner Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       <button
                         type="button"
                         onClick={() => setEmailImage("")}
-                        style={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,0.6)", color: "#fff", border: "none", borderRadius: "50%", width: 20, height: 20, cursor: "pointer", fontSize: 11 }}
+                        style={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,0.7)", color: "#fff", border: "none", borderRadius: "50%", width: 22, height: 22, cursor: "pointer", fontSize: 12, fontWeight: 700 }}
                       >
                         ✕
                       </button>
                     </div>
+                  )}
+                  {emailImage && (
+                    <span style={{ fontSize: 11, color: "#45A027", fontWeight: 600, display: "block", marginTop: 4 }}>
+                      ✓ Image uploaded &amp; hosted at public CDN!
+                    </span>
                   )}
                 </div>
 
@@ -2269,27 +2289,34 @@ export default function AdminPage() {
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => {
+                      onChange={async (e) => {
                         const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setArtImage(reader.result as string);
-                          };
-                          reader.readAsDataURL(file);
+                        if (!file) return;
+                        try {
+                          const fd = new FormData();
+                          fd.append("file", file);
+                          const res = await fetch("/api/upload-image", { method: "POST", body: fd });
+                          const data = await res.json();
+                          if (res.ok && data.url) {
+                            setArtImage(data.url);
+                          } else {
+                            alert(`Upload failed: ${data.error || "Could not upload image"}`);
+                          }
+                        } catch (err: any) {
+                          alert(`Upload error: ${err.message}`);
                         }
                       }}
                       style={{ fontSize: 13 }}
                     />
                   </div>
                   {artImage && (
-                    <div style={{ marginTop: 10, position: "relative", width: 120, height: 80, borderRadius: 8, overflow: "hidden", border: "1px solid #2691BA" }}>
+                    <div style={{ marginTop: 10, position: "relative", width: 140, height: 90, borderRadius: 8, overflow: "hidden", border: "1px solid #2691BA" }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={artImage} alt="Cover Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       <button
                         type="button"
                         onClick={() => setArtImage("")}
-                        style={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,0.6)", color: "#fff", border: "none", borderRadius: "50%", width: 20, height: 20, cursor: "pointer", fontSize: 11 }}
+                        style={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,0.7)", color: "#fff", border: "none", borderRadius: "50%", width: 22, height: 22, cursor: "pointer", fontSize: 12, fontWeight: 700 }}
                       >
                         ✕
                       </button>
