@@ -858,6 +858,17 @@ export default function AdminPage() {
     setArtContent("");
     setArtImage("");
     setIsPublishingArticle(false);
+
+    const socialChannels: string[] = [];
+    if (postToFacebook) socialChannels.push("Facebook Page");
+    if (postToLinkedin) socialChannels.push("LinkedIn");
+
+    alert(
+      `✓ Journal Note Published Successfully!\n\n` +
+        `1. Website Journal: "${currentTitle}" is published live on susidavies.com/blog\n` +
+        (socialChannels.length > 0 ? `2. Social Cross-Posting: Dispatched to ${socialChannels.join(" & ")}\n` : "") +
+        (broadcastToEmail ? `3. Email Broadcast: Dispatched to subscribers batch today!` : "")
+    );
   };
 
   // Edit Article Modal State
