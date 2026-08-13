@@ -74,7 +74,7 @@ export async function POST(req: Request) {
       title: subject,
       bodyHtml: formattedBodyHtml,
       recipientName,
-      headerImage: templateHeaderImage,
+      headerImage: imageUrl && imageUrl.startsWith("http") ? imageUrl : templateHeaderImage,
     });
 
     const emailPayload: any = {
