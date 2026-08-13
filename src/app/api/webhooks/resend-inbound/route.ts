@@ -47,6 +47,34 @@ export async function POST(req: Request) {
       }),
     }).catch((err) => console.error("Internal inbox POST error:", err));
 
+    // Forward incoming email directly to Susi's Gmail inbox via Resend
+    const apiKey = process.env.RESEND_API_KEY || process.env.NEXT_PUBLIC_RESEND_API_KEY;
+    const targetGmail = process.env.SUSI_GMAIL_ADDRESS || "susidavies@gmail.com";
+
+    if (apiKey && targetGmail) {
+      fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          from: "Susi Davies Website <hello@susidavies.com>",
+          to: [targetGmail],
+          subject: `📩 Inbound Email from ${fromName}: ${subject}`,
+          html: `<div style="font-family: Arial, sans-serif; padding: 20px; border-left: 4px solid #1f78b4; background-color: #f9fbfd; border-radius: 8px;">
+            <p style="margin-top:0; font-weight: bold; color: #1f78b4; font-size: 16px;">📩 New Email Received for hello@susidavies.com</p>
+            <p><strong>From:</strong> ${fromName} &lt;${fromEmail}&gt;</p>
+            <p><strong>Subject:</strong> ${subject}</p>
+            <hr style="border: none; border-top: 1px solid #e2ddd3; margin: 15px 0;" />
+            <div style="white-space: pre-line; color: #2c3e50; font-size: 15px; line-height: 1.6;">${emailBody}</div>
+            <hr style="border: none; border-top: 1px solid #e2ddd3; margin: 15px 0;" />
+            <p style="font-size: 12px; color: #888;">You can reply directly to ${fromEmail} or reply from your Gmail as hello@susidavies.com.</p>
+          </div>`,
+        }),
+      }).catch((err) => console.error("Inbound forwarding error:", err));
+    }
+
     return NextResponse.json({ success: true, message: "Inbound email received and added to Studio Inbox" });
   } catch (error: any) {
     console.error("Resend Inbound Webhook Exception:", error);
