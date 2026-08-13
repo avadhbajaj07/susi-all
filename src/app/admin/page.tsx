@@ -893,6 +893,26 @@ export default function AdminPage() {
     }
   };
 
+  const handleDeleteSubscriber = async (id: string) => {
+    const sub = subscribers.find((s) => s.id === id || s.email === id);
+    if (!confirm(`Are you sure you want to permanently delete subscriber ${sub?.name || sub?.email || id}?`)) return;
+
+    setSubscribers((prev) => prev.filter((s) => s.id !== id && s.email !== id));
+
+    try {
+      await fetch(`/api/subscribers?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+    } catch (err) {
+      console.error("Delete subscriber error:", err);
+    }
+  };
+
+  const handleDeleteCampaign = (id: string) => {
+    if (!confirm("Are you sure you want to delete this broadcast log?")) return;
+    setCampaigns((prev) => prev.filter((c) => c.id !== id));
+  };
+
   const handleSendComposeEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!composeTo || !composeSubject || isSendingEmail) return;
@@ -1074,7 +1094,6 @@ export default function AdminPage() {
         <nav style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
           {[
             { id: "overview", label: "Overview", icon: LayoutDashboard },
-            { id: "inbox", label: "Inbox", icon: Inbox },
             { id: "bookings", label: "Bookings & Clients", icon: Calendar },
             { id: "invoices", label: "Invoice Generator", icon: FileText },
             { id: "email", label: "Email Automation", icon: Mail },
@@ -1255,193 +1274,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* TAB: STUDIO INBOX & MESSAGING */}
-        {activeTab === "inbox" && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.6fr", gap: 25, height: "calc(100vh - 180px)", minHeight: 650 }}>
-            {/* Left Column: Messages List */}
-            <div style={{ backgroundColor: "#ffffff", borderRadius: 18, border: "1px solid #E2DDD3", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-              {/* Folder Selector Tabs */}
-              <div style={{ display: "flex", borderBottom: "1px solid #E2DDD3", backgroundColor: "#FBF9F4" }}>
-                <button
-                  onClick={() => setInboxFolder("inbox")}
-                  style={{ flex: 1, padding: "14px", border: "none", background: inboxFolder === "inbox" ? "#ffffff" : "transparent", fontWeight: 700, color: inboxFolder === "inbox" ? "#2691BA" : "#6B7A70", fontSize: 13, borderBottom: inboxFolder === "inbox" ? "2px solid #2691BA" : "none", cursor: "pointer" }}
-                >
-                  Inbox (hello@susidavies.com)
-                </button>
-                <button
-                  onClick={() => setInboxFolder("sent")}
-                  style={{ flex: 1, padding: "14px", border: "none", background: inboxFolder === "sent" ? "#ffffff" : "transparent", fontWeight: 700, color: inboxFolder === "sent" ? "#2691BA" : "#6B7A70", fontSize: 13, borderBottom: inboxFolder === "sent" ? "2px solid #2691BA" : "none", cursor: "pointer" }}
-                >
-                  Sent Messages
-                </button>
-              </div>
 
-              {/* Compose Email Action Button */}
-              <div style={{ padding: "14px 14px 4px", backgroundColor: "#FBF9F4" }}>
-                <button
-                  onClick={() => setShowComposeModal(true)}
-                  className="btn-pill btn-pill-cyan"
-                  style={{ width: "100%", padding: "11px 16px", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, boxShadow: "0 4px 14px rgba(38,145,186,0.2)" }}
-                >
-                  <Plus size={16} /> COMPOSE NEW EMAIL
-                </button>
-              </div>
-
-              {/* Search Inbox */}
-              <div style={{ padding: "14px", borderBottom: "1px solid #E2DDD3" }}>
-                <div style={{ position: "relative" }}>
-                  <Search size={16} style={{ position: "absolute", left: 10, top: 10, color: "#999" }} />
-                  <input
-                    type="text"
-                    placeholder="Search inbox or client email..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ width: "100%", padding: "8px 10px 8px 34px", borderRadius: 8, border: "1px solid #E2DDD3", fontSize: 13, outline: "none" }}
-                  />
-                </div>
-              </div>
-
-              {/* Message List */}
-              <div style={{ flex: 1, overflowY: "auto" }}>
-                {inboxMessages
-                  .filter((m) => m.folder === inboxFolder)
-                  .filter((m) => m.subject.toLowerCase().includes(searchQuery.toLowerCase()) || m.fromName.toLowerCase().includes(searchQuery.toLowerCase()) || m.body.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map((msg) => {
-                    const isSelected = selectedMessage?.id === msg.id;
-                    return (
-                      <div
-                        key={msg.id}
-                        onClick={() => setSelectedMessage(msg)}
-                        style={{
-                          padding: "16px",
-                          borderBottom: "1px solid #F0ECE1",
-                          backgroundColor: isSelected ? "rgba(38,145,186,0.08)" : msg.read ? "#ffffff" : "#F8FCFD",
-                          cursor: "pointer",
-                          transition: "background-color 0.15s ease",
-                        }}
-                      >
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                          <strong style={{ fontSize: 14, color: "#1A252C" }}>{msg.fromName}</strong>
-                          <span style={{ fontSize: 11, color: "#888" }}>{msg.date}</span>
-                        </div>
-                        <div style={{ fontSize: 13, fontWeight: msg.read ? 500 : 700, color: "#2691BA", marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                          {msg.subject}
-                        </div>
-                        <div style={{ fontSize: 12, color: "#6B7A70", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                          {msg.body}
-                        </div>
-                        {msg.attachments && msg.attachments.length > 0 && (
-                          <div style={{ marginTop: 6, display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, color: "#2691BA", fontWeight: 600, backgroundColor: "#EBF5F9", padding: "2px 8px", borderRadius: 4 }}>
-                            <Paperclip size={12} /> {msg.attachments.length} Attachment
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-              </div>
-            </div>
-
-            {/* Right Column: Active Message Reader & Reply Composer */}
-            <div style={{ backgroundColor: "#ffffff", borderRadius: 18, border: "1px solid #E2DDD3", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-              {selectedMessage ? (
-                <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                  {/* Reader Header */}
-                  <div style={{ padding: "24px", borderBottom: "1px solid #E2DDD3", backgroundColor: "#FBF9F4" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: 12 }}>
-                      <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, color: "#1A252C", margin: 0 }}>
-                        {selectedMessage.subject}
-                      </h3>
-                      <button onClick={() => setShowComposeModal(true)} className="btn-pill btn-pill-cyan" style={{ padding: "6px 14px", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
-                        <Reply size={14} /> Reply
-                      </button>
-                    </div>
-
-                    <div style={{ fontSize: 13, color: "#6B7A70", display: "flex", justifyContent: "space-between" }}>
-                      <div>
-                        <strong>From:</strong> {selectedMessage.fromName} &lt;{selectedMessage.fromEmail}&gt;
-                        <div style={{ marginTop: 2 }}><strong>To:</strong> {selectedMessage.to}</div>
-                      </div>
-                      <span style={{ fontSize: 12 }}>{selectedMessage.date}</span>
-                    </div>
-                  </div>
-
-                  {/* Message Body Content */}
-                  <div style={{ flex: 1, padding: "24px", overflowY: "auto", fontSize: 15, lineHeight: 1.6, color: "#2C3E50", whiteSpace: "pre-wrap" }}>
-                    {selectedMessage.body}
-
-                    {/* Render Attachments */}
-                    {selectedMessage.attachments && selectedMessage.attachments.length > 0 && (
-                      <div style={{ marginTop: 25, paddingTop: 16, borderTop: "1px solid #E2DDD3" }}>
-                        <strong style={{ fontSize: 13, color: "#2691BA", display: "block", marginBottom: 10 }}>Attachments ({selectedMessage.attachments.length})</strong>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-                          {selectedMessage.attachments.map((att: any, idx: number) => (
-                            <div key={idx} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 8, border: "1px solid #2691BA", backgroundColor: "#F4FAFC", fontSize: 12 }}>
-                              <Paperclip size={14} color="#2691BA" />
-                              <div>
-                                <strong style={{ display: "block", color: "#1A252C" }}>{att.name}</strong>
-                                <span style={{ fontSize: 10, color: "#666" }}>{att.size}</span>
-                              </div>
-                              <Download size={14} color="#2691BA" style={{ cursor: "pointer", marginLeft: 6 }} />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Quick Reply Form with Attachment Support */}
-                  <form onSubmit={handleSendReply} style={{ padding: "20px", borderTop: "1px solid #E2DDD3", backgroundColor: "#FBF9F4" }}>
-                    <div style={{ marginBottom: 10 }}>
-                      <textarea
-                        className="form-textarea"
-                        rows={3}
-                        value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
-                        placeholder={`Reply to ${selectedMessage.fromName} (sending from hello@susidavies.com)...`}
-                        style={{ fontSize: 13 }}
-                      />
-                    </div>
-
-                    {/* Reply Attachment Upload */}
-                    {replyAttachments.length > 0 && (
-                      <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
-                        {replyAttachments.map((att, i) => (
-                          <span key={i} style={{ fontSize: 11, padding: "4px 8px", borderRadius: 6, backgroundColor: "#2691BA", color: "#fff", display: "inline-flex", alignItems: "center", gap: 4 }}>
-                            <Paperclip size={10} /> {att.name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <label style={{ cursor: "pointer", fontSize: 12, color: "#2691BA", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}>
-                        <Paperclip size={15} /> Attach File (Invoice / PDF / Image)
-                        <input
-                          type="file"
-                          multiple
-                          onChange={(e) => {
-                            const files = Array.from(e.target.files || []);
-                            const newAtts = files.map((f) => ({ name: f.name, size: `${(f.size / 1024).toFixed(0)} KB` }));
-                            setReplyAttachments([...replyAttachments, ...newAtts]);
-                          }}
-                          style={{ display: "none" }}
-                        />
-                      </label>
-
-                      <button type="submit" className="btn-pill btn-pill-cyan" style={{ padding: "8px 18px", fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6 }}>
-                        <Send size={14} /> Send Reply (hello@susidavies.com)
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              ) : (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#6B7A70" }}>
-                  Select a message to view
-                </div>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* TAB 2: BOOKINGS */}
         {activeTab === "bookings" && (
@@ -1918,6 +1751,7 @@ export default function AdminPage() {
                       <th style={{ padding: "12px 10px" }}>Opens</th>
                       <th style={{ padding: "12px 10px" }}>Clicks</th>
                       <th style={{ padding: "12px 10px" }}>Status</th>
+                      <th style={{ padding: "12px 10px" }}>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1932,6 +1766,14 @@ export default function AdminPage() {
                           <span style={{ padding: "4px 12px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: cmp.status === "Sent" ? "#54BC3318" : "#F39C1218", color: cmp.status === "Sent" ? "#45A027" : "#D68910" }}>
                             {cmp.status}
                           </span>
+                        </td>
+                        <td style={{ padding: "14px 10px" }}>
+                          <button
+                            onClick={() => handleDeleteCampaign(cmp.id)}
+                            style={{ background: "none", border: "none", color: "#E74C3C", cursor: "pointer", fontWeight: 600, fontSize: 13, display: "inline-flex", alignItems: "center", gap: 4 }}
+                          >
+                            <Trash2 size={15} /> Delete
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -1990,13 +1832,21 @@ export default function AdminPage() {
                       </span>
                     </td>
                     <td style={{ padding: "14px 10px" }}>
-                      <button
-                        onClick={() => toggleSubscriberStatus(sub.id)}
-                        style={{ background: "none", border: "none", color: sub.status === "Subscribed" ? "#E74C3C" : "#45A027", cursor: "pointer", fontWeight: 600, fontSize: 13, display: "inline-flex", alignItems: "center", gap: 4 }}
-                      >
-                        {sub.status === "Subscribed" ? <UserX size={15} /> : <UserCheck size={15} />}
-                        {sub.status === "Subscribed" ? "Unsubscribe" : "Resubscribe"}
-                      </button>
+                      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                        <button
+                          onClick={() => toggleSubscriberStatus(sub.id)}
+                          style={{ background: "none", border: "none", color: sub.status === "Subscribed" ? "#E74C3C" : "#45A027", cursor: "pointer", fontWeight: 600, fontSize: 13, display: "inline-flex", alignItems: "center", gap: 4 }}
+                        >
+                          {sub.status === "Subscribed" ? <UserX size={15} /> : <UserCheck size={15} />}
+                          {sub.status === "Subscribed" ? "Unsubscribe" : "Resubscribe"}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteSubscriber(sub.id)}
+                          style={{ background: "none", border: "none", color: "#C0392B", cursor: "pointer", fontWeight: 600, fontSize: 13, display: "inline-flex", alignItems: "center", gap: 4 }}
+                        >
+                          <Trash2 size={15} /> Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
