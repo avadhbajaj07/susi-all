@@ -11,7 +11,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      message: "Daily 100-email batch runner executed successfully",
+      message: "Daily 80-email batch runner executed successfully",
       activeSubscribersCount: activeSubscribers.length,
       timestamp: new Date().toISOString(),
     });

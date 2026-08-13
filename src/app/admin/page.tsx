@@ -636,8 +636,8 @@ export default function AdminPage() {
       targetEmails.push("hello@susidavies.com");
     }
 
-    // AUTOMATED 100/DAY BATCH SCHEDULER
-    const DAILY_LIMIT = 100;
+        // AUTOMATED 80/DAY BATCH SCHEDULER
+        const DAILY_LIMIT = 80;
     const totalRecipients = targetEmails.length;
     const todayBatch = targetEmails.slice(0, DAILY_LIMIT);
     const queuedBatches = targetEmails.slice(DAILY_LIMIT);
@@ -714,7 +714,7 @@ export default function AdminPage() {
     setShowEmailModal(false);
 
     if (totalRecipients > DAILY_LIMIT) {
-      alert(`✓ Automated 100-Email Daily Batch Scheduler Activated!\n\n1. Batch 1 (${sentCount} emails): Dispatched today successfully.\n2. ${queuedBatches.length} remaining emails queued across ${Math.ceil(queuedBatches.length / 100)} upcoming days (100/day daily limit respected).`);
+      alert(`✓ Automated 80-Email Daily Batch Scheduler Activated!\n\n1. Batch 1 (${sentCount} emails): Dispatched today successfully.\n2. ${queuedBatches.length} remaining emails queued across ${Math.ceil(queuedBatches.length / 80)} upcoming days (80/day daily limit respected).`);
     } else {
       alert(`Broadcast Delivery Summary (${sentCount}/${targetEmails.length} Delivered):\n\n${logDetails.join("\n")}`);
     }
@@ -813,7 +813,7 @@ export default function AdminPage() {
           targetEmails.push("hello@susidavies.com");
         }
 
-        const DAILY_LIMIT = 100;
+        const DAILY_LIMIT = 80;
         const totalRecipients = targetEmails.length;
         const todayBatch = targetEmails.slice(0, DAILY_LIMIT);
 
