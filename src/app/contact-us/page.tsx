@@ -10,12 +10,14 @@ export default function ContactPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [honeypot, setHoneypot] = useState("");
+  const [isHumanVerified, setIsHumanVerified] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !message || isSubmitting) return;
+    if (honeypot || !isHumanVerified || !name || !email || !message || isSubmitting) return;
 
     setIsSubmitting(true);
 
@@ -125,6 +127,17 @@ export default function ContactPage() {
                         onChange={(e) => setEmail(e.target.value)}
                       />
                     </div>
+                    {/* Honeypot field for bot protection */}
+                    <input
+                      type="text"
+                      name="website_hp"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                      style={{ display: "none" }}
+                      tabIndex={-1}
+                      autoComplete="off"
+                    />
+
                     <div className="form-group">
                       <textarea
                         className="form-textarea"
@@ -135,7 +148,23 @@ export default function ContactPage() {
                         onChange={(e) => setMessage(e.target.value)}
                       ></textarea>
                     </div>
-                    <button type="submit" disabled={isSubmitting} className="btn-pill btn-pill-cyan" style={{ width: "100%", marginTop: 10, opacity: isSubmitting ? 0.7 : 1 }}>
+
+                    {/* Anti-Spam Human Verification */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 15, padding: "10px 14px", backgroundColor: "#F4F7F6", borderRadius: 10, border: "1px solid #E2DDD3" }}>
+                      <input
+                        type="checkbox"
+                        id="humanCheck"
+                        required
+                        checked={isHumanVerified}
+                        onChange={(e) => setIsHumanVerified(e.target.checked)}
+                        style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#2691BA" }}
+                      />
+                      <label htmlFor="humanCheck" style={{ fontSize: 13, color: "#2B3D44", cursor: "pointer", userSelect: "none", fontWeight: 500 }}>
+                        🔒 I am human (Not a spam robot)
+                      </label>
+                    </div>
+
+                    <button type="submit" disabled={isSubmitting || !isHumanVerified} className="btn-pill btn-pill-cyan" style={{ width: "100%", marginTop: 5, opacity: (isSubmitting || !isHumanVerified) ? 0.7 : 1 }}>
                       {isSubmitting ? "SENDING ENQUIRY..." : "SEND ENQUIRY"}
                     </button>
                   </form>
