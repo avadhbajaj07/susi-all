@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
     const accountIds = Array.isArray(targetAccountIds) && targetAccountIds.length > 0
       ? targetAccountIds
-      : ["acc_susi_linkedin", "acc_susi_facebook"];
+      : ["32567", "419995168046710"];
 
     const fullContent = `${title ? title + "\n\n" : ""}${content || ""}\n\nRead more on Susi Davies Journal: ${link || "https://susidavies.com/blog"}`;
 
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     const blotatoUrl = "https://backend.blotato.com/v2/posts";
 
     for (const accId of accountIds) {
-      const platform = accId.includes("facebook") ? "facebook" : "linkedin";
+      const platform = accId === "419995168046710" || accId.includes("facebook") ? "facebook" : "linkedin";
 
       const postPayload = {
         post: {

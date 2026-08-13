@@ -97,10 +97,8 @@ export default function AdminPage() {
   const [resendKey, setResendKey] = useState("");
   const [blotatoKey, setBlotatoKey] = useState("");
   const [blotatoAccounts, setBlotatoAccounts] = useState<any[]>([
-    { id: "acc_susi_linkedin", name: "Susi Davies (LinkedIn)", platform: "linkedin", selected: true },
-    { id: "acc_susi_facebook", name: "Susi Davies Yoga (Facebook Page)", platform: "facebook", selected: true },
-    { id: "acc_client_1", name: "Client Partner 1 (LinkedIn)", platform: "linkedin", selected: false },
-    { id: "acc_client_2", name: "Client Business 2 (Facebook)", platform: "facebook", selected: false },
+    { id: "32567", name: "Susi Davies (LinkedIn ID: 32567)", platform: "linkedin", selected: true },
+    { id: "419995168046710", name: "Susi Davies Yoga (Facebook Page ID: 419995168046710)", platform: "facebook", selected: true },
   ]);
   const [isLoadingBlotatoAccounts, setIsLoadingBlotatoAccounts] = useState(false);
 
