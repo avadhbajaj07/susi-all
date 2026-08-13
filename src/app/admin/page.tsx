@@ -205,6 +205,23 @@ export default function AdminPage() {
     fetchPosts();
   }, []);
 
+  useEffect(() => {
+    const fetchCampaignStats = async () => {
+      try {
+        const res = await fetch("/api/campaigns/stats");
+        const data = await res.json();
+        if (data.campaigns && Array.isArray(data.campaigns) && data.campaigns.length > 0) {
+          setCampaigns(data.campaigns);
+        }
+      } catch (err) {
+        console.error("Campaign stats fetch error:", err);
+      }
+    };
+    fetchCampaignStats();
+    const interval = setInterval(fetchCampaignStats, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
   const [adminComments, setAdminComments] = useState<any[]>([]);
 
   useEffect(() => {
