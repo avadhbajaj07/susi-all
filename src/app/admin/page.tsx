@@ -406,8 +406,10 @@ export default function AdminPage() {
   const [artScheduleMode, setArtScheduleMode] = useState<"now" | "schedule">("now");
   const [artScheduleDate, setArtScheduleDate] = useState("2026-08-10");
   const [artScheduleTime, setArtScheduleTime] = useState("09:00 AM");
+  const [postToFacebook, setPostToFacebook] = useState(true);
   const [postToLinkedin, setPostToLinkedin] = useState(true);
   const [broadcastToEmail, setBroadcastToEmail] = useState(true);
+  const [socialConnectionStatus, setSocialConnectionStatus] = useState<"connected" | "error">("connected");
 
   // New Subscriber Modal State
   const [showSubModal, setShowSubModal] = useState(false);
@@ -687,6 +689,7 @@ export default function AdminPage() {
       image: currentImage,
       status: isScheduled ? `Scheduled (${artScheduleDate} ${artScheduleTime})` : "Published",
       date: isScheduled ? artScheduleDate : "Aug 10, 2026",
+      facebook: postToFacebook,
       linkedin: postToLinkedin,
       broadcastSent: broadcastToEmail,
     };
@@ -711,7 +714,7 @@ export default function AdminPage() {
       console.error("Save post error:", err);
     }
 
-    if (postToLinkedin) {
+    if (postToFacebook || postToLinkedin) {
       const selectedAccountIds = blotatoAccounts.filter((a) => a.selected).map((a) => a.id);
       fetch("/api/social/publish", {
         method: "POST",
@@ -723,7 +726,16 @@ export default function AdminPage() {
           content: `${currentTitle}\n\n${currentContent}\n\nRead more on Susi Davies Journal: https://susidavies.com/blog`,
           image: currentImage,
         }),
-      }).catch((err) => console.error("Social publish error:", err));
+      }).then((res) => {
+        if (res.ok) {
+          setSocialConnectionStatus("connected");
+        } else {
+          setSocialConnectionStatus("error");
+        }
+      }).catch((err) => {
+        console.error("Social publish error:", err);
+        setSocialConnectionStatus("error");
+      });
     }
 
     if (broadcastToEmail) {
@@ -2012,15 +2024,26 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* TAB 7: CONTENT & LINKEDIN */}
+        {/* TAB 7: CONTENT & SOCIAL AUTO-PUBLISH */}
         {activeTab === "content" && (
           <div style={{ backgroundColor: "#ffffff", padding: "30px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <div>
-                <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", margin: 0 }}>Journal Articles &amp; LinkedIn Auto-Publish</h3>
-                <p style={{ fontSize: 14, color: "#6B7A70", margin: "4px 0 0" }}>Publishing a blog note automatically cross-posts to LinkedIn and broadcasts to email subscribers.</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
+                  <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", margin: 0 }}>Journal Notes &amp; Social Auto-Publish</h3>
+                  {socialConnectionStatus === "connected" ? (
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#45A027", backgroundColor: "#54BC3318", padding: "4px 12px", borderRadius: 100, border: "1px solid #54BC3340", display: "inline-flex", alignItems: "center", gap: 5 }}>
+                      🟢 Facebook &amp; LinkedIn Connected
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#C0392B", backgroundColor: "#E74C3C18", padding: "4px 12px", borderRadius: 100, border: "1px solid #E74C3C40", display: "inline-flex", alignItems: "center", gap: 5 }}>
+                      🔴 Connection Issue - Click to Re-verify
+                    </span>
+                  )}
+                </div>
+                <p style={{ fontSize: 14, color: "#6B7A70", margin: 0 }}>Publishing a blog note automatically cross-posts to Facebook, LinkedIn, and email subscribers.</p>
               </div>
-              <button onClick={() => setShowArticleModal(true)} className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <button onClick={() => setShowArticleModal(true)} className="btn-pill btn-pill-cyan" style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
                 <Plus size={16} /> Write New Journal Note
               </button>
             </div>
@@ -2039,6 +2062,11 @@ export default function AdminPage() {
                       <strong style={{ fontSize: 17, color: "#1A252C" }}>{art.title}</strong>
                       <div style={{ fontSize: 13, color: "#6B7A70", marginTop: 4, display: "flex", gap: 15, alignItems: "center", flexWrap: "wrap" }}>
                         <span>{art.category} · {art.date}</span>
+                        {(art.facebook || art.facebook !== false) && (
+                          <span style={{ color: "#1877F2", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 3 }}>
+                            📘 Facebook {art.status.includes("Scheduled") ? "Scheduled" : "Posted"}
+                          </span>
+                        )}
                         {art.linkedin && (
                           <span style={{ color: "#0077B5", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 3 }}>
                             <Linkedin size={13} /> LinkedIn {art.status.includes("Scheduled") ? "Scheduled" : "Posted"}
@@ -2325,6 +2353,10 @@ export default function AdminPage() {
 
                 {/* Auto Cross-Posting Options */}
                 <div style={{ backgroundColor: "rgba(38,145,186,0.06)", padding: "16px 20px", borderRadius: 12, marginBottom: 25, display: "flex", flexDirection: "column", gap: 10 }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#1877F2" }}>
+                    <input type="checkbox" checked={postToFacebook} onChange={(e) => setPostToFacebook(e.target.checked)} />
+                    <Share2 size={16} color="#1877F2" /> Auto Cross-Post to Susi&apos;s Facebook Page
+                  </label>
                   <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#0077B5" }}>
                     <input type="checkbox" checked={postToLinkedin} onChange={(e) => setPostToLinkedin(e.target.checked)} />
                     <Linkedin size={16} /> Auto Cross-Post to Susi&apos;s LinkedIn Account
