@@ -32,7 +32,9 @@ export async function POST(req: Request) {
 
         if (res.ok) {
           const data = await res.json();
-          blotatoAccounts = Array.isArray(data) ? data : data.accounts || data.data || [];
+          blotatoAccounts = Array.isArray(data)
+            ? data
+            : data.accounts || data.data || data.items || data.results || data.connected_accounts || [];
           fetchSuccess = true;
           break;
         }
