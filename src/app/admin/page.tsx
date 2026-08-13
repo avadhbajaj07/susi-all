@@ -1069,7 +1069,6 @@ export default function AdminPage() {
             { id: "subscribers", label: "Subscribers & Opt-Outs", icon: Users },
             { id: "retreats", label: "Retreat Reservations", icon: Users },
             { id: "content", label: "Journal & LinkedIn", icon: PenSquare },
-            { id: "settings", label: "API & Integrations", icon: Key },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -1099,16 +1098,6 @@ export default function AdminPage() {
             );
           })}
         </nav>
-
-        <div style={{ background: "rgba(0,0,0,0.15)", padding: "16px", borderRadius: 12, fontSize: 12, opacity: 0.9 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-            <ShieldCheck size={16} color="#25D366" />
-            <strong style={{ color: "#ffffff" }}>Supabase Connected</strong>
-          </div>
-          <p style={{ margin: 0, fontSize: 11, opacity: 0.8 }}>
-            DB: postgresql://postgres:***@db.bszyzttyashekzqmehxg.supabase.co
-          </p>
-        </div>
       </aside>
 
       {/* Main Content Area */}
@@ -1249,27 +1238,7 @@ export default function AdminPage() {
                 )}
               </div>
 
-              {/* Integrations Health Widget */}
-              <div style={{ backgroundColor: "#ffffff", padding: "28px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
-                <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, color: "#2691BA", margin: "0 0 20px" }}>System Status</h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderRadius: 12, backgroundColor: "#F9F8F5", border: "1px solid #E2DDD3" }}>
-                    <div>
-                      <strong style={{ fontSize: 14, display: "block" }}>Supabase Database</strong>
-                      <span style={{ fontSize: 11, color: "#6B7A70" }}>13 PostgreSQL Tables Live</span>
-                    </div>
-                    <CheckCircle2 size={20} color="#54BC33" />
-                  </div>
-
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderRadius: 12, backgroundColor: "#F9F8F5", border: "1px solid #E2DDD3" }}>
-                    <div>
-                      <strong style={{ fontSize: 14, display: "block" }}>Vercel Hosting</strong>
-                      <span style={{ fontSize: 11, color: "#6B7A70" }}>susi-all.vercel.app</span>
-                    </div>
-                    <CheckCircle2 size={20} color="#54BC33" />
-                  </div>
-                </div>
-              </div>
+              {/* Overview End */}
             </div>
           </div>
         )}
@@ -2159,84 +2128,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* TAB 8: API & INTEGRATIONS SETTINGS */}
-        {activeTab === "settings" && (
-          <div style={{ backgroundColor: "#ffffff", padding: "35px", borderRadius: 18, border: "1px solid #E2DDD3", maxWidth: 850 }}>
-            <h3 style={{ fontFamily: "var(--serif)", fontSize: 26, color: "#2691BA", marginBottom: 25 }}>API Keys &amp; Integrations Setup</h3>
 
-            {/* Blotato API Key Input & Account Selector */}
-            <div style={{ marginBottom: 30, padding: 25, borderRadius: 16, backgroundColor: "#FBF9F4", border: "1px solid #E2DDD3" }}>
-              <label style={{ fontSize: 15, fontWeight: 700, color: "#1A252C", display: "block", marginBottom: 8 }}>
-                Blotato Social API Key &amp; Account Selector (LinkedIn &amp; Facebook)
-              </label>
-              <p style={{ fontSize: 13, color: "#6B7A70", marginBottom: 15 }}>
-                Enter your Blotato API Key to auto-publish journal notes and social updates directly to your Susi Davies LinkedIn and Facebook pages.
-              </p>
-              <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-                <input
-                  type="password"
-                  placeholder="blotato_sec_... (or leave blank if saved in Vercel)"
-                  value={blotatoKey}
-                  onChange={(e) => setBlotatoKey(e.target.value)}
-                  style={{ flex: 1, padding: "12px 14px", borderRadius: 10, border: "1px solid #E2DDD3", fontSize: 14, outline: "none" }}
-                />
-                <button
-                  type="button"
-                  onClick={handleFetchBlotatoAccounts}
-                  disabled={isLoadingBlotatoAccounts}
-                  className="btn-pill btn-pill-cyan"
-                  style={{ whiteSpace: "nowrap", cursor: "pointer" }}
-                >
-                  {isLoadingBlotatoAccounts ? "Loading Accounts..." : "FETCH CONNECTED ACCOUNTS"}
-                </button>
-              </div>
-
-              {/* Blotato Connected Accounts List & Filter */}
-              <div style={{ marginTop: 15 }}>
-                <strong style={{ fontSize: 14, color: "#2691BA", display: "block", marginBottom: 6 }}>
-                  Target Accounts Filter (Selected: {blotatoAccounts.filter(a => a.selected).length} of {blotatoAccounts.length} Connected Accounts)
-                </strong>
-                <p style={{ fontSize: 12, color: "#6B7A70", marginBottom: 12 }}>
-                  Check ONLY your Susi Davies accounts below so cross-posts are published strictly to Susi Davies pages, ignoring your 18 client accounts.
-                </p>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 220, overflowY: "auto", border: "1px solid #E2DDD3", borderRadius: 10, padding: 12, backgroundColor: "#ffffff" }}>
-                  {blotatoAccounts.map((acc) => (
-                    <label key={acc.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: 8, backgroundColor: acc.selected ? "rgba(38,145,186,0.06)" : "transparent", cursor: "pointer", border: acc.selected ? "1px solid rgba(38,145,186,0.3)" : "1px solid #F0ECE1" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <input
-                          type="checkbox"
-                          checked={acc.selected}
-                          onChange={() => toggleBlotatoAccountSelection(acc.id)}
-                          style={{ width: 16, height: 16, cursor: "pointer" }}
-                        />
-                        <div>
-                          <strong style={{ fontSize: 14, color: "#1A252C" }}>{acc.name}</strong>
-                          <span style={{ fontSize: 11, color: "#6B7A70", marginLeft: 8, textTransform: "capitalize" }}>
-                            ({acc.platform})
-                          </span>
-                        </div>
-                      </div>
-                      {acc.selected ? (
-                        <span style={{ fontSize: 11, fontWeight: 700, color: "#45A027", backgroundColor: "#54BC3318", padding: "2px 8px", borderRadius: 100 }}>
-                          ✓ TARGET SUSI ACCOUNT
-                        </span>
-                      ) : (
-                        <span style={{ fontSize: 11, color: "#888", backgroundColor: "#EEE", padding: "2px 8px", borderRadius: 100 }}>
-                          IGNORED CLIENT ACCOUNT
-                        </span>
-                      )}
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <button onClick={handleSaveBlotatoConfig} className="btn-pill btn-pill-cyan" style={{ cursor: "pointer" }}>
-              SAVE SOCIAL API CONFIGURATION
-            </button>
-          </div>
-        )}
 
         {/* Modal 1: Add Booking */}
         {showAddBooking && (
