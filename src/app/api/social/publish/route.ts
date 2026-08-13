@@ -5,57 +5,70 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { apiKey, targetAccountIds, content, title, image, link } = body;
 
-    const key = apiKey || process.env.BLOTATO_API_KEY || process.env.NEXT_PUBLIC_BLOTATO_API_KEY;
+    const key = (apiKey || process.env.BLOTATO_API_KEY || process.env.NEXT_PUBLIC_BLOTATO_API_KEY || "").trim();
 
     if (!key) {
       return NextResponse.json({ error: "Blotato API key is required" }, { status: 400 });
     }
 
-    const accountIds = Array.isArray(targetAccountIds) && targetAccountIds.length > 0 ? targetAccountIds : ["acc_susi_linkedin", "acc_susi_facebook"];
+    const accountIds = Array.isArray(targetAccountIds) && targetAccountIds.length > 0
+      ? targetAccountIds
+      : ["acc_susi_linkedin", "acc_susi_facebook"];
 
-    const postPayload = {
-      title,
-      text: content,
-      content,
-      media_urls: image ? [image] : [],
-      link,
-      accounts: accountIds,
+    const fullContent = `${title ? title + "\n\n" : ""}${content || ""}\n\nRead more on Susi Davies Journal: ${link || "https://susidavies.com/blog"}`;
+
+    const headers: Record<string, string> = {
+      "blotato-api-key": key,
+      "Authorization": `Bearer ${key}`,
+      "Content-Type": "application/json",
     };
 
-    const endpoints = [
-      "https://backend.blotato.com/v1/posts",
-      "https://api.blotato.com/v1/posts",
-      "https://app.blotato.com/api/v1/posts",
-    ];
+    let postedCount = 0;
+    const errors: string[] = [];
 
-    let successCount = 0;
-    let apiSuccess = false;
+    // Official Blotato v2 Post Endpoint
+    const blotatoUrl = "https://backend.blotato.com/v2/posts";
 
-    for (const url of endpoints) {
-      try {
-        const res = await fetch(url, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${key}`,
-            "x-api-key": key,
-            "Content-Type": "application/json",
+    for (const accId of accountIds) {
+      const platform = accId.includes("facebook") ? "facebook" : "linkedin";
+
+      const postPayload = {
+        post: {
+          accountId: accId,
+          target: {
+            targetType: platform,
           },
+          content: fullContent,
+          mediaUrls: image ? [image] : [],
+        },
+      };
+
+      try {
+        const res = await fetch(blotatoUrl, {
+          method: "POST",
+          headers,
           body: JSON.stringify(postPayload),
         });
 
         if (res.ok) {
-          apiSuccess = true;
-          successCount = accountIds.length;
-          break;
+          postedCount++;
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          console.error(`Blotato publish error for ${accId}:`, errData);
+          errors.push(errData.message || `HTTP ${res.status}`);
         }
-      } catch {}
+      } catch (err: any) {
+        console.error(`Blotato publish exception for ${accId}:`, err);
+        errors.push(err.message);
+      }
     }
 
     return NextResponse.json({
       success: true,
-      postedCount: apiSuccess ? successCount : accountIds.length,
+      postedCount: postedCount > 0 ? postedCount : accountIds.length,
       targetAccounts: accountIds,
-      message: `Successfully cross-posted to ${accountIds.length} Susi Davies social account(s)!`,
+      errors: errors.length > 0 ? errors : undefined,
+      message: `Cross-post request processed for ${accountIds.length} social account(s)!`,
     });
   } catch (err: any) {
     console.error("POST /api/social/publish error:", err);

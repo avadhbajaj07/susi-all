@@ -9,56 +9,49 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Blotato API key is required" }, { status: 400 });
     }
 
-    // Try fetching connected social accounts from Blotato API endpoints
-    const endpoints = [
-      "https://backend.blotato.com/v1/accounts",
-      "https://api.blotato.com/v1/accounts",
-      "https://app.blotato.com/api/v1/accounts",
-    ];
+    // Official Blotato v2 API endpoint
+    const url = "https://backend.blotato.com/v2/users/me/accounts";
+
+    const headers: Record<string, string> = {
+      "blotato-api-key": apiKey.trim(),
+      "Authorization": `Bearer ${apiKey.trim()}`,
+      "Content-Type": "application/json",
+    };
 
     let blotatoAccounts: any[] = [];
     let fetchSuccess = false;
 
-    for (const url of endpoints) {
-      try {
-        const res = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "x-api-key": apiKey,
-            "Content-Type": "application/json",
-          },
-          cache: "no-store",
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          blotatoAccounts = Array.isArray(data)
-            ? data
-            : data.accounts || data.data || data.items || data.results || data.connected_accounts || [];
-          fetchSuccess = true;
-          break;
-        }
-      } catch {}
+    try {
+      const res = await fetch(url, { headers, cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        blotatoAccounts = Array.isArray(data)
+          ? data
+          : data.accounts || data.data || data.items || [];
+        fetchSuccess = true;
+      } else {
+        console.error("Blotato v2 accounts fetch status:", res.status);
+      }
+    } catch (err) {
+      console.error("Blotato v2 accounts fetch error:", err);
     }
 
-    // Fallback formatted mock accounts list if Blotato API requires CORS or local key preview
+    // Fallback accounts if Blotato API requires initial setup
     if (!fetchSuccess || blotatoAccounts.length === 0) {
       blotatoAccounts = [
         { id: "acc_susi_linkedin", name: "Susi Davies (LinkedIn)", platform: "linkedin", isSusiAccount: true },
         { id: "acc_susi_facebook", name: "Susi Davies Yoga (Facebook Page)", platform: "facebook", isSusiAccount: true },
-        { id: "acc_client_1", name: "Swiss Tech Partner 1", platform: "linkedin", isSusiAccount: false },
-        { id: "acc_client_2", name: "Zurich Wellness Club", platform: "facebook", isSusiAccount: false },
       ];
     }
 
     const formatted = blotatoAccounts.map((a: any) => ({
-      id: a.id || a.account_id || `acc_${Math.random().toString(36).substr(2, 9)}`,
-      name: a.name || a.account_name || a.username || "Social Account",
-      platform: (a.platform || a.provider || "linkedin").toLowerCase(),
-      isSusiAccount: a.name ? a.name.toLowerCase().includes("susi") || a.isSusiAccount : true,
+      id: a.id || a.accountId || `acc_${Math.random().toString(36).substr(2, 9)}`,
+      name: a.name || a.accountName || a.username || "Social Account",
+      platform: (a.platform || a.targetType || a.provider || "linkedin").toLowerCase(),
+      isSusiAccount: true,
     }));
 
-    return NextResponse.json({ accounts: formatted });
+    return NextResponse.json({ accounts: formatted, success: fetchSuccess });
   } catch (err: any) {
     console.error("POST /api/social/accounts error:", err);
     return NextResponse.json({ error: err.message || "Failed to fetch Blotato social accounts" }, { status: 500 });

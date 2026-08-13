@@ -774,7 +774,7 @@ export default function AdminPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          apiKey: blotatoKey,
+          apiKey: blotatoKey || (typeof window !== "undefined" ? localStorage.getItem("blotato_api_key") || "" : ""),
           targetAccountIds: selectedAccountIds,
           title: currentTitle,
           content: `${currentTitle}\n\n${currentContent}\n\nRead more on Susi Davies Journal: https://susidavies.com/blog`,
