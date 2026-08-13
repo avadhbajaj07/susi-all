@@ -148,9 +148,18 @@ export default function AdminPage() {
     alert(`✓ Successfully loaded connected Blotato accounts!\n\nSelect your Susi Davies accounts below.`);
   };
 
-  const handleSaveBlotatoConfig = () => {
+  const handleSaveBlotatoConfig = async () => {
     if (blotatoKey) {
       localStorage.setItem("blotato_api_key", blotatoKey);
+      try {
+        await fetch("/api/social/save-key", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ apiKey: blotatoKey }),
+        });
+      } catch (err) {
+        console.error("Save Blotato key error:", err);
+      }
     }
     const selectedIds = blotatoAccounts.filter((a) => a.selected).map((a) => a.id);
     localStorage.setItem("blotato_selected_accounts", JSON.stringify(selectedIds));
