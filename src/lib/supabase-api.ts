@@ -269,11 +269,15 @@ export async function fetchSupabaseContacts() {
       if (Array.isArray(data)) {
         return data.map((c: any) => ({
           id: c.id,
-          name: c.full_name || (c.email ? c.email.split("@")[0] : "Subscriber"),
+          name: c.full_name || (c.first_name ? `${c.first_name} ${c.last_name || ""}`.trim() : c.email ? c.email.split("@")[0] : "Subscriber"),
+          firstName: c.first_name || "",
+          lastName: c.last_name || "",
           email: c.email,
-          segment: c.source || "Journal Subscribers",
-          date: c.created_at ? new Date(c.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }) : "Aug 2026",
-          status: c.consent_marketing === false ? "Unsubscribed" : "Subscribed",
+          segment: c.segment || c.source || "Journal Subscribers",
+          date: c.subscribed_date || (c.created_at ? new Date(c.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }) : "Aug 2026"),
+          status: c.status || (c.consent_marketing === false ? "Unsubscribed" : "Subscribed"),
+          ipAddress: c.ip_address || "--",
+          country: c.country || "--",
         }));
       }
     }

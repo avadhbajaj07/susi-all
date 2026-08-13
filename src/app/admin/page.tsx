@@ -67,6 +67,33 @@ export default function AdminPage() {
   const [articles, setArticles] = useState(initialArticles);
   const [subscribers, setSubscribers] = useState(initialSubscribers);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState("All Categories");
+
+  const availableCategories = useMemo(() => {
+    const cats = new Set<string>(["Journal Subscribers", "Online Students", "Coaching Clients", "Retreat Guests", "Imported Excel"]);
+    subscribers.forEach((s) => {
+      if (s.segment) cats.add(s.segment);
+    });
+    return Array.from(cats);
+  }, [subscribers]);
+
+  const filteredSubscribers = useMemo(() => {
+    return subscribers.filter((sub) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        sub.name?.toLowerCase().includes(q) ||
+        sub.email?.toLowerCase().includes(q) ||
+        sub.segment?.toLowerCase().includes(q) ||
+        sub.country?.toLowerCase().includes(q) ||
+        sub.ipAddress?.toLowerCase().includes(q);
+
+      const matchesCategory =
+        selectedCategoryFilter === "All Categories" || sub.segment === selectedCategoryFilter;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [subscribers, searchQuery, selectedCategoryFilter]);
   const [resendKey, setResendKey] = useState("");
   const [blotatoKey, setBlotatoKey] = useState("");
   const [blotatoAccounts, setBlotatoAccounts] = useState<any[]>([
@@ -416,6 +443,7 @@ export default function AdminPage() {
   const [subName, setSubName] = useState("");
   const [subEmail, setSubEmail] = useState("");
   const [subSegment, setSubSegment] = useState("Journal Subscribers");
+  const [customCategoryInput, setCustomCategoryInput] = useState("");
 
   // CSV Import State
   const [showCsvModal, setShowCsvModal] = useState(false);
@@ -845,26 +873,31 @@ export default function AdminPage() {
     if (!subEmail) return;
     const cleanEmail = subEmail.trim().toLowerCase();
     const cleanName = subName || cleanEmail.split("@")[0];
+    const finalSegment = subSegment === "NEW_CATEGORY" ? (customCategoryInput.trim() || "Journal Subscribers") : subSegment;
 
     const newSub = {
       id: `SUB-${Date.now()}`,
       name: cleanName,
       email: cleanEmail,
-      segment: subSegment,
+      segment: finalSegment,
       date: new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
       status: "Subscribed",
+      ipAddress: "--",
+      country: "--",
     };
 
     setSubscribers((prev) => [newSub, ...prev.filter((s) => s.email !== cleanEmail)]);
     setSubName("");
     setSubEmail("");
+    setSubSegment(finalSegment);
+    setCustomCategoryInput("");
     setShowSubModal(false);
 
     try {
       await fetch("/api/subscribers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: cleanName, email: cleanEmail, segment: subSegment }),
+        body: JSON.stringify({ name: cleanName, email: cleanEmail, segment: finalSegment }),
       });
     } catch (err) {
       console.error("Save subscriber error:", err);
@@ -1790,7 +1823,7 @@ export default function AdminPage() {
         {/* TAB 5: SUBSCRIBERS & CONSENT MANAGEMENT */}
         {activeTab === "subscribers" && (
           <div style={{ backgroundColor: "#ffffff", padding: "30px", borderRadius: 18, border: "1px solid #E2DDD3" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 25 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <div>
                 <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", margin: 0 }}>Subscriber &amp; Opt-Out Directory</h3>
                 <p style={{ color: "#6B7A70", fontSize: 14, margin: "4px 0 0" }}>Manage studio newsletter contacts, active subscribers, and unsubscribed opt-outs.</p>
@@ -1805,54 +1838,110 @@ export default function AdminPage() {
               </div>
             </div>
 
+            {/* Filter Toolbar: Search & Category Dropdown */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, marginBottom: 20, backgroundColor: "#FBF9F4", padding: "14px 18px", borderRadius: 12, border: "1px solid #E2DDD3" }}>
+              <div style={{ display: "flex", gap: 14, alignItems: "center", flex: 1 }}>
+                <div style={{ position: "relative", minWidth: 260 }}>
+                  <Search size={16} style={{ position: "absolute", left: 10, top: 10, color: "#999" }} />
+                  <input
+                    type="text"
+                    placeholder="Search by name, email, country, IP..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ width: "100%", padding: "8px 10px 8px 34px", borderRadius: 8, border: "1px solid #E2DDD3", fontSize: 13, outline: "none" }}
+                  />
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <label style={{ fontSize: 13, fontWeight: 700, color: "#2691BA", whiteSpace: "nowrap" }}>Filter Category:</label>
+                  <select
+                    value={selectedCategoryFilter}
+                    onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+                    style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid #E2DDD3", fontSize: 13, backgroundColor: "#ffffff", fontWeight: 600, color: "#1A252C" }}
+                  >
+                    <option value="All Categories">All Categories ({subscribers.length})</option>
+                    {availableCategories.map((cat) => {
+                      const count = subscribers.filter((s) => s.segment === cat).length;
+                      return (
+                        <option key={cat} value={cat}>
+                          {cat} ({count})
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#2691BA" }}>
+                Showing {filteredSubscribers.length} of {subscribers.length} Contacts
+              </div>
+            </div>
+
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
               <thead>
                 <tr style={{ borderBottom: "2px solid #E2DDD3", textAlign: "left", color: "#6B7A70", fontSize: 12, textTransform: "uppercase" }}>
-                  <th style={{ padding: "12px 10px" }}>ID</th>
-                  <th style={{ padding: "12px 10px" }}>Name</th>
+                  <th style={{ padding: "12px 10px" }}>Subscriber Name</th>
                   <th style={{ padding: "12px 10px" }}>Email</th>
-                  <th style={{ padding: "12px 10px" }}>Segment</th>
+                  <th style={{ padding: "12px 10px" }}>Category / Segment</th>
+                  <th style={{ padding: "12px 10px" }}>Country</th>
+                  <th style={{ padding: "12px 10px" }}>IP Address</th>
                   <th style={{ padding: "12px 10px" }}>Subscribed Date</th>
                   <th style={{ padding: "12px 10px" }}>Status</th>
                   <th style={{ padding: "12px 10px" }}>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {subscribers.map((sub) => (
-                  <tr key={sub.id} style={{ borderBottom: "1px solid #F0ECE1" }}>
-                    <td style={{ padding: "14px 10px", fontWeight: 700, color: "#2691BA" }}>{sub.id}</td>
-                    <td style={{ padding: "14px 10px", fontWeight: 600 }}>{sub.name}</td>
-                    <td style={{ padding: "14px 10px", color: "#6B7A70" }}>{sub.email}</td>
-                    <td style={{ padding: "14px 10px" }}>
-                      <span style={{ padding: "3px 8px", borderRadius: 6, backgroundColor: "#EAEAEA", fontSize: 12 }}>
-                        {sub.segment}
-                      </span>
-                    </td>
-                    <td style={{ padding: "14px 10px" }}>{sub.date}</td>
-                    <td style={{ padding: "14px 10px" }}>
-                      <span style={{ padding: "4px 12px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: sub.status === "Subscribed" ? "#54BC3318" : "#E74C3C18", color: sub.status === "Subscribed" ? "#45A027" : "#C0392B" }}>
-                        {sub.status}
-                      </span>
-                    </td>
-                    <td style={{ padding: "14px 10px" }}>
-                      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                        <button
-                          onClick={() => toggleSubscriberStatus(sub.id)}
-                          style={{ background: "none", border: "none", color: sub.status === "Subscribed" ? "#E74C3C" : "#45A027", cursor: "pointer", fontWeight: 600, fontSize: 13, display: "inline-flex", alignItems: "center", gap: 4 }}
-                        >
-                          {sub.status === "Subscribed" ? <UserX size={15} /> : <UserCheck size={15} />}
-                          {sub.status === "Subscribed" ? "Unsubscribe" : "Resubscribe"}
-                        </button>
-                        <button
-                          onClick={() => handleDeleteSubscriber(sub.id)}
-                          style={{ background: "none", border: "none", color: "#C0392B", cursor: "pointer", fontWeight: 600, fontSize: 13, display: "inline-flex", alignItems: "center", gap: 4 }}
-                        >
-                          <Trash2 size={15} /> Delete
-                        </button>
-                      </div>
+                {filteredSubscribers.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} style={{ padding: "30px", textAlign: "center", color: "#888" }}>
+                      No contacts found matching your filter.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredSubscribers.map((sub) => (
+                    <tr key={sub.id} style={{ borderBottom: "1px solid #F0ECE1" }}>
+                      <td style={{ padding: "14px 10px", fontWeight: 700, color: "#1A252C" }}>
+                        {sub.name}
+                        {sub.firstName && sub.lastName && sub.name !== `${sub.firstName} ${sub.lastName}` && (
+                          <span style={{ display: "block", fontSize: 11, color: "#888", fontWeight: 400 }}>
+                            {sub.firstName} {sub.lastName}
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ padding: "14px 10px", color: "#2691BA", fontWeight: 600 }}>{sub.email}</td>
+                      <td style={{ padding: "14px 10px" }}>
+                        <span style={{ padding: "3px 10px", borderRadius: 6, backgroundColor: "#EBF5F9", color: "#1A6E8F", fontSize: 12, fontWeight: 600, border: "1px solid #BCE0EE" }}>
+                          {sub.segment || "Journal Subscribers"}
+                        </span>
+                      </td>
+                      <td style={{ padding: "14px 10px", fontWeight: 600, color: "#444" }}>{sub.country || "--"}</td>
+                      <td style={{ padding: "14px 10px", fontSize: 12, color: "#666", fontFamily: "monospace" }}>{sub.ipAddress || "--"}</td>
+                      <td style={{ padding: "14px 10px", fontSize: 13, color: "#555" }}>{sub.date}</td>
+                      <td style={{ padding: "14px 10px" }}>
+                        <span style={{ padding: "4px 12px", borderRadius: 100, fontSize: 11, fontWeight: 700, backgroundColor: sub.status === "Subscribed" ? "#54BC3318" : "#E74C3C18", color: sub.status === "Subscribed" ? "#45A027" : "#C0392B" }}>
+                          {sub.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: "14px 10px" }}>
+                        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                          <button
+                            onClick={() => toggleSubscriberStatus(sub.id)}
+                            style={{ background: "none", border: "none", color: sub.status === "Subscribed" ? "#E74C3C" : "#45A027", cursor: "pointer", fontWeight: 600, fontSize: 13, display: "inline-flex", alignItems: "center", gap: 4 }}
+                          >
+                            {sub.status === "Subscribed" ? <UserX size={15} /> : <UserCheck size={15} />}
+                            {sub.status === "Subscribed" ? "Unsubscribe" : "Resubscribe"}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSubscriber(sub.id)}
+                            style={{ background: "none", border: "none", color: "#C0392B", cursor: "pointer", fontWeight: 600, fontSize: 13, display: "inline-flex", alignItems: "center", gap: 4 }}
+                          >
+                            <Trash2 size={15} /> Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -2299,13 +2388,27 @@ export default function AdminPage() {
                 </div>
 
                 <div style={{ marginBottom: 25 }}>
-                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Segment</label>
+                  <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Category / Segment</label>
                   <select value={subSegment} onChange={(e) => setSubSegment(e.target.value)} className="form-input">
-                    <option value="Journal Subscribers">Journal Subscribers</option>
-                    <option value="Online Students">Weekly Online Students</option>
-                    <option value="Coaching Clients">Coaching Clients</option>
-                    <option value="Retreat Guests">Retreat Guests</option>
+                    {availableCategories.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                    <option value="NEW_CATEGORY">+ Create New Category...</option>
                   </select>
+
+                  {subSegment === "NEW_CATEGORY" && (
+                    <div style={{ marginTop: 10 }}>
+                      <label style={{ fontSize: 12, fontWeight: 600, color: "#2691BA", display: "block", marginBottom: 4 }}>New Category Name *</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        required
+                        value={customCategoryInput}
+                        onChange={(e) => setCustomCategoryInput(e.target.value)}
+                        placeholder="e.g. VIP Members, Private Workshop 2026..."
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
