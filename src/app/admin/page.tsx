@@ -98,7 +98,7 @@ export default function AdminPage() {
   const [blotatoKey, setBlotatoKey] = useState("");
   const [blotatoAccounts, setBlotatoAccounts] = useState<any[]>([
     { id: "32567", name: "Susi Davies (LinkedIn ID: 32567)", platform: "linkedin", selected: true },
-    { id: "419995168046710", name: "Susi Davies Yoga (Facebook Page ID: 419995168046710)", platform: "facebook", selected: true },
+    { id: "46279", name: "Susi Davies Yoga (Facebook Page: 419995168046710)", platform: "facebook", selected: true },
   ]);
   const [isLoadingBlotatoAccounts, setIsLoadingBlotatoAccounts] = useState(false);
 

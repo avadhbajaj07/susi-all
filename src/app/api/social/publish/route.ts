@@ -11,9 +11,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Blotato API key is required" }, { status: 400 });
     }
 
-    const accountIds = Array.isArray(targetAccountIds) && targetAccountIds.length > 0
+    const rawAccountIds: string[] = Array.isArray(targetAccountIds) && targetAccountIds.length > 0
       ? targetAccountIds
-      : ["32567", "419995168046710"];
+      : ["32567", "46279"];
 
     const fullContent = `${title ? title + "\n\n" : ""}${content || ""}\n\nRead more on Susi Davies Journal: ${link || "https://susidavies.com/blog"}`;
 
@@ -29,19 +29,21 @@ export async function POST(req: Request) {
     // Official Blotato v2 Post Endpoint
     const blotatoUrl = "https://backend.blotato.com/v2/posts";
 
-    for (const accId of accountIds) {
-      const isFb = accId === "419995168046710" || accId.includes("facebook");
+    for (const accId of rawAccountIds) {
+      const isFb = accId === "46279" || accId === "419995168046710" || accId.includes("facebook");
       const platform = isFb ? "facebook" : "linkedin";
+
+      // Account ID in Blotato: 46279 for Facebook Page, 32567 for LinkedIn
+      const blotatoAccountId = isFb ? "46279" : accId === "acc_susi_linkedin" ? "32567" : accId;
 
       const targetObj: Record<string, string> = { targetType: platform };
       if (isFb) {
-        targetObj.pageId = accId;
-        targetObj.targetId = accId;
+        targetObj.pageId = "419995168046710";
       }
 
       const postPayload = {
         post: {
-          accountId: accId,
+          accountId: blotatoAccountId,
           content: {
             text: fullContent,
             mediaUrls: image ? [image] : [],
@@ -73,10 +75,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      postedCount: postedCount > 0 ? postedCount : accountIds.length,
-      targetAccounts: accountIds,
+      postedCount: postedCount > 0 ? postedCount : rawAccountIds.length,
+      targetAccounts: rawAccountIds,
       errors: errors.length > 0 ? errors : undefined,
-      message: `Cross-post request processed for ${accountIds.length} social account(s)!`,
+      message: `Cross-post request processed for ${rawAccountIds.length} social account(s)!`,
     });
   } catch (err: any) {
     console.error("POST /api/social/publish error:", err);
