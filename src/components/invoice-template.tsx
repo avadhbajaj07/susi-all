@@ -342,15 +342,14 @@ export function SusiInvoiceTemplate({ data }: { data: InvoiceData }) {
 
         {/* Totals & Payment Instructions */}
         <div className="inv-bottom-container">
-          <div className="inv-payment-notes">
-            <strong>Payment Information &amp; Notice:</strong>
-            {data.paymentNotice || "Payment due within 14 days via TWINT or IBAN."}
-            {data.paymentMethod && (
-              <div style={{ marginTop: 4, fontWeight: 600 }}>
-                {data.paymentMethod}
-              </div>
-            )}
-          </div>
+          {data.paymentNotice && data.paymentNotice.trim().length > 0 ? (
+            <div className="inv-payment-notes">
+              <strong>Personal Note / Instructions:</strong>
+              {data.paymentNotice}
+            </div>
+          ) : (
+            <div />
+          )}
 
           <div className="inv-totals-box">
             <div className="inv-totals-row">

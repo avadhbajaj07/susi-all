@@ -221,29 +221,23 @@ export function generateInvoicePdfBuffer(data: PdfInvoiceData): Promise<Buffer> 
 
       currentY += 35;
 
-      // ── PAYMENT INFORMATION BOX ──
-      doc
-        .rect(40, currentY, 515, 60)
-        .fillAndStroke(lightBg, "#BCD4E3");
+      // ── PERSONAL NOTE / INSTRUCTIONS BOX (ONLY IF WRITTEN) ──
+      if (data.paymentNotice && data.paymentNotice.trim().length > 0) {
+        doc
+          .rect(40, currentY, 515, 50)
+          .fillAndStroke(lightBg, "#BCD4E3");
 
-      doc
-        .fontSize(9)
-        .font("Helvetica-Bold")
-        .fillColor(primaryBlue)
-        .text("PAYMENT INFORMATION & NOTICE:", 52, currentY + 10);
-
-      doc
-        .fontSize(9)
-        .font("Helvetica")
-        .fillColor(darkInk)
-        .text(data.paymentNotice || "Payment due within 14 days via TWINT (+41 79 854 97 52) or bank transfer.", 52, currentY + 24, { width: 490 });
-
-      if (data.paymentMethod) {
         doc
           .fontSize(9)
           .font("Helvetica-Bold")
           .fillColor(primaryBlue)
-          .text(data.paymentMethod, 52, currentY + 40, { width: 490 });
+          .text("PERSONAL NOTE / INSTRUCTIONS:", 52, currentY + 10);
+
+        doc
+          .fontSize(9)
+          .font("Helvetica")
+          .fillColor(darkInk)
+          .text(data.paymentNotice, 52, currentY + 24, { width: 490 });
       }
 
       // ── FOOTER NAMASTE ──

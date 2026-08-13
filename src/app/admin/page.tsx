@@ -256,7 +256,7 @@ export default function AdminPage() {
   const [invIssueDate, setInvIssueDate] = useState("");
   const [invDueDate, setInvDueDate] = useState("");
   const [invStatus, setInvStatus] = useState("draft");
-  const [invPaymentNotice, setInvPaymentNotice] = useState("Payment due within 14 days via TWINT or IBAN.");
+  const [invPaymentNotice, setInvPaymentNotice] = useState("");
   const [invPaymentMethod, setInvPaymentMethod] = useState("Bank transfer or TWINT (+41 79 854 97 52)");
 
   const [invItems, setInvItems] = useState<InvoiceItem[]>([]);
@@ -1440,14 +1440,17 @@ export default function AdminPage() {
                     )}
                   </div>
 
-                  {/* Payment Info */}
+                  {/* Personal Note / Instructions */}
                   <div style={{ marginBottom: 20 }}>
-                    <label style={{ fontSize: 12, fontWeight: 700, color: "#6B7A70", display: "block", marginBottom: 4 }}>Payment Notice</label>
+                    <label style={{ fontSize: 12, fontWeight: 700, color: "#2691BA", display: "block", marginBottom: 4 }}>
+                      Personal Note / Special Instructions (Optional - Only displays on invoice if written)
+                    </label>
                     <input
                       type="text"
                       className="form-input"
                       value={invPaymentNotice}
                       onChange={(e) => setInvPaymentNotice(e.target.value)}
+                      placeholder="e.g. Thank you for moving with me! Payment due within 14 days."
                     />
                   </div>
 
