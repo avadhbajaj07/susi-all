@@ -35,11 +35,14 @@ export async function POST(req: Request) {
       const postPayload = {
         post: {
           accountId: accId,
+          content: {
+            text: fullContent,
+            mediaUrls: image ? [image] : [],
+            platform: platform,
+          },
           target: {
             targetType: platform,
           },
-          content: fullContent,
-          mediaUrls: image ? [image] : [],
         },
       };
 
@@ -54,7 +57,7 @@ export async function POST(req: Request) {
           postedCount++;
         } else {
           const errData = await res.json().catch(() => ({}));
-          console.error(`Blotato publish error for ${accId}:`, errData);
+          console.error(`Blotato publish error for ${accId} (${platform}):`, res.status, errData);
           errors.push(errData.message || `HTTP ${res.status}`);
         }
       } catch (err: any) {
