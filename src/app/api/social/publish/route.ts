@@ -30,7 +30,14 @@ export async function POST(req: Request) {
     const blotatoUrl = "https://backend.blotato.com/v2/posts";
 
     for (const accId of accountIds) {
-      const platform = accId === "419995168046710" || accId.includes("facebook") ? "facebook" : "linkedin";
+      const isFb = accId === "419995168046710" || accId.includes("facebook");
+      const platform = isFb ? "facebook" : "linkedin";
+
+      const targetObj: Record<string, string> = { targetType: platform };
+      if (isFb) {
+        targetObj.pageId = accId;
+        targetObj.targetId = accId;
+      }
 
       const postPayload = {
         post: {
@@ -40,9 +47,7 @@ export async function POST(req: Request) {
             mediaUrls: image ? [image] : [],
             platform: platform,
           },
-          target: {
-            targetType: platform,
-          },
+          target: targetObj,
         },
       };
 
