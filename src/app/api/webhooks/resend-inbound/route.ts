@@ -47,7 +47,7 @@ export async function POST(req: Request) {
       }),
     }).catch((err) => console.error("Internal inbox POST error:", err));
 
-    // Forward incoming email directly to Susi's Gmail inbox via Resend
+    // Forward incoming email directly to Susi's Gmail inbox (susidavies@gmail.com) via Resend
     const apiKey = process.env.RESEND_API_KEY || process.env.NEXT_PUBLIC_RESEND_API_KEY;
     const targetGmail = process.env.SUSI_GMAIL_ADDRESS || "susidavies@gmail.com";
 
