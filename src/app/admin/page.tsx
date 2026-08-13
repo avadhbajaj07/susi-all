@@ -85,14 +85,13 @@ export default function AdminPage() {
     }
   }, []);
 
-  const fetchBlotatoAccountsWithKey = async (key: string) => {
-    if (!key) return;
+  const fetchBlotatoAccountsWithKey = async (key?: string) => {
     setIsLoadingBlotatoAccounts(true);
     try {
       const res = await fetch("/api/social/accounts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ apiKey: key }),
+        body: JSON.stringify({ apiKey: key || blotatoKey }),
       });
       const data = await res.json();
       if (data.accounts && Array.isArray(data.accounts)) {
@@ -115,24 +114,20 @@ export default function AdminPage() {
   };
 
   const handleFetchBlotatoAccounts = async () => {
-    if (!blotatoKey) {
-      alert("Please enter your Blotato API key first.");
-      return;
+    if (blotatoKey) {
+      localStorage.setItem("blotato_api_key", blotatoKey);
     }
-    localStorage.setItem("blotato_api_key", blotatoKey);
     await fetchBlotatoAccountsWithKey(blotatoKey);
     alert(`✓ Successfully loaded connected Blotato accounts!\n\nSelect your Susi Davies accounts below.`);
   };
 
   const handleSaveBlotatoConfig = () => {
-    if (!blotatoKey) {
-      alert("Please enter your Blotato API key.");
-      return;
+    if (blotatoKey) {
+      localStorage.setItem("blotato_api_key", blotatoKey);
     }
-    localStorage.setItem("blotato_api_key", blotatoKey);
     const selectedIds = blotatoAccounts.filter((a) => a.selected).map((a) => a.id);
     localStorage.setItem("blotato_selected_accounts", JSON.stringify(selectedIds));
-    alert(`✓ Social API Configuration Saved!\n\nAPI Key saved and ${selectedIds.length} Susi Davies accounts targeted for auto-posting.`);
+    alert(`✓ Social API Configuration Saved!\n\n${selectedIds.length} Susi Davies accounts targeted for auto-posting.`);
   };
 
   const toggleBlotatoAccountSelection = (id: string) => {
@@ -2179,8 +2174,8 @@ export default function AdminPage() {
               </p>
               <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
                 <input
-                  type="text"
-                  placeholder="blotato_sec_..."
+                  type="password"
+                  placeholder="blotato_sec_... (or leave blank if saved in Vercel)"
                   value={blotatoKey}
                   onChange={(e) => setBlotatoKey(e.target.value)}
                   style={{ flex: 1, padding: "12px 14px", borderRadius: 10, border: "1px solid #E2DDD3", fontSize: 14, outline: "none" }}
