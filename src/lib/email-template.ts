@@ -3,9 +3,10 @@ export interface SusiEmailOptions {
   preheader?: string;
   bodyHtml: string;
   recipientName?: string;
+  headerImage?: string;
 }
 
-export function renderSusiEmailTemplate({ title, preheader, bodyHtml, recipientName }: SusiEmailOptions): string {
+export function renderSusiEmailTemplate({ title, preheader, bodyHtml, recipientName, headerImage }: SusiEmailOptions): string {
   const logoUrl = "https://susidavies.com/images/susi-davies-logo-white-official.png";
 
   return `
@@ -40,6 +41,13 @@ export function renderSusiEmailTemplate({ title, preheader, bodyHtml, recipientN
         Movement · Breathwork · Remedial Therapy · Mentoring
       </div>
     </div>
+
+    <!-- Optional Uploaded Broadcast Header Image -->
+    ${headerImage ? `
+      <div style="text-align: center; background-color: #ffffff; padding: 25px 30px 0;">
+        <img src="${headerImage}" alt="Header Banner" style="max-width: 100%; height: auto; border-radius: 12px; border: 1px solid #E2DDD3; display: block; margin: 0 auto;" />
+      </div>
+    ` : ""}
 
     <!-- Main Message Body -->
     <div style="padding: 35px 40px; color: #2C3E50; font-size: 15px; line-height: 1.7; font-family: 'Open Sans', Helvetica, Arial, sans-serif;">

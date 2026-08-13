@@ -3,7 +3,7 @@ import { renderSusiEmailTemplate } from "@/lib/email-template";
 
 export async function POST(req: Request) {
   try {
-    const { to, subject, body, fromName } = await req.json();
+    const { to, subject, body, fromName, imageUrl } = await req.json();
 
     if (!to || !subject || !body) {
       return NextResponse.json({ error: "Missing required fields: to, subject, body" }, { status: 400 });
@@ -32,6 +32,7 @@ export async function POST(req: Request) {
       title: subject,
       bodyHtml: formattedBodyHtml,
       recipientName,
+      headerImage: imageUrl,
     });
 
     const response = await fetch("https://api.resend.com/emails", {
