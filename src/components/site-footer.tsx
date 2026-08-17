@@ -17,14 +17,14 @@ export function SiteFooter() {
         <Link href="/contact-us">Contact Us</Link>
       </nav>
       <div className="footer-copyright" style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "center" }}>
-        <span>SUSI DAVIES &copy; {new Date().getFullYear()}. All Rights Reserved.</span>
-        <span style={{ fontSize: 13, color: "rgba(255, 255, 255, 0.85)", marginTop: 4 }}>
+        <span style={{ color: "#FFFFFF" }}>SUSI DAVIES &copy; {new Date().getFullYear()}. All Rights Reserved.</span>
+        <span style={{ fontSize: 13, color: "#FFFFFF", marginTop: 4 }}>
           🎨 Created by{" "}
           <a
             href="https://avadhbajaj.com"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "#2691BA", textDecoration: "underline", fontWeight: 600 }}
+            style={{ color: "#FFFFFF", textDecoration: "underline", fontWeight: 700 }}
           >
             Avadh Bajaj
           </a>
