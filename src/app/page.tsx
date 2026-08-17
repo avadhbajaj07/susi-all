@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { TestimonialSlider } from "@/components/testimonial-slider";
 import { MessageCircle, CheckCircle } from "lucide-react";
 import { HomeHero } from "@/components/home-hero";
 
@@ -230,8 +229,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials Slider */}
-      <TestimonialSlider />
 
       {/* Block 4: Susi Image 3 — Image Left, Contact Form Right */}
       <div className="container-narrow">

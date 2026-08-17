@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { TestimonialSlider } from "@/components/testimonial-slider";
 import { ImageSlider } from "@/components/image-slider";
 import { Check } from "lucide-react";
 
@@ -119,8 +118,6 @@ export default function CoachingMentoringPage() {
           <ImageSlider images={coachingImages} />
         </section>
 
-        {/* Testimonials Slider */}
-        <TestimonialSlider />
       </div>
 
       <SiteFooter />

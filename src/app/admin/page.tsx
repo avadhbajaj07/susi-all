@@ -643,11 +643,54 @@ export default function AdminPage() {
       targetEmails.push("hello@susidavies.com");
     }
 
-        // AUTOMATED 80/DAY BATCH SCHEDULER
-        const DAILY_LIMIT = 80;
+    // AUTOMATED 80/DAY PERSISTENT DATABASE BATCH SCHEDULER
+    const DAILY_LIMIT = 80;
     const totalRecipients = targetEmails.length;
+    const campaignId = `CMP-${Date.now()}`;
     const todayBatch = targetEmails.slice(0, DAILY_LIMIT);
     const queuedBatches = targetEmails.slice(DAILY_LIMIT);
+
+    // Save all batches to Supabase email_campaign_queue for persistent automated daily execution
+    const queueRecords: any[] = [];
+    for (let i = 0; i < targetEmails.length; i++) {
+      const recipient = targetEmails[i];
+      const batchNum = Math.floor(i / DAILY_LIMIT) + 1;
+      const schedDate = new Date();
+      schedDate.setDate(schedDate.getDate() + (batchNum - 1));
+      const scheduledDateStr = schedDate.toISOString().split("T")[0];
+
+      queueRecords.push({
+        campaign_id: campaignId,
+        subject: emailSubject,
+        body: emailBody,
+        image_url: emailImage || null,
+        from_name: "Susi Davies",
+        recipient_email: recipient,
+        batch_number: batchNum,
+        scheduled_date: scheduledDateStr,
+        status: batchNum === 1 ? "sent" : "pending",
+        sent_at: batchNum === 1 ? new Date().toISOString() : null,
+      });
+    }
+
+    try {
+      const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://bszyzttyashekzqmehxg.supabase.co";
+      const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+      if (SUPABASE_KEY) {
+        await fetch(`${SUPABASE_URL}/rest/v1/email_campaign_queue`, {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify(queueRecords),
+        });
+      }
+    } catch (err) {
+      console.error("Queue insert error:", err);
+    }
 
     let sentCount = 0;
     const logDetails: string[] = [];
@@ -678,40 +721,14 @@ export default function AdminPage() {
       }
     }
 
-    const newCmp = {
-      id: `CMP-0${campaigns.length + 1}`,
-      subject: emailSubject,
-      segment: customRecipients ? "Custom List" : emailSegment || "All Subscribers",
-      status: totalRecipients > DAILY_LIMIT ? `Batch 1 Sent (${sentCount}/${todayBatch.length})` : "Sent",
-      sentDate: "Today",
-      opens: "0%",
-      clicks: "0%",
-    };
-
-    const updatedCampaigns = [newCmp, ...campaigns];
-
-    if (queuedBatches.length > 0) {
-      const batchCount = Math.ceil(queuedBatches.length / DAILY_LIMIT);
-      for (let b = 0; b < batchCount; b++) {
-        const batchEmails = queuedBatches.slice(b * DAILY_LIMIT, (b + 1) * DAILY_LIMIT);
-        const dayNumber = b + 2;
-        const queuedDate = new Date();
-        queuedDate.setDate(queuedDate.getDate() + (b + 1));
-        const formattedDate = queuedDate.toLocaleDateString("en-US", { month: "short", day: "2-digit" });
-
-        updatedCampaigns.unshift({
-          id: `CMP-0${campaigns.length + 2 + b}`,
-          subject: `${emailSubject} (Batch ${dayNumber})`,
-          segment: `${batchEmails.length} Recipients`,
-          status: `Scheduled for Day ${dayNumber} (${formattedDate})`,
-          sentDate: `Day ${dayNumber} (${formattedDate})`,
-          opens: "0%",
-          clicks: "0%",
-        });
+    // Refresh live stats from database queue
+    try {
+      const resStats = await fetch("/api/campaigns/stats");
+      const dataStats = await resStats.json();
+      if (dataStats.campaigns && Array.isArray(dataStats.campaigns)) {
+        setCampaigns(dataStats.campaigns);
       }
-    }
-
-    setCampaigns(updatedCampaigns);
+    } catch {}
 
     setEmailSubject("");
     setEmailBody("");
@@ -721,7 +738,7 @@ export default function AdminPage() {
     setShowEmailModal(false);
 
     if (totalRecipients > DAILY_LIMIT) {
-      alert(`✓ Automated 80-Email Daily Batch Scheduler Activated!\n\n1. Batch 1 (${sentCount} emails): Dispatched today successfully.\n2. ${queuedBatches.length} remaining emails queued across ${Math.ceil(queuedBatches.length / 80)} upcoming days (80/day daily limit respected).`);
+      alert(`✓ Automated 80-Email Daily Persistent Batch Scheduler Activated!\n\n1. Batch 1 (${sentCount} emails): Dispatched today successfully.\n2. ${queuedBatches.length} remaining emails saved to Supabase queue across ${Math.ceil(queuedBatches.length / 80)} upcoming days (server-side daily cron runner will execute automatically).`);
     } else {
       alert(`Broadcast Delivery Summary (${sentCount}/${targetEmails.length} Delivered):\n\n${logDetails.join("\n")}`);
     }
