@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Facebook, Twitter, Youtube, Instagram, Linkedin } from "lucide-react";
 
 export function SiteFooter() {
   return (
@@ -17,25 +16,19 @@ export function SiteFooter() {
         <Link href="/blog">Blog &amp; Journal</Link>
         <Link href="/contact-us">Contact Us</Link>
       </nav>
-      <div className="footer-socials">
-        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-          <Facebook size={16} />
-        </a>
-        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-          <Twitter size={16} />
-        </a>
-        <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
-          <Youtube size={16} />
-        </a>
-        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-          <Instagram size={16} />
-        </a>
-        <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-          <Linkedin size={16} />
-        </a>
-      </div>
-      <div className="footer-copyright">
-        SUSI DAVIES © {new Date().getFullYear()}. All Rights Reserved.
+      <div className="footer-copyright" style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "center" }}>
+        <span>SUSI DAVIES &copy; {new Date().getFullYear()}. All Rights Reserved.</span>
+        <span style={{ fontSize: 13, color: "rgba(255, 255, 255, 0.85)", marginTop: 4 }}>
+          🎨 Created by{" "}
+          <a
+            href="https://avadhbajaj.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#2691BA", textDecoration: "underline", fontWeight: 600 }}
+          >
+            Avadh Bajaj
+          </a>
+        </span>
       </div>
     </footer>
   );
