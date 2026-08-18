@@ -48,10 +48,10 @@ export async function PATCH(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const email = searchParams.get("email");
+    const email = searchParams.get("email") || searchParams.get("id");
 
     if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+      return NextResponse.json({ error: "Email or ID is required" }, { status: 400 });
     }
 
     await deleteSupabaseContact(email);

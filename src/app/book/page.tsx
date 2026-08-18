@@ -46,11 +46,17 @@ export default function BookPage() {
   const [clientPhone, setClientPhone] = useState("");
   const [clientNotes, setClientNotes] = useState("");
   const [bookingDate, setBookingDate] = useState("2026-08-15");
+  const [honeypot, setHoneypot] = useState("");
+  const [isHumanVerified, setIsHumanVerified] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const activeSession = sessionTypes.find((s) => s.id === selectedSession) || sessionTypes[0];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (honeypot || !isHumanVerified || !clientName || !clientEmail || isSubmitting) return;
+
+    setIsSubmitting(true);
     setSubmitted(true);
 
     try {
@@ -241,9 +247,35 @@ export default function BookPage() {
                     </div>
                   </div>
 
-                  <button type="submit" className="btn-pill btn-pill-cyan" style={{ width: "100%" }}>
-                    CONFIRM BOOKING ENQUIRY
-                  </button>
+                    {/* Honeypot field for bot protection */}
+                    <input
+                      type="text"
+                      name="website_hp"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                      style={{ display: "none" }}
+                      tabIndex={-1}
+                      autoComplete="off"
+                    />
+
+                    {/* Anti-Spam Human Verification */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20, padding: "10px 14px", backgroundColor: "#F4F7F6", borderRadius: 10, border: "1px solid #E2DDD3" }}>
+                      <input
+                        type="checkbox"
+                        id="humanCheckBook"
+                        required
+                        checked={isHumanVerified}
+                        onChange={(e) => setIsHumanVerified(e.target.checked)}
+                        style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#2691BA" }}
+                      />
+                      <label htmlFor="humanCheckBook" style={{ fontSize: 13, color: "#2B3D44", cursor: "pointer", userSelect: "none", fontWeight: 500 }}>
+                        🔒 I am human (Not a spam robot)
+                      </label>
+                    </div>
+
+                    <button type="submit" disabled={isSubmitting || !isHumanVerified} className="btn-pill btn-pill-cyan" style={{ width: "100%", opacity: (isSubmitting || !isHumanVerified) ? 0.7 : 1 }}>
+                      {isSubmitting ? "CONFIRMING ENQUIRY..." : "CONFIRM BOOKING ENQUIRY"}
+                    </button>
                 </form>
               </div>
             </div>

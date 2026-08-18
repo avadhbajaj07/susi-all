@@ -357,13 +357,26 @@ export async function updateSupabaseContactStatus(email: string, status: string)
 
 export async function deleteSupabaseContact(email: string) {
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/contacts?email=eq.${encodeURIComponent(email)}`, {
+    const cleanEmail = email.trim().toLowerCase();
+
+    // 1. Delete from email_campaign_queue
+    await fetch(`${SUPABASE_URL}/rest/v1/email_campaign_queue?recipient_email=eq.${encodeURIComponent(cleanEmail)}`, {
+      method: "DELETE",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+      },
+    }).catch(() => {});
+
+    // 2. Delete from contacts table
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/contacts?email=eq.${encodeURIComponent(cleanEmail)}`, {
       method: "DELETE",
       headers: {
         "apikey": SUPABASE_KEY,
         "Authorization": `Bearer ${SUPABASE_KEY}`,
       },
     });
+
     return res.ok;
   } catch (err) {
     console.error("deleteSupabaseContact error:", err);

@@ -1018,14 +1018,22 @@ export default function AdminPage() {
 
   const handleDeleteSubscriber = async (id: string) => {
     const sub = subscribers.find((s) => s.id === id || s.email === id);
+    const targetEmail = sub?.email || (id.includes("@") ? id : "");
     if (!confirm(`Are you sure you want to permanently delete subscriber ${sub?.name || sub?.email || id}?`)) return;
 
-    setSubscribers((prev) => prev.filter((s) => s.id !== id && s.email !== id));
+    setSubscribers((prev) => prev.filter((s) => s.id !== id && s.email !== targetEmail));
 
     try {
-      await fetch(`/api/subscribers?id=${encodeURIComponent(id)}`, {
-        method: "DELETE",
-      });
+      const deleteUrl = targetEmail
+        ? `/api/subscribers?email=${encodeURIComponent(targetEmail)}`
+        : `/api/subscribers?id=${encodeURIComponent(id)}`;
+      await fetch(deleteUrl, { method: "DELETE" });
+
+      const res = await fetch("/api/subscribers");
+      const data = await res.json();
+      if (data.subscribers && Array.isArray(data.subscribers)) {
+        setSubscribers(data.subscribers);
+      }
     } catch (err) {
       console.error("Delete subscriber error:", err);
     }
