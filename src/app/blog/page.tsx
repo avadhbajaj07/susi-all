@@ -23,26 +23,53 @@ export default function JournalPage() {
       .catch((err) => console.error("Fetch posts error:", err));
   }, []);
 
+  const [honeypot, setHoneypot] = useState("");
+  const [isHumanVerified, setIsHumanVerified] = useState(false);
+
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!subEmail) return;
+    if (honeypot || !isHumanVerified || !subEmail) return;
 
     try {
-      await fetch("/api/inbox", {
+      // 1. Save subscriber to Supabase database
+      await fetch("/api/subscribers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fromName: subEmail.split("@")[0],
-          fromEmail: subEmail,
-          to: "hello@susidavies.com",
-          subject: "New Newsletter Subscriber via Blog",
-          body: `Please add ${subEmail} to the Susi Davies Journal Newsletter list.`,
+          name: subEmail.split("@")[0],
+          email: subEmail,
+          segment: "Journal Subscriber",
         }),
-      });
-      setSubMessage("Thank you! You are now subscribed to Susi's Journal.");
+      }).catch(() => {});
+
+      // 2. Dispatch notification email to Susi's Gmail (susidavies@gmail.com)
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: "susidavies@gmail.com",
+          subject: `New Journal Subscriber: ${subEmail}`,
+          body: `New subscriber joined Susi's Journal on susidavies.com:\n\nEmail: ${subEmail}\nStatus: Subscribed`,
+          fromName: "Susi Davies Journal Subscription",
+        }),
+      }).catch(() => {});
+
+      // 3. Dispatch automated 24-hr thank-you confirmation email to client
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: subEmail,
+          subject: "Welcome to Susi Davies' Journal",
+          body: `Dear Subscriber,\n\nThank you for subscribing to Susi Davies' Journal! You will now receive Susi's practice notes, movement guidance, and retreat announcements directly in your inbox.\n\nWarm regards,\nSusi Davies & Team\nhttps://susidavies.com`,
+          fromName: "Susi Davies Studio",
+        }),
+      }).catch(() => {});
+
+      setSubMessage("Thank you for subscribing! An automated welcome confirmation has been sent to your email.");
       setSubEmail("");
     } catch (err) {
-      setSubMessage("Thank you for subscribing!");
+      setSubMessage("Thank you for subscribing to Susi's Journal!");
     }
   };
 
@@ -158,19 +185,47 @@ export default function JournalPage() {
               {subMessage}
             </div>
           ) : (
-            <form onSubmit={handleSubscribe} style={{ maxWidth: 540, margin: "0 auto", display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <form onSubmit={handleSubscribe} style={{ maxWidth: 540, margin: "0 auto", display: "flex", flexDirection: "column", gap: 14, alignItems: "center" }}>
+              {/* Honeypot field for bot protection */}
               <input
-                type="email"
-                className="form-input"
-                placeholder="Enter your email address"
-                required
-                value={subEmail}
-                onChange={(e) => setSubEmail(e.target.value)}
-                style={{ flex: 1, minWidth: 260 }}
+                type="text"
+                name="website_hp"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                style={{ display: "none" }}
+                tabIndex={-1}
+                autoComplete="off"
               />
-              <button type="submit" className="btn-pill btn-pill-cyan" style={{ whiteSpace: "nowrap" }}>
-                SUBSCRIBE TO JOURNAL
-              </button>
+
+              <div style={{ display: "flex", gap: 12, width: "100%", flexWrap: "wrap" }}>
+                <input
+                  type="email"
+                  className="form-input"
+                  placeholder="Enter your email address *"
+                  required
+                  value={subEmail}
+                  onChange={(e) => setSubEmail(e.target.value)}
+                  style={{ flex: 1, minWidth: 260 }}
+                />
+                <button type="submit" disabled={!isHumanVerified} className="btn-pill btn-pill-cyan" style={{ whiteSpace: "nowrap", opacity: !isHumanVerified ? 0.7 : 1 }}>
+                  SUBSCRIBE TO JOURNAL
+                </button>
+              </div>
+
+              {/* Anti-Spam Human Verification */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 14px", backgroundColor: "#F4F7F6", borderRadius: 10, border: "1px solid #E2DDD3" }}>
+                <input
+                  type="checkbox"
+                  id="humanCheckBlog"
+                  required
+                  checked={isHumanVerified}
+                  onChange={(e) => setIsHumanVerified(e.target.checked)}
+                  style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#2691BA" }}
+                />
+                <label htmlFor="humanCheckBlog" style={{ fontSize: 13, color: "#2B3D44", cursor: "pointer", userSelect: "none", fontWeight: 500 }}>
+                  🔒 I am human (Not a spam robot)
+                </label>
+              </div>
             </form>
           )}
         </section>

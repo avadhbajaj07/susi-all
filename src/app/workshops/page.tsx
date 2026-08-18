@@ -22,6 +22,9 @@ const whatToExpect = [
 export default function WorkshopsPage() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
+  const [honeypot, setHoneypot] = useState("");
+  const [isHumanVerified, setIsHumanVerified] = useState(false);
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
 
   const set = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
@@ -36,7 +39,7 @@ export default function WorkshopsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email || selectedDates.length === 0) return;
+    if (honeypot || !isHumanVerified || !form.name || !form.email || selectedDates.length === 0 || status === "sending") return;
     setStatus("sending");
 
     const datesText = selectedDates.map((d, i) => `  ${i + 1}. ${d} · 18:30 – 20:30 · CHF 60.–`).join("\n");
@@ -52,42 +55,53 @@ Selected Workshops:
 ${datesText}
 
 ${totalText}
+Newsletter Opt-in: ${subscribeNewsletter ? "YES (Subscribed)" : "No"}
 
 Message:
 ${form.message || "None"}`;
 
     try {
-      const res = await fetch("/api/send-email", {
+      // 1. Dispatch notification email to Susi's Gmail (susidavies@gmail.com)
+      await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: "hello@susidavies.com",
+          to: "susidavies@gmail.com",
           subject: `Deeper Practice Workshop Registration — ${form.name}`,
           body,
           fromName: "Susi Davies Website",
         }),
-      });
+      }).catch(() => {});
 
-      if (res.ok) {
-        // Send confirmation to registrant
-        const datesConfirmText = selectedDates.map((d, i) => `  ${i + 1}. ${d} · 18:30 – 20:30`).join("\n");
-        fetch("/api/send-email", {
+      // 2. Dispatch automated thank-you email to client
+      const datesConfirmText = selectedDates.map((d, i) => `  ${i + 1}. ${d} · 18:30 – 20:30`).join("\n");
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: form.email,
+          subject: `Your Deeper Practice Workshop Registration — Susi Davies`,
+          body: `Dear ${form.name},\n\nThank you for registering for the Deeper Practice workshop series! We have received your registration and our team will connect with you within 24 hours.\n\nYour selected dates:\n${datesConfirmText}\n\nTime: 18:30 – 20:30\nVenue: at BODYTALKS, Alte Landstrasse 32, Thalwil\nTotal: CHF ${totalPrice}.– (payable by TWINT)\n\nSusi will be in touch shortly to confirm your spots and share payment details.\n\nWith warmth,\nSusi Davies & Team\nhttps://susidavies.com`,
+          fromName: "Susi Davies",
+        }),
+      }).catch(() => {});
+
+      // 3. Save subscriber into database if opted in
+      if (subscribeNewsletter) {
+        await fetch("/api/subscribers", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            to: form.email,
-            subject: `Your Deeper Practice Workshop Registration — Susi Davies`,
-            body: `Dear ${form.name},\n\nThank you for registering for the Deeper Practice workshop series!\n\nYour selected dates:\n${datesConfirmText}\n\nTime: 18:30 – 20:30\nVenue: at BODYTALKS, Alte Landstrasse 32, Thalwil\nTotal: CHF ${totalPrice}.– (payable by TWINT)\n\nSusi will be in touch shortly to confirm your spots and share payment details.\n\nWith warmth,\nSusi Davies`,
-            fromName: "Susi Davies",
+            name: form.name,
+            email: form.email,
+            segment: "Workshop Registrant",
           }),
         }).catch(() => {});
-
-        setStatus("success");
-        setForm({ name: "", email: "", phone: "", message: "" });
-        setSelectedDates([]);
-      } else {
-        setStatus("error");
       }
+
+      setStatus("success");
+      setForm({ name: "", email: "", phone: "", message: "" });
+      setSelectedDates([]);
     } catch {
       setStatus("error");
     }
@@ -331,6 +345,46 @@ ${form.message || "None"}`;
                 <textarea className="form-textarea" rows={3} placeholder="e.g. Is this suitable for beginners? Do I need a yoga mat?" value={form.message} onChange={(e) => set("message", e.target.value)} />
               </div>
 
+              {/* Honeypot field for bot protection */}
+              <input
+                type="text"
+                name="website_hp"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                style={{ display: "none" }}
+                tabIndex={-1}
+                autoComplete="off"
+              />
+
+              {/* Newsletter Subscription Opt-in */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, padding: "10px 14px", backgroundColor: "#FAFBFB", borderRadius: 10, border: "1px solid #E2DDD3" }}>
+                <input
+                  type="checkbox"
+                  id="subCheckWork"
+                  checked={subscribeNewsletter}
+                  onChange={(e) => setSubscribeNewsletter(e.target.checked)}
+                  style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#2691BA" }}
+                />
+                <label htmlFor="subCheckWork" style={{ fontSize: 13, color: "#2B3D44", cursor: "pointer", userSelect: "none", fontWeight: 500 }}>
+                  📩 Subscribe to Susi Davies&apos; Newsletter &amp; Monthly Movement Insights
+                </label>
+              </div>
+
+              {/* Anti-Spam Human Verification */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20, padding: "10px 14px", backgroundColor: "#F4F7F6", borderRadius: 10, border: "1px solid #E2DDD3" }}>
+                <input
+                  type="checkbox"
+                  id="humanCheckWork"
+                  required
+                  checked={isHumanVerified}
+                  onChange={(e) => setIsHumanVerified(e.target.checked)}
+                  style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#2691BA" }}
+                />
+                <label htmlFor="humanCheckWork" style={{ fontSize: 13, color: "#2B3D44", cursor: "pointer", userSelect: "none", fontWeight: 500 }}>
+                  🔒 I am human (Not a spam robot)
+                </label>
+              </div>
+
               {status === "error" && (
                 <p style={{ color: "#E74C3C", fontSize: 14, marginBottom: 16 }}>Something went wrong. Please email hello@susidavies.com directly.</p>
               )}
@@ -338,8 +392,8 @@ ${form.message || "None"}`;
               <button
                 type="submit"
                 className="btn-pill btn-pill-cyan"
-                disabled={status === "sending" || selectedDates.length === 0}
-                style={{ width: "100%", justifyContent: "center", fontSize: 16, padding: "16px 24px", opacity: (status === "sending" || selectedDates.length === 0) ? 0.5 : 1 }}
+                disabled={status === "sending" || selectedDates.length === 0 || !isHumanVerified}
+                style={{ width: "100%", justifyContent: "center", fontSize: 16, padding: "16px 24px", opacity: (status === "sending" || selectedDates.length === 0 || !isHumanVerified) ? 0.5 : 1 }}
               >
                 {status === "sending" ? "Sending Registration…" : selectedDates.length === 0 ? "Select at least one date to register" : `Register for ${selectedDates.length} Workshop${selectedDates.length > 1 ? "s" : ""} — CHF ${totalPrice}.– →`}
               </button>

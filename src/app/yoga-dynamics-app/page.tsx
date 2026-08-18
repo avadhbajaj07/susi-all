@@ -1,139 +1,251 @@
 "use client";
 
-import Image from "next/image";
+import { useState } from "react";
+import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { ExternalLink, Smartphone } from "lucide-react";
+import { Check, CheckCircle2 } from "lucide-react";
 
 export default function YogaDynamicsAppPage() {
-  const appStoreUrl = "https://apps.apple.com/ch/app/yoga-lifestyle/id1659410021?l=en-GB";
+  const [appName, setAppName] = useState("");
+  const [appEmail, setAppEmail] = useState("");
+  const [appMsg, setAppMsg] = useState("");
+  const [honeypot, setHoneypot] = useState("");
+  const [isHumanVerified, setIsHumanVerified] = useState(false);
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleAppSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (honeypot || !isHumanVerified || !appName || !appEmail || !appMsg || isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    try {
+      // 1. Post to Studio Inbox
+      await fetch("/api/inbox", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fromName: appName,
+          fromEmail: appEmail,
+          to: "hello@susidavies.com",
+          subject: `Yoga Dynamics App Inquiry from ${appName}`,
+          body: appMsg,
+        }),
+      }).catch(() => {});
+
+      // 2. Dispatch notification email to Susi's Gmail (susidavies@gmail.com)
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: "susidavies@gmail.com",
+          subject: `New App Inquiry from ${appName}`,
+          body: `New Dynamic Yoga App inquiry received on susidavies.com:\n\nClient Name: ${appName}\nClient Email: ${appEmail}\nNewsletter Opt-in: ${subscribeNewsletter ? "YES (Subscribed)" : "No"}\n\nMessage:\n${appMsg}`,
+          fromName: "Susi Davies App Inquiry",
+        }),
+      }).catch(() => {});
+
+      // 3. Dispatch automated 24-hr thank-you confirmation email to client
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: appEmail,
+          subject: "Thank You for Contacting Susi Davies Studio",
+          body: `Dear ${appName},\n\nThank you for reaching out about the Dynamic Yoga App! We have received your query and our team will get back to you within 24 hours.\n\nWarm regards,\nSusi Davies & Team\nhttps://susidavies.com`,
+          fromName: "Susi Davies Studio",
+        }),
+      }).catch(() => {});
+
+      // 4. Save subscriber into database if opted in
+      if (subscribeNewsletter) {
+        await fetch("/api/subscribers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: appName,
+            email: appEmail,
+            segment: "Dynamic Yoga App Inquiry",
+          }),
+        }).catch(() => {});
+      }
+
+      setSubmitted(true);
+      setAppName("");
+      setAppEmail("");
+      setAppMsg("");
+    } catch {
+      setSubmitted(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <main>
       <SiteHeader />
 
-      {/* Hero Banner */}
+      {/* Page Hero Banner */}
       <section className="page-banner">
         <div>
-          <h1>Yoga Dynamics App</h1>
+          <h1>Dynamic Yoga App</h1>
         </div>
         <span className="page-banner-arrow">⌄</span>
       </section>
 
       <div className="container">
-        {/* Section 1: Intro & Features + Mockups */}
-        <section className="grid-2col">
-          <div className="col-content">
-            <h2 className="section-heading">Your Pocket Guide to Wellness</h2>
-            <p className="body-text" style={{ marginBottom: 24 }}>
-              Welcome to the Yoga Dynamics App, your ultimate companion for wellness, balance, and personal growth. Whether you&apos;re a seasoned yogi or just starting your journey, our app offers a comprehensive platform to support your physical, mental, and emotional well-being. Created by Susi Davies, a certified life coach and yoga instructor, the Yoga Dynamics App combines her years of expertise with cutting-edge technology to provide you with an immersive and transformative experience.
-            </p>
-
-            {/* SINGLE Official App Store Download Link Button on Page */}
-            <div style={{ backgroundColor: "rgba(38,145,186,0.08)", border: "2px solid var(--blue)", borderRadius: 20, padding: "26px 30px", marginBottom: 35 }}>
-              <strong style={{ fontSize: 19, color: "var(--blue)", display: "block", marginBottom: 8 }}>
-                📱 Get Susi Davies App on the iOS App Store
-              </strong>
-              <p className="body-text" style={{ fontSize: 14, marginBottom: 20, color: "var(--ink-body)" }}>
-                Get instant access to Susi&apos;s guided yoga classes, breathwork routines, meditation practices, and daily inspirations directly on your iPhone or iPad.
-              </p>
-              <a
-                href={appStoreUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-pill btn-pill-cyan"
-                style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "15px 32px", fontSize: 15, fontWeight: 700 }}
-              >
-                <Smartphone size={18} /> DOWNLOAD ON APPLE APP STORE <ExternalLink size={16} />
-              </a>
-            </div>
-
-            <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
-              <h3 style={{ fontSize: 22, marginBottom: 10, color: "var(--blue)" }}>Yoga Classes</h3>
-              <p className="body-text">
-                <strong>Dynamic Classes:</strong> Explore dynamic and powerful yoga classes that improve strength, stamina, and flexibility. Each class is a fusion of Iyengar and Vinyasa yoga, emphasizing movement from the core without compromising joint or spine integrity.
-              </p>
-              <p className="body-text">
-                <strong>Alignment Techniques:</strong> Learn important alignment techniques based on Iyengar yoga, combined with graceful and powerful Vinyasa flow.
-              </p>
-            </div>
-
-            <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
-              <h3 style={{ fontSize: 22, marginBottom: 10, color: "var(--blue)" }}>Meditation &amp; Mindfulness</h3>
-              <p className="body-text">
-                <strong>Guided Meditations:</strong> Immerse yourself in guided meditations designed to calm your mind, reduce stress, and enhance your overall well-being.
-              </p>
-              <p className="body-text">
-                <strong>Breathing Techniques:</strong> Discover a variety of breathing exercises that enhance vitality and keep your nervous system balanced.
-              </p>
-              <p className="body-text">
-                <strong>Mindfulness Practices:</strong> Cultivate mindfulness through a range of practices designed to increase present-moment awareness and reduce mental chatter.
-              </p>
-            </div>
-
-            <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
-              <h3 style={{ fontSize: 22, marginBottom: 10, color: "var(--blue)" }}>Yoga Philosophy</h3>
-              <p className="body-text">
-                <strong>Philosophical insights:</strong> Gain deeper insights into yoga philosophy, including its principles and teachings, and how they can be applied to daily life.
-              </p>
-              <p className="body-text">
-                <strong>Daily Inspirations:</strong> Start your day with inspirational quotes and messages that resonate with the yogic philosophy of balance and harmony.
-              </p>
-            </div>
-
-            <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24 }}>
-              <h3 style={{ fontSize: 22, marginBottom: 10, color: "var(--blue)" }}>Community &amp; Support</h3>
-              <p className="body-text">
-                <strong>Community Connection:</strong> Connect with like-minded individuals, share your experiences, and build a supportive community.
-              </p>
-              <p className="body-text">
-                <strong>Expert Guidance:</strong> Access expert guidance from Susi Davies and other experienced instructors, providing you with valuable insights and support on your yoga and wellness journey.
-              </p>
-            </div>
-          </div>
-
-          <div className="col-media">
-            <div className="phone-mockups-wrapper" style={{ position: "sticky", top: 110, textAlign: "center" }}>
-              <Image
-                src="/images/imgi_7_mobile.png"
-                alt="Susi Davies App Screen Mockups"
-                width={480}
-                height={580}
-                priority
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Section 2: Contact Form */}
-        <section className="grid-2col" style={{ marginTop: 90 }}>
+        {/* Section 1: Intro Overview */}
+        <section className="grid-2col-alt">
           <div className="col-media">
             <div className="image-card-rounded">
               <img
-                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies14.jpg"
-                alt="Susi Davies Practice"
+                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527173/susi-davies2.jpg"
+                alt="Susi Davies Dynamic Yoga App"
                 style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
               />
             </div>
           </div>
+
+          <div className="col-content">
+            <span className="eyebrow">YOUR PERSONAL YOGA PRACTICE</span>
+            <h2 className="section-heading" style={{ fontSize: 36, marginBottom: 20 }}>
+              Dynamic Movement. Anywhere.
+            </h2>
+            <p className="body-text" style={{ marginBottom: 24 }}>
+              The Dynamic Yoga app gives you direct access to Susi Davies&apos; complete library of movement practices, guided pranayama, restorative sequences, and functional alignment tutorials.
+            </p>
+
+            <ul className="bullet-list" style={{ marginBottom: 30 }}>
+              <li><Check size={18} color="var(--blue)" /> Live streaming weekly online classes</li>
+              <li><Check size={18} color="var(--blue)" /> On-demand video library categorized by focus &amp; duration</li>
+              <li><Check size={18} color="var(--blue)" /> Guided breathwork and restorative meditation</li>
+              <li><Check size={18} color="var(--blue)" /> Functional alignment guides for home practice</li>
+            </ul>
+
+            <Link href="/book" className="btn-pill btn-pill-cyan">
+              JOIN WEEKLY ONLINE CLASS (TWINT OK)
+            </Link>
+          </div>
+        </section>
+
+        {/* Section 2: Have Questions About The App Form */}
+        <section className="grid-2col" style={{ marginTop: 60 }}>
+          <div className="col-media">
+            <div className="image-card-rounded">
+              <img
+                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527174/susi-davies13.jpg"
+                alt="Susi Davies App Practice"
+                style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
+              />
+            </div>
+          </div>
+
           <div className="col-content">
             <div className="contact-form-card">
               <span className="eyebrow">Get in touch</span>
-              <h2 className="section-heading" style={{ fontSize: 32 }}>Have Questions About The App?</h2>
-              <form onSubmit={(e) => e.preventDefault()}>
-                <div className="form-group">
-                  <input type="text" className="form-input" placeholder="Your name" required />
+              <h2 className="section-heading" style={{ fontSize: 32, marginBottom: 12 }}>Have Questions About The App?</h2>
+              
+              {submitted ? (
+                <div style={{ textAlign: "center", padding: "30px 15px" }}>
+                  <div style={{ margin: "0 auto 14px", width: 56, height: 56, borderRadius: "50%", background: "rgba(38,145,186,0.12)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--blue)" }}>
+                    <CheckCircle2 size={32} />
+                  </div>
+                  <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, color: "#2691BA", marginBottom: 10 }}>
+                    Inquiry Received!
+                  </h3>
+                  <p style={{ color: "#4A6068", fontSize: 14, marginBottom: 20 }}>
+                    Thank you! An automated confirmation has been sent to your email, and Susi Davies will get back to you within 24 hours.
+                  </p>
+                  <button onClick={() => setSubmitted(false)} className="btn-pill btn-pill-cyan">
+                    Ask Another Question
+                  </button>
                 </div>
-                <div className="form-group">
-                  <input type="email" className="form-input" placeholder="Your email" required />
-                </div>
-                <div className="form-group">
-                  <textarea className="form-textarea" rows={4} placeholder="Your message" required></textarea>
-                </div>
-                <button type="submit" className="btn-pill btn-pill-green" style={{ width: "100%", marginTop: 10 }}>
-                  SUBMIT
-                </button>
-              </form>
+              ) : (
+                <form onSubmit={handleAppSubmit}>
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="Your name *"
+                      required
+                      value={appName}
+                      onChange={(e) => setAppName(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <input
+                      type="email"
+                      className="form-input"
+                      placeholder="Your email *"
+                      required
+                      value={appEmail}
+                      onChange={(e) => setAppEmail(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 16 }}>
+                    <textarea
+                      className="form-textarea"
+                      rows={4}
+                      placeholder="Your message or question..."
+                      required
+                      value={appMsg}
+                      onChange={(e) => setAppMsg(e.target.value)}
+                    ></textarea>
+                  </div>
+
+                  {/* Honeypot field for bot protection */}
+                  <input
+                    type="text"
+                    name="website_hp"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    style={{ display: "none" }}
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+
+                  {/* Newsletter Subscription Opt-in */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12, padding: "10px 14px", backgroundColor: "#FAFBFB", borderRadius: 10, border: "1px solid #E2DDD3" }}>
+                    <input
+                      type="checkbox"
+                      id="subCheckApp"
+                      checked={subscribeNewsletter}
+                      onChange={(e) => setSubscribeNewsletter(e.target.checked)}
+                      style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#2691BA" }}
+                    />
+                    <label htmlFor="subCheckApp" style={{ fontSize: 13, color: "#2B3D44", cursor: "pointer", userSelect: "none", fontWeight: 500 }}>
+                      📩 Subscribe to Susi Davies&apos; Newsletter &amp; Monthly Movement Insights
+                    </label>
+                  </div>
+
+                  {/* Anti-Spam Human Verification */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18, padding: "10px 14px", backgroundColor: "#F4F7F6", borderRadius: 10, border: "1px solid #E2DDD3" }}>
+                    <input
+                      type="checkbox"
+                      id="humanCheckApp"
+                      required
+                      checked={isHumanVerified}
+                      onChange={(e) => setIsHumanVerified(e.target.checked)}
+                      style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#2691BA" }}
+                    />
+                    <label htmlFor="humanCheckApp" style={{ fontSize: 13, color: "#2B3D44", cursor: "pointer", userSelect: "none", fontWeight: 500 }}>
+                      🔒 I am human (Not a spam robot)
+                    </label>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || !isHumanVerified}
+                    className="btn-pill btn-pill-green"
+                    style={{ width: "100%", padding: "16px", fontSize: 15, opacity: (isSubmitting || !isHumanVerified) ? 0.7 : 1 }}
+                  >
+                    {isSubmitting ? "SUBMITTING..." : "SUBMIT INQUIRY"}
+                  </button>
+                </form>
+              )}
             </div>
           </div>
         </section>

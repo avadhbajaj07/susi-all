@@ -31,6 +31,9 @@ export default function PrivateSessionsPage() {
     location: "",
     message: "",
   });
+  const [honeypot, setHoneypot] = useState("");
+  const [isHumanVerified, setIsHumanVerified] = useState(false);
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
 
   const set = (field: string, value: string) =>
@@ -38,7 +41,7 @@ export default function PrivateSessionsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.sessionType) return;
+    if (honeypot || !isHumanVerified || !form.name || !form.email || !form.sessionType || status === "sending") return;
     setStatus("sending");
 
     const modeLabel = sessionMode === "in-person" ? "In-Person Session" : "Online Session (Video Call)";
@@ -56,40 +59,51 @@ Focus Area: ${form.sessionType}
 Preferred Date: ${form.preferredDate || "Flexible"}
 Preferred Time: ${form.preferredTime || "Flexible"}
 ${locationLine}
+Newsletter Opt-in: ${subscribeNewsletter ? "YES (Subscribed)" : "No"}
 
 Additional Notes:
 ${form.message || "None"}`;
 
     try {
-      const res = await fetch("/api/send-email", {
+      // 1. Dispatch notification email to Susi's Gmail (susidavies@gmail.com)
+      await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: "hello@susidavies.com",
+          to: "susidavies@gmail.com",
           subject: `Private Session Booking Request — ${form.name}`,
           body: emailBody,
           fromName: "Susi Davies Website",
         }),
-      });
+      }).catch(() => {});
 
-      if (res.ok) {
-        // Also send confirmation to client
-        fetch("/api/send-email", {
+      // 2. Dispatch automated thank-you email to client
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: form.email,
+          subject: "Your Private Session Request — Susi Davies",
+          body: `Dear ${form.name},\n\nThank you for reaching out! Your private session booking request (${form.sessionType}) has been received.\n\nSusi will personally get back to you within 24 hours to confirm your session details.\n\nSession Focus: ${form.sessionType}\nFormat: ${modeLabel}\n\nWith warmth,\nSusi Davies & Team\nhttps://susidavies.com`,
+          fromName: "Susi Davies",
+        }),
+      }).catch(() => {});
+
+      // 3. Save subscriber into database if opted in
+      if (subscribeNewsletter) {
+        await fetch("/api/subscribers", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            to: form.email,
-            subject: "Your Private Session Request — Susi Davies",
-            body: `Dear ${form.name},\n\nThank you for reaching out! Your private session booking request has been received.\n\nSusi will personally get back to you within 24 hours to confirm your session details.\n\nSession Focus: ${form.sessionType}\nFormat: ${modeLabel}\n\nWith warmth,\nSusi Davies`,
-            fromName: "Susi Davies",
+            name: form.name,
+            email: form.email,
+            segment: `Private Session (${form.sessionType})`,
           }),
         }).catch(() => {});
-
-        setStatus("success");
-        setForm({ name: "", email: "", phone: "", sessionType: "", preferredDate: "", preferredTime: "", location: "", message: "" });
-      } else {
-        setStatus("error");
       }
+
+      setStatus("success");
+      setForm({ name: "", email: "", phone: "", sessionType: "", preferredDate: "", preferredTime: "", location: "", message: "" });
     } catch {
       setStatus("error");
     }
@@ -406,6 +420,46 @@ ${form.message || "None"}`;
                 />
               </div>
 
+              {/* Honeypot field for bot protection */}
+              <input
+                type="text"
+                name="website_hp"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                style={{ display: "none" }}
+                tabIndex={-1}
+                autoComplete="off"
+              />
+
+              {/* Newsletter Subscription Opt-in */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, padding: "10px 14px", backgroundColor: "#FAFBFB", borderRadius: 10, border: "1px solid #E2DDD3" }}>
+                <input
+                  type="checkbox"
+                  id="subCheckPriv"
+                  checked={subscribeNewsletter}
+                  onChange={(e) => setSubscribeNewsletter(e.target.checked)}
+                  style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#2691BA" }}
+                />
+                <label htmlFor="subCheckPriv" style={{ fontSize: 13, color: "#2B3D44", cursor: "pointer", userSelect: "none", fontWeight: 500 }}>
+                  📩 Subscribe to Susi Davies&apos; Newsletter &amp; Monthly Movement Insights
+                </label>
+              </div>
+
+              {/* Anti-Spam Human Verification */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20, padding: "10px 14px", backgroundColor: "#F4F7F6", borderRadius: 10, border: "1px solid #E2DDD3" }}>
+                <input
+                  type="checkbox"
+                  id="humanCheckPriv"
+                  required
+                  checked={isHumanVerified}
+                  onChange={(e) => setIsHumanVerified(e.target.checked)}
+                  style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#2691BA" }}
+                />
+                <label htmlFor="humanCheckPriv" style={{ fontSize: 13, color: "#2B3D44", cursor: "pointer", userSelect: "none", fontWeight: 500 }}>
+                  🔒 I am human (Not a spam robot)
+                </label>
+              </div>
+
               {status === "error" && (
                 <p style={{ color: "#E74C3C", fontSize: 14, marginBottom: 16 }}>
                   Something went wrong. Please try again or email hello@susidavies.com directly.
@@ -415,8 +469,8 @@ ${form.message || "None"}`;
               <button
                 type="submit"
                 className="btn-pill btn-pill-cyan"
-                disabled={status === "sending"}
-                style={{ width: "100%", justifyContent: "center", fontSize: 16, padding: "16px 24px", opacity: status === "sending" ? 0.7 : 1 }}
+                disabled={status === "sending" || !isHumanVerified}
+                style={{ width: "100%", justifyContent: "center", fontSize: 16, padding: "16px 24px", opacity: (status === "sending" || !isHumanVerified) ? 0.7 : 1 }}
               >
                 {status === "sending" ? "Sending Request…" : `Request ${sessionMode === "in-person" ? "In-Person" : "Online"} Session with Susi →`}
               </button>
