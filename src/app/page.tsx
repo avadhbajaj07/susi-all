@@ -12,6 +12,8 @@ export default function Home() {
   const [formEmail, setFormEmail] = useState("");
   const [formMsg, setFormMsg] = useState("");
   const [formStatus, setFormStatus] = useState<string | null>(null);
+  const [honeypot, setHoneypot] = useState("");
+  const [isHumanVerified, setIsHumanVerified] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const serviceCards = [
@@ -39,7 +41,7 @@ export default function Home() {
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formName || !formEmail || !formMsg || isSubmitting) return;
+    if (honeypot || !isHumanVerified || !formName || !formEmail || !formMsg || isSubmitting) return;
 
     setIsSubmitting(true);
     setFormStatus("Sending message to Susi Davies...");
@@ -288,11 +290,37 @@ export default function Home() {
                     onChange={(e) => setFormMsg(e.target.value)}
                   ></textarea>
                 </div>
+                {/* Honeypot field for bot protection */}
+                <input
+                  type="text"
+                  name="website_hp"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                  style={{ display: "none" }}
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+
+                {/* Anti-Spam Human Verification */}
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18, padding: "10px 14px", backgroundColor: "#F4F7F6", borderRadius: 10, border: "1px solid #E2DDD3" }}>
+                  <input
+                    type="checkbox"
+                    id="humanCheckHome"
+                    required
+                    checked={isHumanVerified}
+                    onChange={(e) => setIsHumanVerified(e.target.checked)}
+                    style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#2691BA" }}
+                  />
+                  <label htmlFor="humanCheckHome" style={{ fontSize: 13, color: "#2B3D44", cursor: "pointer", userSelect: "none", fontWeight: 500 }}>
+                    🔒 I am human (Not a spam robot)
+                  </label>
+                </div>
+
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !isHumanVerified}
                   className="btn-pill btn-pill-cyan"
-                  style={{ width: "100%", padding: "16px", fontSize: 15, opacity: isSubmitting ? 0.7 : 1 }}
+                  style={{ width: "100%", padding: "16px", fontSize: 15, opacity: (isSubmitting || !isHumanVerified) ? 0.7 : 1 }}
                 >
                   {isSubmitting ? "SENDING MESSAGE..." : "SEND MESSAGE TO SUSI"}
                 </button>
