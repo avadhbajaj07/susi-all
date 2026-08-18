@@ -1,9 +1,34 @@
 import { NextResponse } from "next/server";
 import { renderSusiEmailTemplate } from "@/lib/email-template";
 
+const countryNameMap: { [code: string]: string } = {
+  CH: "Switzerland 🇨🇭",
+  DE: "Germany 🇩🇪",
+  AT: "Austria 🇦🇹",
+  FR: "France 🇫🇷",
+  IT: "Italy 🇮🇹",
+  GB: "United Kingdom 🇬🇧",
+  US: "United States 🇺🇸",
+  CA: "Canada 🇨🇦",
+  IN: "India 🇮🇳",
+  ES: "Spain 🇪🇸",
+  NL: "Netherlands 🇳🇱",
+  SE: "Sweden 🇸🇪",
+  NO: "Norway 🇳🇴",
+  DK: "Denmark 🇩🇰",
+  FI: "Finland 🇫🇮",
+  BE: "Belgium 🇧🇪",
+  PT: "Portugal 🇵🇹",
+  IE: "Ireland 🇮🇪",
+  AU: "Australia 🇦🇺",
+  NZ: "New Zealand 🇳🇿",
+  SG: "Singapore 🇸🇬",
+  AE: "United Arab Emirates 🇦🇪",
+};
+
 export async function POST(req: Request) {
   try {
-    const { to, subject, body, fromName, imageUrl } = await req.json();
+    const { to, subject, body, fromName, imageUrl, includeGeo } = await req.json();
 
     if (!to || !subject || !body) {
       return NextResponse.json({ error: "Missing required fields: to, subject, body" }, { status: 400 });
@@ -14,6 +39,17 @@ export async function POST(req: Request) {
     if (!apiKey) {
       return NextResponse.json({ error: "RESEND_API_KEY is not configured in environment variables." }, { status: 500 });
     }
+
+    // Extract IP Address and Country Location from request headers
+    const clientIp =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.headers.get("x-real-ip") ||
+      "Not captured";
+
+    const countryCode = (req.headers.get("x-vercel-ip-country") || "CH").toUpperCase();
+    const city = req.headers.get("x-vercel-ip-city") || "";
+    const countryName = countryNameMap[countryCode] || `${countryCode} Location`;
+    const formattedGeo = `${countryName}${city ? ` (${city})` : ""}`;
 
     // Clean email recipient if format is "Name <email@domain.com>"
     let recipientEmail = to.trim();
@@ -26,7 +62,13 @@ export async function POST(req: Request) {
       }
     }
 
-    // Process optional header image into inline CID attachment for 100% Gmail & Apple Mail display
+    // Append IP & Country footer for internal notification emails to Susi
+    let finalBody = body;
+    if (recipientEmail.includes("susidavies") || includeGeo) {
+      finalBody = `${body}\n\n----------------------------------------\n📍 Submission Location Details:\n• IP Address: ${clientIp}\n• Country / Region: ${formattedGeo}`;
+    }
+
+    // Process optional header image into inline CID attachment
     let resendAttachments: any[] = [];
     let templateHeaderImage = imageUrl || undefined;
 
@@ -68,8 +110,8 @@ export async function POST(req: Request) {
       }
     }
 
-    // Wrap email body in Susi Davies template & signature
-    const formattedBodyHtml = `<div style="white-space: pre-line;">${body}</div>`;
+    // Wrap email body in Susi Davies template
+    const formattedBodyHtml = `<div style="white-space: pre-line;">${finalBody}</div>`;
     const fullHtml = renderSusiEmailTemplate({
       title: subject,
       bodyHtml: formattedBodyHtml,
@@ -81,7 +123,7 @@ export async function POST(req: Request) {
       from: `${fromName || "Susi Davies"} <hello@susidavies.com>`,
       to: [recipientEmail],
       subject: subject,
-      text: body,
+      text: finalBody,
       html: fullHtml,
     };
 
