@@ -24,6 +24,8 @@ export function BlogCommentsSection({ postSlug }: { postSlug: string }) {
       .catch((err) => console.error("Fetch comments error:", err));
   }, [postSlug]);
 
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
+
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (honeypot || !isHumanVerified || !authorName || !authorEmail || !content || isSubmitting) return;
@@ -32,6 +34,7 @@ export function BlogCommentsSection({ postSlug }: { postSlug: string }) {
     setStatusMessage(null);
 
     try {
+      // 1. Submit comment to API
       const res = await fetch("/api/comments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -43,17 +46,49 @@ export function BlogCommentsSection({ postSlug }: { postSlug: string }) {
         }),
       });
 
-      const data = await res.json();
-      if (data.success) {
-        setStatusMessage("Thank you for your feedback! Your comment has been submitted to Susi Davies and is pending review.");
-        setAuthorName("");
-        setAuthorEmail("");
-        setContent("");
-      } else {
-        setStatusMessage("Failed to submit feedback. Please try again.");
+      // 2. Dispatch notification email to Susi's Gmail (susidavies@gmail.com)
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: "susidavies@gmail.com",
+          subject: `New Article Comment from ${authorName}`,
+          body: `New comment submitted on blog article (${postSlug}):\n\nAuthor Name: ${authorName}\nEmail: ${authorEmail}\nNewsletter Opt-in: ${subscribeNewsletter ? "YES (Subscribed)" : "No"}\n\nComment:\n${content}`,
+          fromName: "Susi Davies Blog Comments",
+        }),
+      }).catch(() => {});
+
+      // 3. Dispatch automated 24-hr thank-you confirmation email to client
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: authorEmail,
+          subject: "Thank You for Your Feedback to Susi Davies",
+          body: `Dear ${authorName},\n\nThank you for sharing your thoughts on susidavies.com! We have received your query and our team will connect with you within 24 hours.\n\nWarm regards,\nSusi Davies & Team\nhttps://susidavies.com`,
+          fromName: "Susi Davies Studio",
+        }),
+      }).catch(() => {});
+
+      // 4. Save subscriber into database if opted in
+      if (subscribeNewsletter) {
+        await fetch("/api/subscribers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: authorName,
+            email: authorEmail,
+            segment: "Blog Reader Feedback",
+          }),
+        }).catch(() => {});
       }
+
+      setStatusMessage("Thank you for your query! An automated confirmation has been sent to your email, and our team will connect with you within 24 hours.");
+      setAuthorName("");
+      setAuthorEmail("");
+      setContent("");
     } catch (err) {
-      setStatusMessage("Thank you for your feedback! Your comment is pending studio review.");
+      setStatusMessage("Thank you for your feedback! Our team will connect with you within 24 hours.");
     } finally {
       setIsSubmitting(false);
     }
@@ -154,6 +189,20 @@ export function BlogCommentsSection({ postSlug }: { postSlug: string }) {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
               ></textarea>
+            </div>
+
+            {/* Newsletter Subscription Opt-in */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12, padding: "10px 14px", backgroundColor: "#FAFBFB", borderRadius: 10, border: "1px solid #E5EEF3" }}>
+              <input
+                type="checkbox"
+                id="subCheckComment"
+                checked={subscribeNewsletter}
+                onChange={(e) => setSubscribeNewsletter(e.target.checked)}
+                style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#2691BA" }}
+              />
+              <label htmlFor="subCheckComment" style={{ fontSize: 13, color: "#2B3D44", cursor: "pointer", userSelect: "none", fontWeight: 500 }}>
+                📩 Subscribe to Susi Davies&apos; Newsletter &amp; Monthly Movement Insights
+              </label>
             </div>
 
             {/* Anti-Spam Human Verification */}

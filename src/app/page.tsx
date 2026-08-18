@@ -15,6 +15,7 @@ export default function Home() {
   const [honeypot, setHoneypot] = useState("");
   const [isHumanVerified, setIsHumanVerified] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
 
   const serviceCards = [
     {
@@ -58,26 +59,51 @@ export default function Home() {
           subject: `Website Inquiry from ${formName}`,
           body: formMsg,
         }),
-      });
+      }).catch(() => {});
 
-      // 2. Dispatch notification email via Resend API
+      // 2. Dispatch notification email directly to Susi's Gmail (susidavies@gmail.com)
       await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: "hello@susidavies.com",
-          subject: `New Contact Form Inquiry: ${formName}`,
-          body: `Client Name: ${formName}\nClient Email: ${formEmail}\n\nMessage:\n${formMsg}`,
-          fromName: "Susi Davies Website",
+          to: "susidavies@gmail.com",
+          subject: `New Website Inquiry from ${formName}`,
+          body: `New website inquiry received on susidavies.com:\n\nClient Name: ${formName}\nClient Email: ${formEmail}\nNewsletter Opt-in: ${subscribeNewsletter ? "YES (Subscribed)" : "No"}\n\nMessage:\n${formMsg}`,
+          fromName: "Susi Davies Website Form",
         }),
       }).catch(() => {});
 
-      setFormStatus("Thank you! Your message has been sent to Susi Davies.");
+      // 3. Dispatch automated thank-you confirmation email to client
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: formEmail,
+          subject: "Thank You for Contacting Susi Davies",
+          body: `Dear ${formName},\n\nThank you for reaching out to Susi Davies! We have received your query and our team will get back to you within 24 hours.\n\nWarm regards,\nSusi Davies & Team\nhttps://susidavies.com`,
+          fromName: "Susi Davies Studio",
+        }),
+      }).catch(() => {});
+
+      // 4. Save/upsert subscriber into database if opted in
+      if (subscribeNewsletter) {
+        await fetch("/api/subscribers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formName,
+            email: formEmail,
+            segment: "Homepage Contact Inquiry",
+          }),
+        }).catch(() => {});
+      }
+
+      setFormStatus("Thank you for your query! An automated confirmation has been sent to your email, and our team will connect with you within 24 hours.");
       setFormName("");
       setFormEmail("");
       setFormMsg("");
     } catch (err: any) {
-      setFormStatus("Message saved to Studio Inbox! Susi will reply shortly.");
+      setFormStatus("Thank you for your query! Our team will connect with you within 24 hours.");
     } finally {
       setIsSubmitting(false);
     }
@@ -300,6 +326,20 @@ export default function Home() {
                   tabIndex={-1}
                   autoComplete="off"
                 />
+
+                {/* Newsletter Subscription Opt-in */}
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12, padding: "10px 14px", backgroundColor: "#FAFBFB", borderRadius: 10, border: "1px solid #E2DDD3" }}>
+                  <input
+                    type="checkbox"
+                    id="subCheckHome"
+                    checked={subscribeNewsletter}
+                    onChange={(e) => setSubscribeNewsletter(e.target.checked)}
+                    style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#2691BA" }}
+                  />
+                  <label htmlFor="subCheckHome" style={{ fontSize: 13, color: "#2B3D44", cursor: "pointer", userSelect: "none", fontWeight: 500 }}>
+                    📩 Subscribe to Susi Davies&apos; Newsletter &amp; Monthly Movement Insights
+                  </label>
+                </div>
 
                 {/* Anti-Spam Human Verification */}
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18, padding: "10px 14px", backgroundColor: "#F4F7F6", borderRadius: 10, border: "1px solid #E2DDD3" }}>

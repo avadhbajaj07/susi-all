@@ -52,6 +52,8 @@ export default function BookPage() {
 
   const activeSession = sessionTypes.find((s) => s.id === selectedSession) || sessionTypes[0];
 
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (honeypot || !isHumanVerified || !clientName || !clientEmail || isSubmitting) return;
@@ -60,28 +62,42 @@ export default function BookPage() {
     setSubmitted(true);
 
     try {
-      // Send notification email via Resend to hello@susidavies.com
+      // 1. Dispatch notification email to Susi's Gmail (susidavies@gmail.com)
       await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: "hello@susidavies.com",
+          to: "susidavies@gmail.com",
           subject: `New Booking Request: ${activeSession.title} - ${clientName}`,
-          body: `New session booking request received on susidavies.com:\n\nClient Name: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nSession: ${activeSession.title} (${activeSession.price})\nDate: ${bookingDate}\nTime Slot: ${timeSlot}\n\nClient Notes:\n${clientNotes || "None"}`,
+          body: `New session booking request received on susidavies.com:\n\nClient Name: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nSession: ${activeSession.title} (${activeSession.price})\nDate: ${bookingDate}\nTime Slot: ${timeSlot}\nNewsletter Opt-in: ${subscribeNewsletter ? "YES (Subscribed)" : "No"}\n\nClient Notes:\n${clientNotes || "None"}`,
           fromName: "Susi Davies Booking System",
         }),
-      });
+      }).catch(() => {});
 
-      // Save client contact into Supabase database
-      await fetch("/api/subscribers", {
+      // 2. Dispatch automated 24-hr thank-you confirmation email to client
+      await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: clientName,
-          email: clientEmail,
-          segment: activeSession.title,
+          to: clientEmail,
+          subject: `Booking Request Confirmation: ${activeSession.title}`,
+          body: `Dear ${clientName},\n\nThank you for requesting a session (${activeSession.title}) with Susi Davies! We have received your booking request for ${bookingDate} (${timeSlot}), and our team will connect with you within 24 hours to confirm your reservation.\n\nWarm regards,\nSusi Davies Studio\nhttps://susidavies.com`,
+          fromName: "Susi Davies Studio",
         }),
       }).catch(() => {});
+
+      // 3. Save client contact & subscriber into database if opted in
+      if (subscribeNewsletter) {
+        await fetch("/api/subscribers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: clientName,
+            email: clientEmail,
+            segment: activeSession.title,
+          }),
+        }).catch(() => {});
+      }
     } catch (err) {
       console.error("Booking email dispatch error:", err);
     }
@@ -257,6 +273,20 @@ export default function BookPage() {
                       tabIndex={-1}
                       autoComplete="off"
                     />
+
+                    {/* Newsletter Subscription Opt-in */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12, padding: "10px 14px", backgroundColor: "#FAFBFB", borderRadius: 10, border: "1px solid #E2DDD3" }}>
+                      <input
+                        type="checkbox"
+                        id="subCheckBook"
+                        checked={subscribeNewsletter}
+                        onChange={(e) => setSubscribeNewsletter(e.target.checked)}
+                        style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#2691BA" }}
+                      />
+                      <label htmlFor="subCheckBook" style={{ fontSize: 13, color: "#2B3D44", cursor: "pointer", userSelect: "none", fontWeight: 500 }}>
+                        📩 Subscribe to Susi Davies&apos; Newsletter &amp; Monthly Movement Insights
+                      </label>
+                    </div>
 
                     {/* Anti-Spam Human Verification */}
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20, padding: "10px 14px", backgroundColor: "#F4F7F6", borderRadius: 10, border: "1px solid #E2DDD3" }}>

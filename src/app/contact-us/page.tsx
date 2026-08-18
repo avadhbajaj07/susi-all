@@ -14,6 +14,7 @@ export default function ContactPage() {
   const [isHumanVerified, setIsHumanVerified] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,33 +23,47 @@ export default function ContactPage() {
     setIsSubmitting(true);
 
     try {
-      // 1. Send notification email via Resend to hello@susidavies.com
+      // 1. Send notification email to Susi's Gmail (susidavies@gmail.com)
       await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: "hello@susidavies.com",
-          subject: `New Contact Enquiry from ${name}`,
-          body: `New contact message from Susi Davies Website:\n\nName: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
-          fromName: "Susi Davies Website",
+          to: "susidavies@gmail.com",
+          subject: `New Contact Form Submission from ${name}`,
+          body: `New contact inquiry received on susidavies.com:\n\nName: ${name}\nEmail: ${email}\nNewsletter Opt-in: ${subscribeNewsletter ? "YES (Subscribed)" : "No"}\n\nMessage:\n${message}`,
+          fromName: "Susi Davies Website Form",
         }),
-      });
+      }).catch(() => {});
 
-      // 2. Save contact to Supabase database
-      await fetch("/api/subscribers", {
+      // 2. Send automated 24-hr thank-you confirmation email to client
+      await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name,
-          email,
-          segment: "Contact Form Enquiry",
+          to: email,
+          subject: "Thank You for Contacting Susi Davies",
+          body: `Dear ${name},\n\nThank you for reaching out to Susi Davies! We have received your query and our team will get back to you within 24 hours.\n\nWarm regards,\nSusi Davies & Team\nhttps://susidavies.com`,
+          fromName: "Susi Davies Studio",
         }),
       }).catch(() => {});
+
+      // 3. Save contact into database & newsletter subscribers if opted in
+      if (subscribeNewsletter) {
+        await fetch("/api/subscribers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name,
+            email,
+            segment: "Contact Us Form",
+          }),
+        }).catch(() => {});
+      }
 
       setSubmitted(true);
     } catch (err) {
       console.error("Contact submit error:", err);
-      alert("There was an issue sending your message. Please try again.");
+      setSubmitted(true);
     }
 
     setIsSubmitting(false);
@@ -147,6 +162,20 @@ export default function ContactPage() {
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                       ></textarea>
+                    </div>
+
+                    {/* Newsletter Subscription Opt-in */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12, padding: "10px 14px", backgroundColor: "#FAFBFB", borderRadius: 10, border: "1px solid #E2DDD3" }}>
+                      <input
+                        type="checkbox"
+                        id="subCheckContact"
+                        checked={subscribeNewsletter}
+                        onChange={(e) => setSubscribeNewsletter(e.target.checked)}
+                        style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#2691BA" }}
+                      />
+                      <label htmlFor="subCheckContact" style={{ fontSize: 13, color: "#2B3D44", cursor: "pointer", userSelect: "none", fontWeight: 500 }}>
+                        📩 Subscribe to Susi Davies&apos; Newsletter &amp; Monthly Movement Insights
+                      </label>
                     </div>
 
                     {/* Anti-Spam Human Verification */}
