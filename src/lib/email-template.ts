@@ -38,7 +38,7 @@ export function renderSusiEmailTemplate({ title, preheader, bodyHtml, recipientN
         <img src="${logoUrl}" alt="Susi Davies Logo" height="82" style="height: 82px; width: auto; max-width: 280px; border: 0; display: block; margin: 0 auto;" />
       </a>
       <div style="font-family: 'Open Sans', sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: rgba(255,255,255,0.85); margin-top: 8px;">
-        Movement · Breathwork · Remedial Therapy · Mentoring
+        Yoga · Movement · Breathwork · Mentoring
       </div>
     </div>
 

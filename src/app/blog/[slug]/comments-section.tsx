@@ -12,6 +12,7 @@ export function BlogCommentsSection({ postSlug }: { postSlug: string }) {
   const [isHumanVerified, setIsHumanVerified] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [formStartedAt, setFormStartedAt] = useState(() => Date.now());
 
   useEffect(() => {
     fetch(`/api/comments?slug=${encodeURIComponent(postSlug)}`)
@@ -46,49 +47,34 @@ export function BlogCommentsSection({ postSlug }: { postSlug: string }) {
         }),
       });
 
-      // 2. Dispatch notification email to Susi's Gmail (susidavies@gmail.com)
-      await fetch("/api/send-email", {
+      if (!res.ok) throw new Error("Comment was not accepted");
+
+      const notificationResponse = await fetch("/api/forms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: "susidavies@gmail.com",
-          subject: `New Article Comment from ${authorName}`,
-          body: `New comment submitted on blog article (${postSlug}):\n\nAuthor Name: ${authorName}\nEmail: ${authorEmail}\nNewsletter Opt-in: ${subscribeNewsletter ? "YES (Subscribed)" : "No"}\n\nComment:\n${content}`,
-          fromName: "Susi Davies Blog Comments",
-        }),
-      }).catch(() => {});
-
-      // 3. Dispatch automated 24-hr thank-you confirmation email to client
-      await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: authorEmail,
-          subject: "Thank You for Your Feedback to Susi Davies",
-          body: `Dear ${authorName},\n\nThank you for sharing your thoughts on susidavies.com! We have received your query and our team will connect with you within 24 hours.\n\nWarm regards,\nSusi Davies & Team\nhttps://susidavies.com`,
-          fromName: "Susi Davies Studio",
-        }),
-      }).catch(() => {});
-
-      // 4. Save subscriber into database if opted in
-      if (subscribeNewsletter) {
-        await fetch("/api/subscribers", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+          kind: "blog-comment",
+          website: honeypot,
+          startedAt: formStartedAt,
+          fields: {
             name: authorName,
             email: authorEmail,
-            segment: "Blog Reader Feedback",
-          }),
-        }).catch(() => {});
-      }
+            message: content,
+            slug: postSlug,
+            subscribeNewsletter,
+          },
+        }),
+      });
+      if (!notificationResponse.ok) throw new Error("Comment notification was not accepted");
 
       setStatusMessage("Thank you for your query! An automated confirmation has been sent to your email, and our team will connect with you within 24 hours.");
+      setFormStartedAt(Date.now());
       setAuthorName("");
       setAuthorEmail("");
       setContent("");
     } catch (err) {
-      setStatusMessage("Thank you for your feedback! Our team will connect with you within 24 hours.");
+      console.error("Comment submission failed:", err);
+      setStatusMessage("We could not submit your feedback. Please wait a moment and try again.");
     } finally {
       setIsSubmitting(false);
     }

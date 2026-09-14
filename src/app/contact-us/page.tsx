@@ -15,6 +15,7 @@ export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
+  const [formStartedAt, setFormStartedAt] = useState(() => Date.now());
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,47 +24,22 @@ export default function ContactPage() {
     setIsSubmitting(true);
 
     try {
-      // 1. Send notification email to Susi's Gmail (susidavies@gmail.com)
-      await fetch("/api/send-email", {
+      const response = await fetch("/api/forms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: "susidavies@gmail.com",
-          subject: `New Contact Form Submission from ${name}`,
-          body: `New contact inquiry received on susidavies.com:\n\nName: ${name}\nEmail: ${email}\nNewsletter Opt-in: ${subscribeNewsletter ? "YES (Subscribed)" : "No"}\n\nMessage:\n${message}`,
-          fromName: "Susi Davies Website Form",
+          kind: "contact",
+          website: honeypot,
+          startedAt: formStartedAt,
+          fields: { name, email, message, subscribeNewsletter },
         }),
-      }).catch(() => {});
-
-      // 2. Send automated 24-hr thank-you confirmation email to client
-      await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: email,
-          subject: "Thank You for Contacting Susi Davies",
-          body: `Dear ${name},\n\nThank you for reaching out to Susi Davies! We have received your query and our team will get back to you within 24 hours.\n\nWarm regards,\nSusi Davies & Team\nhttps://susidavies.com`,
-          fromName: "Susi Davies Studio",
-        }),
-      }).catch(() => {});
-
-      // 3. Save contact into database & newsletter subscribers if opted in
-      if (subscribeNewsletter) {
-        await fetch("/api/subscribers", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name,
-            email,
-            segment: "Contact Us Form",
-          }),
-        }).catch(() => {});
-      }
+      });
+      if (!response.ok) throw new Error("Contact request was not accepted");
 
       setSubmitted(true);
+      setFormStartedAt(Date.now());
     } catch (err) {
       console.error("Contact submit error:", err);
-      setSubmitted(true);
     }
 
     setIsSubmitting(false);

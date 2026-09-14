@@ -25,51 +25,31 @@ export default function JournalPage() {
 
   const [honeypot, setHoneypot] = useState("");
   const [isHumanVerified, setIsHumanVerified] = useState(false);
+  const [formStartedAt, setFormStartedAt] = useState(() => Date.now());
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (honeypot || !isHumanVerified || !subEmail) return;
 
     try {
-      // 1. Save subscriber to Supabase database
-      await fetch("/api/subscribers", {
+      const response = await fetch("/api/forms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: subEmail.split("@")[0],
-          email: subEmail,
-          segment: "Journal Subscriber",
+          kind: "journal-subscription",
+          website: honeypot,
+          startedAt: formStartedAt,
+          fields: { email: subEmail },
         }),
-      }).catch(() => {});
-
-      // 2. Dispatch notification email to Susi's Gmail (susidavies@gmail.com)
-      await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: "susidavies@gmail.com",
-          subject: `New Journal Subscriber: ${subEmail}`,
-          body: `New subscriber joined Susi's Journal on susidavies.com:\n\nEmail: ${subEmail}\nStatus: Subscribed`,
-          fromName: "Susi Davies Journal Subscription",
-        }),
-      }).catch(() => {});
-
-      // 3. Dispatch automated 24-hr thank-you confirmation email to client
-      await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: subEmail,
-          subject: "Welcome to Susi Davies' Journal",
-          body: `Dear Subscriber,\n\nThank you for subscribing to Susi Davies' Journal! You will now receive Susi's practice notes, movement guidance, and retreat announcements directly in your inbox.\n\nWarm regards,\nSusi Davies & Team\nhttps://susidavies.com`,
-          fromName: "Susi Davies Studio",
-        }),
-      }).catch(() => {});
+      });
+      if (!response.ok) throw new Error("Subscription was not accepted");
 
       setSubMessage("Thank you for subscribing! An automated welcome confirmation has been sent to your email.");
       setSubEmail("");
+      setFormStartedAt(Date.now());
     } catch (err) {
-      setSubMessage("Thank you for subscribing to Susi's Journal!");
+      console.error("Journal subscription failed:", err);
+      setSubMessage("We could not complete the subscription. Please wait a moment and try again.");
     }
   };
 

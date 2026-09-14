@@ -168,15 +168,44 @@ export default function OnlineCoursesPage() {
                 </div>
               </div>
 
-              <a
-                href="https://wa.me/41798549752?text=Hello%20Susi%2C%20I%20am%20interested%20in%20the%20Dynamic%20Movement%20weekly%20online%20classes.%20Could%20you%20please%20share%20more%20details%3F"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-pill btn-pill-cyan"
-                style={{ width: "100%", justifyContent: "center", fontSize: 15, padding: "14px 20px" }}
-              >
-                Join Dynamic Movement Classes →
-              </a>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <Link
+                  href="/book?session=online-class&slot=wed-morning"
+                  className="btn-pill btn-pill-cyan"
+                  style={{ width: "100%", justifyContent: "center", fontSize: 14, padding: "12px 18px" }}
+                >
+                  Book Wednesday Class (09:00) →
+                </Link>
+                <Link
+                  href="/book?session=online-class&slot=mon-evening"
+                  style={{
+                    width: "100%",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    padding: "12px 18px",
+                    borderRadius: 100,
+                    border: "1.5px solid var(--blue)",
+                    color: "var(--blue)",
+                    fontWeight: 700,
+                    fontSize: 14,
+                    textDecoration: "none",
+                    backgroundColor: "transparent",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  Book Monday Class (18:30) →
+                </Link>
+                <a
+                  href="https://wa.me/41798549752?text=Hello%20Susi%2C%20I%20am%20interested%20in%20the%20Dynamic%20Movement%20weekly%20online%20classes.%20Could%20you%20please%20share%20more%20details%3F"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ textAlign: "center", fontSize: 13, color: "var(--muted)", textDecoration: "underline", marginTop: 4 }}
+                >
+                  Or enquire via WhatsApp
+                </a>
+              </div>
             </div>
 
             {/* Card 2: 1-on-1 Online Mentoring & Guided Breathwork */}

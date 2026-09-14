@@ -35,6 +35,7 @@ export default function PrivateSessionsPage() {
   const [isHumanVerified, setIsHumanVerified] = useState(false);
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [formStartedAt, setFormStartedAt] = useState(() => Date.now());
 
   const set = (field: string, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -44,65 +45,32 @@ export default function PrivateSessionsPage() {
     if (honeypot || !isHumanVerified || !form.name || !form.email || !form.sessionType || status === "sending") return;
     setStatus("sending");
 
-    const modeLabel = sessionMode === "in-person" ? "In-Person Session" : "Online Session (Video Call)";
-    const locationLine = sessionMode === "in-person"
-      ? `Location: ${form.location || "Client's location / to be confirmed"}`
-      : "Session Format: Online — Video Call";
-
-    const emailBody = `New Private Session Booking Request
-
-Name: ${form.name}
-Email: ${form.email}
-Phone: ${form.phone || "Not provided"}
-Session Type: ${modeLabel}
-Focus Area: ${form.sessionType}
-Preferred Date: ${form.preferredDate || "Flexible"}
-Preferred Time: ${form.preferredTime || "Flexible"}
-${locationLine}
-Newsletter Opt-in: ${subscribeNewsletter ? "YES (Subscribed)" : "No"}
-
-Additional Notes:
-${form.message || "None"}`;
-
     try {
-      // 1. Dispatch notification email to Susi's Gmail (susidavies@gmail.com)
-      await fetch("/api/send-email", {
+      const response = await fetch("/api/forms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: "susidavies@gmail.com",
-          subject: `Private Session Booking Request — ${form.name}`,
-          body: emailBody,
-          fromName: "Susi Davies Website",
-        }),
-      }).catch(() => {});
-
-      // 2. Dispatch automated thank-you email to client
-      await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: form.email,
-          subject: "Your Private Session Request — Susi Davies",
-          body: `Dear ${form.name},\n\nThank you for reaching out! Your private session booking request (${form.sessionType}) has been received.\n\nSusi will personally get back to you within 24 hours to confirm your session details.\n\nSession Focus: ${form.sessionType}\nFormat: ${modeLabel}\n\nWith warmth,\nSusi Davies & Team\nhttps://susidavies.com`,
-          fromName: "Susi Davies",
-        }),
-      }).catch(() => {});
-
-      // 3. Save subscriber into database if opted in
-      if (subscribeNewsletter) {
-        await fetch("/api/subscribers", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+          kind: "private-session",
+          website: honeypot,
+          startedAt: formStartedAt,
+          fields: {
             name: form.name,
             email: form.email,
-            segment: `Private Session (${form.sessionType})`,
-          }),
-        }).catch(() => {});
-      }
+            phone: form.phone,
+            message: form.message,
+            mode: sessionMode,
+            focus: form.sessionType,
+            date: form.preferredDate,
+            time: form.preferredTime,
+            location: form.location,
+            subscribeNewsletter,
+          },
+        }),
+      });
+      if (!response.ok) throw new Error("Private session request was not accepted");
 
       setStatus("success");
+      setFormStartedAt(Date.now());
       setForm({ name: "", email: "", phone: "", sessionType: "", preferredDate: "", preferredTime: "", location: "", message: "" });
     } catch {
       setStatus("error");

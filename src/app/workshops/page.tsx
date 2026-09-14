@@ -26,6 +26,7 @@ export default function WorkshopsPage() {
   const [isHumanVerified, setIsHumanVerified] = useState(false);
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [formStartedAt, setFormStartedAt] = useState(() => Date.now());
 
   const set = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
 
@@ -42,64 +43,21 @@ export default function WorkshopsPage() {
     if (honeypot || !isHumanVerified || !form.name || !form.email || selectedDates.length === 0 || status === "sending") return;
     setStatus("sending");
 
-    const datesText = selectedDates.map((d, i) => `  ${i + 1}. ${d} · 18:30 – 20:30 · CHF 60.–`).join("\n");
-    const totalText = `Total: CHF ${totalPrice}.–${selectedDates.length > 1 ? ` (${selectedDates.length} workshops)` : ""}`;
-
-    const body = `New Deeper Practice Workshop Registration
-
-Name: ${form.name}
-Email: ${form.email}
-Phone: ${form.phone || "Not provided"}
-
-Selected Workshops:
-${datesText}
-
-${totalText}
-Newsletter Opt-in: ${subscribeNewsletter ? "YES (Subscribed)" : "No"}
-
-Message:
-${form.message || "None"}`;
-
     try {
-      // 1. Dispatch notification email to Susi's Gmail (susidavies@gmail.com)
-      await fetch("/api/send-email", {
+      const response = await fetch("/api/forms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: "susidavies@gmail.com",
-          subject: `Deeper Practice Workshop Registration — ${form.name}`,
-          body,
-          fromName: "Susi Davies Website",
+          kind: "workshop",
+          website: honeypot,
+          startedAt: formStartedAt,
+          fields: { ...form, selectedDates, subscribeNewsletter },
         }),
-      }).catch(() => {});
-
-      // 2. Dispatch automated thank-you email to client
-      const datesConfirmText = selectedDates.map((d, i) => `  ${i + 1}. ${d} · 18:30 – 20:30`).join("\n");
-      await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: form.email,
-          subject: `Your Deeper Practice Workshop Registration — Susi Davies`,
-          body: `Dear ${form.name},\n\nThank you for registering for the Deeper Practice workshop series! We have received your registration and our team will connect with you within 24 hours.\n\nYour selected dates:\n${datesConfirmText}\n\nTime: 18:30 – 20:30\nVenue: at BODYTALKS, Alte Landstrasse 32, Thalwil\nTotal: CHF ${totalPrice}.– (payable by TWINT)\n\nSusi will be in touch shortly to confirm your spots and share payment details.\n\nWith warmth,\nSusi Davies & Team\nhttps://susidavies.com`,
-          fromName: "Susi Davies",
-        }),
-      }).catch(() => {});
-
-      // 3. Save subscriber into database if opted in
-      if (subscribeNewsletter) {
-        await fetch("/api/subscribers", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: form.name,
-            email: form.email,
-            segment: "Workshop Registrant",
-          }),
-        }).catch(() => {});
-      }
+      });
+      if (!response.ok) throw new Error("Workshop registration was not accepted");
 
       setStatus("success");
+      setFormStartedAt(Date.now());
       setForm({ name: "", email: "", phone: "", message: "" });
       setSelectedDates([]);
     } catch {

@@ -15,6 +15,7 @@ export default function YogaDynamicsAppPage() {
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [formStartedAt, setFormStartedAt] = useState(() => Date.now());
 
   const handleAppSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,62 +24,25 @@ export default function YogaDynamicsAppPage() {
     setIsSubmitting(true);
 
     try {
-      // 1. Post to Studio Inbox
-      await fetch("/api/inbox", {
+      const response = await fetch("/api/forms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fromName: appName,
-          fromEmail: appEmail,
-          to: "hello@susidavies.com",
-          subject: `Yoga Dynamics App Inquiry from ${appName}`,
-          body: appMsg,
+          kind: "app",
+          website: honeypot,
+          startedAt: formStartedAt,
+          fields: { name: appName, email: appEmail, message: appMsg, subscribeNewsletter },
         }),
-      }).catch(() => {});
-
-      // 2. Dispatch notification email to Susi's Gmail (susidavies@gmail.com)
-      await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: "susidavies@gmail.com",
-          subject: `New App Inquiry from ${appName}`,
-          body: `New Dynamic Yoga App inquiry received on susidavies.com:\n\nClient Name: ${appName}\nClient Email: ${appEmail}\nNewsletter Opt-in: ${subscribeNewsletter ? "YES (Subscribed)" : "No"}\n\nMessage:\n${appMsg}`,
-          fromName: "Susi Davies App Inquiry",
-        }),
-      }).catch(() => {});
-
-      // 3. Dispatch automated 24-hr thank-you confirmation email to client
-      await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: appEmail,
-          subject: "Thank You for Contacting Susi Davies Studio",
-          body: `Dear ${appName},\n\nThank you for reaching out about the Dynamic Yoga App! We have received your query and our team will get back to you within 24 hours.\n\nWarm regards,\nSusi Davies & Team\nhttps://susidavies.com`,
-          fromName: "Susi Davies Studio",
-        }),
-      }).catch(() => {});
-
-      // 4. Save subscriber into database if opted in
-      if (subscribeNewsletter) {
-        await fetch("/api/subscribers", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: appName,
-            email: appEmail,
-            segment: "Dynamic Yoga App Inquiry",
-          }),
-        }).catch(() => {});
-      }
+      });
+      if (!response.ok) throw new Error("App enquiry was not accepted");
 
       setSubmitted(true);
+      setFormStartedAt(Date.now());
       setAppName("");
       setAppEmail("");
       setAppMsg("");
-    } catch {
-      setSubmitted(true);
+    } catch (error) {
+      console.error("App enquiry failed:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -125,7 +89,7 @@ export default function YogaDynamicsAppPage() {
               <li><Check size={18} color="var(--blue)" /> Functional alignment guides for home practice</li>
             </ul>
 
-            <Link href="/book" className="btn-pill btn-pill-cyan">
+            <Link href="/book?session=online-class" className="btn-pill btn-pill-cyan">
               JOIN WEEKLY ONLINE CLASS (TWINT OK)
             </Link>
           </div>

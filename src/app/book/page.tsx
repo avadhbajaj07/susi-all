@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -37,7 +38,16 @@ const sessionTypes = [
   },
 ];
 
-export default function BookPage() {
+const timeSlotLabels: Record<string, string> = {
+  "wed-morning": "Wednesday 09:00 – 10:00 (Live Online Class)",
+  "mon-evening": "Monday 18:30 – 19:30 (Live Online Class)",
+  "morning": "Morning (09:00 – 12:00)",
+  "afternoon": "Afternoon (14:00 – 17:00)",
+  "evening": "Evening (18:00 – 20:00)",
+};
+
+function BookPageContent() {
+  const searchParams = useSearchParams();
   const [selectedSession, setSelectedSession] = useState("private-yoga");
   const [timeSlot, setTimeSlot] = useState("morning");
   const [submitted, setSubmitted] = useState(false);
@@ -45,61 +55,88 @@ export default function BookPage() {
   const [clientEmail, setClientEmail] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [clientNotes, setClientNotes] = useState("");
-  const [bookingDate, setBookingDate] = useState("2026-08-15");
+  const [bookingDate, setBookingDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [honeypot, setHoneypot] = useState("");
   const [isHumanVerified, setIsHumanVerified] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
+  const [formStartedAt, setFormStartedAt] = useState(() => Date.now());
+
+  // Handle URL query parameters on initial mount (e.g. /book?session=online-class&slot=wed-morning)
+  useEffect(() => {
+    const sessionParam = searchParams.get("session") || searchParams.get("type");
+    const slotParam = searchParams.get("slot") || searchParams.get("time");
+
+    if (slotParam === "wed-morning" || slotParam === "wednesday" || slotParam === "wed") {
+      setSelectedSession("online-class");
+      setTimeSlot("wed-morning");
+    } else if (slotParam === "mon-evening" || slotParam === "monday" || slotParam === "mon") {
+      setSelectedSession("online-class");
+      setTimeSlot("mon-evening");
+    } else if (sessionParam) {
+      if (sessionParam === "online-class" || sessionParam === "group" || sessionParam === "class") {
+        setSelectedSession("online-class");
+        setTimeSlot("wed-morning");
+      } else if (sessionParam === "coaching-mentoring" || sessionParam === "coaching") {
+        setSelectedSession("coaching-mentoring");
+        setTimeSlot("morning");
+      } else if (sessionParam === "teacher-development" || sessionParam === "teacher") {
+        setSelectedSession("teacher-development");
+        setTimeSlot("morning");
+      } else if (sessionParam === "private-yoga" || sessionParam === "private") {
+        setSelectedSession("private-yoga");
+        setTimeSlot("morning");
+      }
+    }
+  }, [searchParams]);
+
+  const handleSessionChange = (id: string) => {
+    setSelectedSession(id);
+    if (id === "online-class") {
+      if (timeSlot !== "wed-morning" && timeSlot !== "mon-evening") {
+        setTimeSlot("wed-morning");
+      }
+    } else {
+      if (timeSlot === "wed-morning" || timeSlot === "mon-evening") {
+        setTimeSlot("morning");
+      }
+    }
+  };
 
   const activeSession = sessionTypes.find((s) => s.id === selectedSession) || sessionTypes[0];
-
-  const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
+  const formattedTimeSlot = timeSlotLabels[timeSlot] || timeSlot;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (honeypot || !isHumanVerified || !clientName || !clientEmail || isSubmitting) return;
 
     setIsSubmitting(true);
-    setSubmitted(true);
-
     try {
-      // 1. Dispatch notification email to Susi's Gmail (susidavies@gmail.com)
-      await fetch("/api/send-email", {
+      const response = await fetch("/api/forms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: "susidavies@gmail.com",
-          subject: `New Booking Request: ${activeSession.title} - ${clientName}`,
-          body: `New session booking request received on susidavies.com:\n\nClient Name: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nSession: ${activeSession.title} (${activeSession.price})\nDate: ${bookingDate}\nTime Slot: ${timeSlot}\nNewsletter Opt-in: ${subscribeNewsletter ? "YES (Subscribed)" : "No"}\n\nClient Notes:\n${clientNotes || "None"}`,
-          fromName: "Susi Davies Booking System",
-        }),
-      }).catch(() => {});
-
-      // 2. Dispatch automated 24-hr thank-you confirmation email to client
-      await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: clientEmail,
-          subject: `Booking Request Confirmation: ${activeSession.title}`,
-          body: `Dear ${clientName},\n\nThank you for requesting a session (${activeSession.title}) with Susi Davies! We have received your booking request for ${bookingDate} (${timeSlot}), and our team will connect with you within 24 hours to confirm your reservation.\n\nWarm regards,\nSusi Davies Studio\nhttps://susidavies.com`,
-          fromName: "Susi Davies Studio",
-        }),
-      }).catch(() => {});
-
-      // 3. Save client contact & subscriber into database if opted in
-      if (subscribeNewsletter) {
-        await fetch("/api/subscribers", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+          kind: "booking",
+          website: honeypot,
+          startedAt: formStartedAt,
+          fields: {
             name: clientName,
             email: clientEmail,
-            segment: activeSession.title,
-          }),
-        }).catch(() => {});
-      }
+            phone: clientPhone,
+            message: clientNotes,
+            sessionId: selectedSession,
+            date: bookingDate,
+            timeSlot,
+            subscribeNewsletter,
+          },
+        }),
+      });
+      if (!response.ok) throw new Error("Booking request was not accepted");
+      setSubmitted(true);
+      setFormStartedAt(Date.now());
     } catch (err) {
       console.error("Booking email dispatch error:", err);
+      setIsSubmitting(false);
     }
   };
 
@@ -138,7 +175,7 @@ export default function BookPage() {
               Booking Request Received!
             </h2>
             <p className="body-text" style={{ marginBottom: 25 }}>
-              Thank you! Your request for <strong>{activeSession.title}</strong> has been sent to Susi. You will receive a email confirmation and calendar invite shortly.
+              Thank you! Your request for <strong>{activeSession.title}</strong> ({formattedTimeSlot}) has been sent to Susi. You will receive an email confirmation and calendar invite shortly.
             </p>
             <button
               onClick={() => setSubmitted(false)}
@@ -162,7 +199,7 @@ export default function BookPage() {
                       {sessionTypes.map((session) => (
                         <div
                           key={session.id}
-                          onClick={() => setSelectedSession(session.id)}
+                          onClick={() => handleSessionChange(session.id)}
                           style={{
                             padding: "16px 20px",
                             borderRadius: 14,
@@ -190,7 +227,7 @@ export default function BookPage() {
                   {/* Step 2: Date & Time */}
                   <div style={{ marginBottom: 30 }}>
                     <label className="eyebrow" style={{ color: "var(--blue)", marginBottom: 14 }}>
-                      2. Preferred Date &amp; Time
+                      2. Preferred Date &amp; Time Slot
                     </label>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
                       <div className="form-group" style={{ margin: 0 }}>
@@ -208,11 +245,18 @@ export default function BookPage() {
                         className="form-input"
                         style={{ cursor: "pointer" }}
                       >
-                        <option value="mon-evening">Monday 18:30 – 19:30 (Online Class)</option>
-                        <option value="wed-morning">Wednesday 09:00 – 10:00 (Online Class)</option>
-                        <option value="morning">Morning (09:00 – 12:00)</option>
-                        <option value="afternoon">Afternoon (14:00 – 17:00)</option>
-                        <option value="evening">Evening (18:00 – 20:00)</option>
+                        {selectedSession === "online-class" ? (
+                          <>
+                            <option value="wed-morning">Wednesday 09:00 – 10:00 (Live Online Class)</option>
+                            <option value="mon-evening">Monday 18:30 – 19:30 (Live Online Class)</option>
+                          </>
+                        ) : (
+                          <>
+                            <option value="morning">Morning (09:00 – 12:00)</option>
+                            <option value="afternoon">Afternoon (14:00 – 17:00)</option>
+                            <option value="evening">Evening (18:00 – 20:00)</option>
+                          </>
+                        )}
                       </select>
                     </div>
                   </div>
@@ -344,5 +388,13 @@ export default function BookPage() {
 
       <SiteFooter />
     </main>
+  );
+}
+
+export default function BookPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>Loading...</div>}>
+      <BookPageContent />
+    </Suspense>
   );
 }

@@ -16,6 +16,7 @@ export default function Home() {
   const [isHumanVerified, setIsHumanVerified] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
+  const [formStartedAt, setFormStartedAt] = useState(() => Date.now());
 
   const serviceCards = [
     {
@@ -48,62 +49,26 @@ export default function Home() {
     setFormStatus("Sending message to Susi Davies...");
 
     try {
-      // 1. Post into Studio Inbox for admin.susidavies.com
-      await fetch("/api/inbox", {
+      const response = await fetch("/api/forms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fromName: formName,
-          fromEmail: formEmail,
-          to: "hello@susidavies.com",
-          subject: `Website Inquiry from ${formName}`,
-          body: formMsg,
+          kind: "home",
+          website: honeypot,
+          startedAt: formStartedAt,
+          fields: { name: formName, email: formEmail, message: formMsg, subscribeNewsletter },
         }),
-      }).catch(() => {});
-
-      // 2. Dispatch notification email directly to Susi's Gmail (susidavies@gmail.com)
-      await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: "susidavies@gmail.com",
-          subject: `New Website Inquiry from ${formName}`,
-          body: `New website inquiry received on susidavies.com:\n\nClient Name: ${formName}\nClient Email: ${formEmail}\nNewsletter Opt-in: ${subscribeNewsletter ? "YES (Subscribed)" : "No"}\n\nMessage:\n${formMsg}`,
-          fromName: "Susi Davies Website Form",
-        }),
-      }).catch(() => {});
-
-      // 3. Dispatch automated thank-you confirmation email to client
-      await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: formEmail,
-          subject: "Thank You for Contacting Susi Davies",
-          body: `Dear ${formName},\n\nThank you for reaching out to Susi Davies! We have received your query and our team will get back to you within 24 hours.\n\nWarm regards,\nSusi Davies & Team\nhttps://susidavies.com`,
-          fromName: "Susi Davies Studio",
-        }),
-      }).catch(() => {});
-
-      // 4. Save/upsert subscriber into database if opted in
-      if (subscribeNewsletter) {
-        await fetch("/api/subscribers", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: formName,
-            email: formEmail,
-            segment: "Homepage Contact Inquiry",
-          }),
-        }).catch(() => {});
-      }
+      });
+      if (!response.ok) throw new Error("Website enquiry was not accepted");
 
       setFormStatus("Thank you for your query! An automated confirmation has been sent to your email, and our team will connect with you within 24 hours.");
+      setFormStartedAt(Date.now());
       setFormName("");
       setFormEmail("");
       setFormMsg("");
     } catch (err: any) {
-      setFormStatus("Thank you for your query! Our team will connect with you within 24 hours.");
+      console.error("Website enquiry failed:", err);
+      setFormStatus("We could not send your message. Please wait a moment and try again.");
     } finally {
       setIsSubmitting(false);
     }
