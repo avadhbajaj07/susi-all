@@ -66,7 +66,7 @@ export default function YogaDynamicsAppPage() {
           <div className="col-media">
             <div className="image-card-rounded">
               <img
-                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527173/susi-davies2.jpg"
+                src="/images/susi-davies2.jpg"
                 alt="Susi Davies Dynamic Yoga App"
                 style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
               />
@@ -100,7 +100,7 @@ export default function YogaDynamicsAppPage() {
           <div className="col-media">
             <div className="image-card-rounded">
               <img
-                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527174/susi-davies13.jpg"
+                src="/images/susi-davies13.jpg"
                 alt="Susi Davies App Practice"
                 style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
               />

@@ -32,7 +32,7 @@ export default function OnlineCoursesPage() {
           <div className="col-media">
             <div className="image-card-rounded" style={{ borderRadius: 24, overflow: "hidden", boxShadow: "0 12px 40px rgba(0,0,0,0.08)" }}>
               <img
-                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies16.jpg"
+                src="/images/susi-davies16.jpg"
                 alt="Practice with Susi Davies online"
                 style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }}
               />

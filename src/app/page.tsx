@@ -100,7 +100,7 @@ export default function Home() {
           <div className="col-media">
             <div className="image-card-rounded">
               <img
-                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527173/susi-davies1.jpg"
+                src="/images/susi-davies1.jpg"
                 alt="Susi Davies Yoga & Movement Practice"
                 style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px" }}
               />
@@ -129,7 +129,7 @@ export default function Home() {
             <div className="badge-overlay-container">
               <div className="image-card-rounded">
                 <img
-                  src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527174/susi-davies10.jpg"
+                  src="/images/susi-davies10.jpg"
                   alt="Susi Davies Main Portrait"
                   style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px" }}
                 />
@@ -183,7 +183,7 @@ export default function Home() {
           <div className="col-media">
             <div className="image-card-rounded">
               <img
-                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527173/susi-davies2.jpg"
+                src="/images/susi-davies2.jpg"
                 alt="Susi Davies Somatic Stretch & Balance"
                 style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px" }}
               />
@@ -229,7 +229,7 @@ export default function Home() {
           <div className="col-media">
             <div className="image-card-rounded">
               <img
-                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527173/susi-davies3.jpg"
+                src="/images/susi-davies3.jpg"
                 alt="Susi Davies Restorative Practice"
                 style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px" }}
               />

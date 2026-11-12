@@ -95,7 +95,7 @@ export default function PrivateSessionsPage() {
           <div className="col-media">
             <div className="image-card-rounded">
               <img
-                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527173/susi-davies4.jpg"
+                src="/images/susi-davies4.jpg"
                 alt="Susi Davies Private Sessions"
                 style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
               />
@@ -154,7 +154,7 @@ export default function PrivateSessionsPage() {
           <div className="col-media">
             <div className="image-card-rounded">
               <img
-                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527173/susi-davies5.jpg"
+                src="/images/susi-davies5.jpg"
                 alt="Susi Davies Focus Pose"
                 style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
               />

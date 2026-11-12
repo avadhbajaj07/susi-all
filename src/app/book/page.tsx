@@ -358,7 +358,7 @@ function BookPageContent() {
             <div className="col-media">
               <div className="image-card-rounded" style={{ marginBottom: 30 }}>
                 <img
-                  src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527174/susi-davies13.jpg"
+                  src="/images/susi-davies13.jpg"
                   alt="Susi Davies yoga posture stretch"
                   style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
                 />

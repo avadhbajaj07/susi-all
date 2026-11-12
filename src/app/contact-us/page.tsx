@@ -63,7 +63,7 @@ export default function ContactPage() {
             <div className="image-card-rounded">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://res.cloudinary.com/qtah71h2/image/upload/v1786527174/susi-davies12.jpg"
+                src="/images/susi-davies12.jpg"
                 alt="Susi Davies Contact"
                 style={{ width: "100%", height: "auto", display: "block", borderRadius: "20px", objectFit: "cover" }}
               />

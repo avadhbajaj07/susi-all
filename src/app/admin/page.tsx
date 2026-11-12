@@ -2519,7 +2519,7 @@ export default function AdminPage() {
 
                 <div className="form-group" style={{ marginBottom: 15 }}>
                   <label style={{ fontSize: 13, fontWeight: 700, display: "block", marginBottom: 4 }}>Featured Image URL (Cloudinary or Web Image)</label>
-                  <input type="text" className="form-input" value={editImage} onChange={(e) => setEditImage(e.target.value)} placeholder="https://res.cloudinary.com/..." />
+                  <input type="text" className="form-input" value={editImage} onChange={(e) => setEditImage(e.target.value)} placeholder="https://..." />
                 </div>
 
                 <div className="form-group" style={{ marginBottom: 20 }}>

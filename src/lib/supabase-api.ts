@@ -1,6 +1,18 @@
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://bszyzttyashekzqmehxg.supabase.co";
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzenl6dHR5YXNoZWt6cW1laHhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NjAwNDI4NiwiZXhwIjoyMTAxNTgwMjg2fQ.XNR9JAKg6ZZubrMpH5lyN3A0_f8lpubWyJ8qTfrQDSM";
 
+function sanitizeImageUrl(url?: string | null): string {
+  if (!url) return "/images/susi-davies15.jpg";
+  if (url.includes("res.cloudinary.com")) {
+    const match = url.match(/(susi[- ]davies\d+\.jpg)/i);
+    if (match) {
+      return `/images/${match[1].replace(" ", "-")}`;
+    }
+    return "/images/susi-davies15.jpg";
+  }
+  return url;
+}
+
 export async function fetchSupabasePosts() {
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/posts?select=*&order=created_at.desc`, {
@@ -22,7 +34,7 @@ export async function fetchSupabasePosts() {
           date: p.date || new Date(p.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
           excerpt: p.excerpt || (typeof p.content === "string" ? p.content.slice(0, 160) + "..." : p.title),
           content: typeof p.content === "string" ? p.content : p.excerpt || p.title,
-          image: p.image || p.featured_image_path || "https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies15.jpg",
+          image: sanitizeImageUrl(p.image || p.featured_image_path),
           status: p.status || "published",
           readTime: "5 min read",
         }));
@@ -74,7 +86,7 @@ export async function fetchSupabasePostBySlug(slug: string) {
         date: p.date || new Date(p.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
         excerpt: p.excerpt || (typeof p.content === "string" ? p.content.slice(0, 160) + "..." : p.title),
         content: typeof p.content === "string" ? p.content : p.excerpt || p.title,
-        image: p.image || p.featured_image_path || "https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies15.jpg",
+        image: sanitizeImageUrl(p.image || p.featured_image_path),
         status: p.status || "published",
         readTime: "5 min read",
       };
@@ -91,7 +103,7 @@ export async function insertSupabasePost(post: { title: string; category?: strin
     const postDate = post.date || new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
     const postExcerpt = post.excerpt || (post.content ? post.content.slice(0, 160) : post.title);
     const postContent = post.content || post.title;
-    const postImage = post.image || "https://res.cloudinary.com/qtah71h2/image/upload/v1786527175/susi-davies15.jpg";
+    const postImage = sanitizeImageUrl(post.image);
     const postCategory = post.category || "Practice Notes";
 
     const res = await fetch(`${SUPABASE_URL}/rest/v1/posts`, {
