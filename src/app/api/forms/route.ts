@@ -13,6 +13,7 @@ import {
 
 const INTERNAL_EMAIL = "susidavies@gmail.com";
 const WORKSHOP_DATES = new Set([
+  "Thursday, 28 January 2027",
   "Thursday, 10 September 2026",
   "Thursday, 29 October 2026",
   "Thursday, 3 December 2026",
@@ -24,6 +25,7 @@ const BOOKING_SESSIONS: Record<string, { title: string; price: string }> = {
   "online-class": { title: "Weekly Online Class Pass", price: "CHF 25" },
 };
 const TIME_SLOTS: Record<string, string> = {
+  "tue-midday": "Tuesday 11:45 – 12:45 (Live Online Class)",
   "wed-morning": "Wednesday 09:00 – 10:00 (Live Online Class)",
   "mon-evening": "Monday 18:30 – 19:30 (Live Online Class)",
   morning: "Morning (09:00 – 12:00)",
@@ -102,10 +104,10 @@ function prepareSubmission(kind: string, fields: Record<string, unknown>): Prepa
     const datesText = selectedDates.map((date, index) => `  ${index + 1}. ${date} · 18:30 – 20:30`).join("\n");
     return {
       name, email, message,
-      internalSubject: `Deeper Practice Workshop Registration — ${name}`,
-      internalBody: `New Deeper Practice Workshop Registration\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone || "Not provided"}\n\nSelected Workshops:\n${datesText}\n\nTotal: CHF ${total}.– (${selectedDates.length} workshop${selectedDates.length === 1 ? "" : "s"})\nNewsletter Opt-in: ${optIn}\n\nMessage:\n${message || "None"}`,
-      confirmationSubject: "Your Deeper Practice Workshop Registration — Susi Davies",
-      confirmationBody: `Dear ${name},\n\nThank you for registering for the Deeper Practice workshop series! We have received your registration and our team will connect with you within 24 hours.\n\nYour selected dates:\n${datesText}\n\nTime: 18:30 – 20:30\nVenue: at BODYTALKS, Alte Landstrasse 32, Thalwil\nTotal: CHF ${total}.– (payable by TWINT)\n\nSusi will be in touch shortly to confirm your spots and share payment details.\n\nWith warmth,\nSusi Davies & Team\nhttps://susidavies.com`,
+      internalSubject: `The Essence of Vinyasa Flow Workshop Registration — ${name}`,
+      internalBody: `New Workshop Registration (The Essence of Vinyasa Flow)\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone || "Not provided"}\n\nSelected Workshop:\n${datesText}\n\nTotal: CHF ${total}.– (${selectedDates.length} workshop${selectedDates.length === 1 ? "" : "s"})\nNewsletter Opt-in: ${optIn}\n\nMessage:\n${message || "None"}`,
+      confirmationSubject: "Your Workshop Registration: The Essence of Vinyasa Flow — Susi Davies",
+      confirmationBody: `Dear ${name},\n\nThank you for registering for "The Essence of Vinyasa Flow" workshop with Susi Davies! We have received your registration and our team will connect with you within 24 hours.\n\nWorkshop Details:\n${datesText}\n\nTime: 18:30 – 20:30\nVenue: BODYTALKS, Alte Landstrasse 32, Thalwil\nTotal: CHF ${total}.– (payable via TWINT)\n\nSusi will be in touch shortly to confirm your reservation and share payment details.\n\nWith warmth,\nSusi Davies & Team\nhttps://susidavies.com`,
       segment: subscribed ? "Workshop Registrant" : undefined,
     };
   }

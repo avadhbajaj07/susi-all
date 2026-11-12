@@ -34,11 +34,12 @@ const sessionTypes = [
     title: "Weekly Online Class Pass",
     duration: "60 mins",
     price: "CHF 25",
-    desc: "Live dynamic movement session online via Teams (Monday 18:30–19:30 & Wednesday 09:00–10:00). TWINT accepted.",
+    desc: "Live dynamic movement session online via Teams (Monday 18:30–19:30, Tuesday 11:45–12:45 & Wednesday 09:00–10:00). TWINT accepted.",
   },
 ];
 
 const timeSlotLabels: Record<string, string> = {
+  "tue-midday": "Tuesday 11:45 – 12:45 (Live Online Class)",
   "wed-morning": "Wednesday 09:00 – 10:00 (Live Online Class)",
   "mon-evening": "Monday 18:30 – 19:30 (Live Online Class)",
   "morning": "Morning (09:00 – 12:00)",
@@ -67,7 +68,10 @@ function BookPageContent() {
     const sessionParam = searchParams.get("session") || searchParams.get("type");
     const slotParam = searchParams.get("slot") || searchParams.get("time");
 
-    if (slotParam === "wed-morning" || slotParam === "wednesday" || slotParam === "wed") {
+    if (slotParam === "tue-midday" || slotParam === "tuesday" || slotParam === "tue") {
+      setSelectedSession("online-class");
+      setTimeSlot("tue-midday");
+    } else if (slotParam === "wed-morning" || slotParam === "wednesday" || slotParam === "wed") {
       setSelectedSession("online-class");
       setTimeSlot("wed-morning");
     } else if (slotParam === "mon-evening" || slotParam === "monday" || slotParam === "mon") {
@@ -93,11 +97,11 @@ function BookPageContent() {
   const handleSessionChange = (id: string) => {
     setSelectedSession(id);
     if (id === "online-class") {
-      if (timeSlot !== "wed-morning" && timeSlot !== "mon-evening") {
-        setTimeSlot("wed-morning");
+      if (timeSlot !== "wed-morning" && timeSlot !== "mon-evening" && timeSlot !== "tue-midday") {
+        setTimeSlot("tue-midday");
       }
     } else {
-      if (timeSlot === "wed-morning" || timeSlot === "mon-evening") {
+      if (timeSlot === "wed-morning" || timeSlot === "mon-evening" || timeSlot === "tue-midday") {
         setTimeSlot("morning");
       }
     }
@@ -247,6 +251,7 @@ function BookPageContent() {
                       >
                         {selectedSession === "online-class" ? (
                           <>
+                            <option value="tue-midday">Tuesday 11:45 – 12:45 (Live Online Class)</option>
                             <option value="wed-morning">Wednesday 09:00 – 10:00 (Live Online Class)</option>
                             <option value="mon-evening">Monday 18:30 – 19:30 (Live Online Class)</option>
                           </>

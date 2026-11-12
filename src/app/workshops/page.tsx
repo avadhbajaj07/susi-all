@@ -7,9 +7,15 @@ import { SiteFooter } from "@/components/site-footer";
 import { MapPin, Calendar, Clock, CheckCircle2, ChevronRight, Wind, Brain, Sparkles, Users } from "lucide-react";
 
 const dates = [
-  { date: "Thursday, 10 September 2026", time: "18:30 – 20:30", spots: "Limited spots" },
-  { date: "Thursday, 29 October 2026", time: "18:30 – 20:30", spots: "Limited spots" },
-  { date: "Thursday, 3 December 2026", time: "18:30 – 20:30", spots: "Limited spots" },
+  {
+    title: "The Essence of Vinyasa Flow with Susi Davies",
+    date: "Thursday, 28 January 2027",
+    time: "18:30 – 20:30",
+    rsvp: "RSVP by: 18 January 2027",
+    spots: "Limited spots",
+    venue: "BODYTALKS, Alte Landstrasse 32, Thalwil",
+    price: "CHF 60.–",
+  },
 ];
 
 const whatToExpect = [
@@ -21,7 +27,7 @@ const whatToExpect = [
 
 export default function WorkshopsPage() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
-  const [selectedDates, setSelectedDates] = useState<string[]>([]);
+  const [selectedDates, setSelectedDates] = useState<string[]>(["Thursday, 28 January 2027"]);
   const [honeypot, setHoneypot] = useState("");
   const [isHumanVerified, setIsHumanVerified] = useState(false);
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
@@ -59,7 +65,7 @@ export default function WorkshopsPage() {
       setStatus("success");
       setFormStartedAt(Date.now());
       setForm({ name: "", email: "", phone: "", message: "" });
-      setSelectedDates([]);
+      setSelectedDates(["Thursday, 28 January 2027"]);
     } catch {
       setStatus("error");
     }
@@ -73,11 +79,11 @@ export default function WorkshopsPage() {
       <section className="page-banner" style={{ minHeight: 300, padding: "70px 20px" }}>
         <div>
           <span style={{ display: "inline-block", fontSize: 13, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.75)", marginBottom: 14 }}>
-            In-Person Workshop Series · Thalwil, Switzerland
+            In-Person Workshop · Thalwil, Switzerland
           </span>
-          <h1 style={{ fontSize: "clamp(40px, 6vw, 68px)", lineHeight: 1.1 }}>Deeper Practice</h1>
+          <h1 style={{ fontSize: "clamp(34px, 5.2vw, 62px)", lineHeight: 1.15 }}>The Essence of Vinyasa Flow</h1>
           <p style={{ fontSize: 18, color: "rgba(255,255,255,0.85)", marginTop: 16, fontFamily: "var(--serif)", fontStyle: "italic" }}>
-            Breathwork · Philosophy · Meditation
+            Yoga with Susi Davies · 28 January 2027
           </p>
         </div>
         <span className="page-banner-arrow">⌄</span>
@@ -85,54 +91,60 @@ export default function WorkshopsPage() {
 
       <div className="container">
 
-        {/* Intro Section */}
+        {/* Intro Section with Flyer */}
         <section className="grid-2col-alt" style={{ marginTop: 70, marginBottom: 70 }}>
           <div className="col-media">
-            <div className="image-card-rounded">
+            <div className="image-card-rounded" style={{ borderRadius: 24, overflow: "hidden", boxShadow: "0 14px 45px rgba(0,0,0,0.12)" }}>
               <img
-                src="/images/susi-davies11.jpg"
-                alt="Susi Davies guiding a deeper practice workshop"
-                style={{ width: "100%", height: "580px", objectFit: "cover", borderRadius: 20, display: "block" }}
+                src="/images/vinyasa-flow-flyer.jpg"
+                alt="The Essence of Vinyasa Flow with Susi Davies - Official Workshop Flyer"
+                style={{ width: "100%", height: "auto", display: "block" }}
               />
             </div>
           </div>
           <div className="col-content">
-            <span className="eyebrow">Workshop Series 2026</span>
+            <span className="eyebrow">Upcoming In-Person Workshop</span>
             <h2 className="section-heading" style={{ marginBottom: 16 }}>
-              Beyond the Physical —<br />A Deeper Exploration
+              The Essence of Vinyasa Flow
             </h2>
 
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 22 }}>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 7, backgroundColor: "#F4F9FC", border: "1px solid #BCD4E3", padding: "9px 14px", borderRadius: 10, fontSize: 13, color: "var(--blue)", fontWeight: 700 }}>
-                <MapPin size={15} /> at BODYTALKS, Alte Landstrasse 32, Thalwil
+                <Calendar size={15} /> Thursday, 28 January 2027
               </span>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 7, backgroundColor: "#F4F9FC", border: "1px solid #BCD4E3", padding: "9px 14px", borderRadius: 10, fontSize: 13, color: "var(--blue)", fontWeight: 700 }}>
                 <Clock size={15} /> 18:30 – 20:30
               </span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 7, backgroundColor: "rgba(230,126,34,0.1)", border: "1px solid rgba(230,126,34,0.3)", padding: "9px 14px", borderRadius: 10, fontSize: 13, color: "#E67E22", fontWeight: 700 }}>
+                ❄️ RSVP by: 18 January 2027
+              </span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 7, backgroundColor: "#F4F9FC", border: "1px solid #BCD4E3", padding: "9px 14px", borderRadius: 10, fontSize: 13, color: "var(--blue)", fontWeight: 700 }}>
+                <MapPin size={15} /> BODYTALKS, Thalwil
+              </span>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 7, backgroundColor: "rgba(84,188,51,0.1)", border: "1px solid rgba(84,188,51,0.3)", padding: "9px 14px", borderRadius: 10, fontSize: 13, color: "#45A027", fontWeight: 700 }}>
-                💰 CHF 60.– per workshop
+                💰 CHF 60.– (TWINT accepted)
               </span>
             </div>
 
             <p className="body-text">
-              The Deeper Practice workshop series is designed for students who want to move beyond the physical posture and explore yoga as a complete system of self-understanding and transformation.
+              Step beyond the modern practice and reconnect with the roots of yoga. In this special in-person workshop, Susi Davies guides an immersive journey exploring <strong>The Essence of Vinyasa Flow</strong>.
             </p>
             <p className="body-text">
-              Led by Susi Davies — E-RYT 500, QualiCert certified, with over 30 years of teaching experience — each evening offers a rare opportunity to slow down, go inward, and explore the deeper layers of your practice in a small, intimate group.
+              We will explore yoga as it was traditionally taught — with mindful movement, breath-led transitions, functional alignment, and how conscious sequencing awakens a deeper connection between body, mind, and spirit.
             </p>
             <p className="body-text">
-              You do not need to be an experienced practitioner. These workshops are open to anyone with genuine curiosity and a willingness to look within.
+              Led by Susi Davies (E-RYT 500 Master Teacher, QualiCert certified) with over 30 years of teaching and movement therapy experience, this evening offers a focused, intimate space to slow down and deepen your practice.
             </p>
 
             <div style={{ padding: "20px 24px", backgroundColor: "rgba(38,145,186,0.06)", border: "1.5px solid var(--blue)", borderRadius: 16, marginTop: 24 }}>
               <strong style={{ fontSize: 15, color: "var(--blue)", display: "block", marginBottom: 6 }}>
-                🌿 This is a space for...
+                🌿 What We Will Explore:
               </strong>
               <ul className="bullet-list" style={{ marginTop: 8 }}>
-                <li>Students seeking depth and understanding beyond asana</li>
-                <li>Yoga teachers wanting to enrich their personal practice</li>
-                <li>Anyone curious about breathwork, philosophy, or meditation</li>
-                <li>Those seeking community and meaningful practice</li>
+                <li>Traditional Vinyasa sequencing logic &amp; breath-led flow</li>
+                <li>Functional alignment principles to protect joints and build strength</li>
+                <li>Heart coherence meditation &amp; nervous system regulation</li>
+                <li>Intimate small-group practice at BODYTALKS Thalwil</li>
               </ul>
             </div>
           </div>
@@ -161,37 +173,48 @@ export default function WorkshopsPage() {
           </div>
         </section>
 
-        {/* Upcoming Dates */}
+        {/* Upcoming Workshop Date from Flyer */}
         <section style={{ marginBottom: 90 }}>
           <div style={{ textAlign: "center", marginBottom: 46 }}>
-            <span className="eyebrow" style={{ color: "var(--blue)" }}>2026 Dates</span>
-            <h2 className="section-heading" style={{ margin: "12px 0 0" }}>Upcoming Workshop Dates</h2>
+            <span className="eyebrow" style={{ color: "var(--blue)" }}>Upcoming 2027 Workshop</span>
+            <h2 className="section-heading" style={{ margin: "12px 0 0" }}>Upcoming Workshop Date</h2>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 18, maxWidth: 780, margin: "0 auto" }}>
             {dates.map((d, i) => (
               <div
                 key={i}
-                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, padding: "24px 30px", backgroundColor: "#ffffff", borderRadius: 18, border: "1.5px solid #E2DDD3", boxShadow: "0 4px 16px rgba(0,0,0,0.04)", flexWrap: "wrap" }}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, padding: "26px 30px", backgroundColor: "#ffffff", borderRadius: 18, border: "1.5px solid #E2DDD3", boxShadow: "0 6px 20px rgba(0,0,0,0.05)", flexWrap: "wrap" }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-                  <div style={{ width: 46, height: 46, borderRadius: 12, backgroundColor: "rgba(38,145,186,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <Calendar size={22} color="var(--blue)" />
+                  <div style={{ width: 50, height: 50, borderRadius: 14, backgroundColor: "rgba(38,145,186,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Calendar size={24} color="var(--blue)" />
                   </div>
                   <div>
-                    <strong style={{ fontSize: 17, color: "var(--ink-title)", display: "block" }}>{d.date}</strong>
-                    <span style={{ fontSize: 14, color: "var(--blue)", fontWeight: 700 }}>
-                      <Clock size={13} style={{ verticalAlign: "middle", marginRight: 4 }} />{d.time}
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "var(--blue)", textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 2 }}>
+                      {d.title}
                     </span>
+                    <strong style={{ fontSize: 18, color: "var(--ink-title)", display: "block" }}>{d.date}</strong>
+                    <div style={{ display: "flex", gap: 14, fontSize: 14, color: "var(--blue)", fontWeight: 700, marginTop: 4, flexWrap: "wrap" }}>
+                      <span>
+                        <Clock size={13} style={{ verticalAlign: "middle", marginRight: 4 }} />{d.time}
+                      </span>
+                      <span style={{ color: "#E67E22" }}>
+                        ❄️ {d.rsvp}
+                      </span>
+                      <span style={{ color: "#45A027" }}>
+                        {d.price}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
-                  <span style={{ fontSize: 12, color: "#E67E22", backgroundColor: "rgba(230,126,34,0.1)", padding: "4px 12px", borderRadius: 100, fontWeight: 700 }}>
+                  <span style={{ fontSize: 12, color: "#E67E22", backgroundColor: "rgba(230,126,34,0.1)", padding: "5px 12px", borderRadius: 100, fontWeight: 700 }}>
                     {d.spots}
                   </span>
                   <a
                     href="#register"
-                    style={{ display: "inline-flex", alignItems: "center", gap: 5, backgroundColor: "var(--blue)", color: "#fff", padding: "10px 18px", borderRadius: 100, fontSize: 13, fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" }}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 5, backgroundColor: "var(--blue)", color: "#fff", padding: "11px 22px", borderRadius: 100, fontSize: 13, fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap" }}
                   >
                     Register <ChevronRight size={15} />
                   </a>
@@ -201,11 +224,11 @@ export default function WorkshopsPage() {
           </div>
 
           {/* Venue Card */}
-          <div style={{ maxWidth: 780, margin: "30px auto 0", padding: "24px 30px", backgroundColor: "rgba(38,145,186,0.05)", border: "1px solid #BCD4E3", borderRadius: 18, display: "flex", gap: 16, alignItems: "flex-start" }}>
+          <div style={{ maxWidth: 780, margin: "24px auto 0", padding: "24px 30px", backgroundColor: "rgba(38,145,186,0.05)", border: "1px solid #BCD4E3", borderRadius: 18, display: "flex", gap: 16, alignItems: "flex-start" }}>
             <MapPin size={22} color="var(--blue)" style={{ flexShrink: 0, marginTop: 2 }} />
             <div>
               <strong style={{ fontSize: 15, color: "var(--blue)", display: "block", marginBottom: 4 }}>Venue: BODYTALKS</strong>
-              <p style={{ fontSize: 14, color: "var(--muted)", margin: 0 }}>Alte Landstrasse 32, Thalwil, Switzerland</p>
+              <p style={{ fontSize: 14, color: "var(--muted)", margin: 0 }}>Alte Landstrasse 32, Thalwil, Switzerland · WhatsApp: +41 79 854 97 52</p>
             </div>
           </div>
         </section>
@@ -241,7 +264,7 @@ export default function WorkshopsPage() {
               {/* Select Date */}
               <div className="form-group" style={{ marginBottom: 22 }}>
                 <label style={{ fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                  <Calendar size={14} /> Choose Your Workshop Date(s) * — select as many as you like
+                  <Calendar size={14} /> Workshop Date &amp; Theme *
                 </label>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {dates.map((d) => {
@@ -249,7 +272,7 @@ export default function WorkshopsPage() {
                     return (
                       <label
                         key={d.date}
-                        style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 20px", borderRadius: 14, border: `2px solid ${checked ? "var(--blue)" : "#E2DDD3"}`, backgroundColor: checked ? "rgba(38,145,186,0.05)" : "#FAFAF8", cursor: "pointer", transition: "all 0.2s" }}
+                        style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 20px", borderRadius: 14, border: `2px solid ${checked ? "var(--blue)" : "#E2DDD3"}`, backgroundColor: checked ? "rgba(38,145,186,0.05)" : "#FAFAF8", cursor: "pointer", transition: "all 0.2s" }}
                       >
                         <input
                           type="checkbox"
@@ -259,11 +282,15 @@ export default function WorkshopsPage() {
                           style={{ accentColor: "var(--blue)", width: 19, height: 19, flexShrink: 0 }}
                         />
                         <div style={{ flex: 1 }}>
-                          <strong style={{ fontSize: 15, color: "var(--ink-title)", display: "block" }}>{d.date}</strong>
-                          <span style={{ fontSize: 13, color: "var(--blue)", fontWeight: 600 }}>{d.time} · CHF 60.–</span>
+                          <strong style={{ fontSize: 15, color: "var(--ink-title)", display: "block", marginBottom: 2 }}>
+                            {d.date} — {d.title}
+                          </strong>
+                          <span style={{ fontSize: 13, color: "var(--blue)", fontWeight: 600 }}>
+                            {d.time} · {d.price} · <span style={{ color: "#E67E22" }}>{d.rsvp}</span>
+                          </span>
                         </div>
                         {checked && (
-                          <span style={{ fontSize: 12, backgroundColor: "var(--blue)", color: "#fff", padding: "3px 10px", borderRadius: 100, fontWeight: 700 }}>✓ Selected</span>
+                          <span style={{ fontSize: 12, backgroundColor: "var(--blue)", color: "#fff", padding: "4px 10px", borderRadius: 100, fontWeight: 700 }}>✓ Selected</span>
                         )}
                       </label>
                     );
@@ -274,7 +301,7 @@ export default function WorkshopsPage() {
                 {selectedDates.length > 0 && (
                   <div style={{ marginTop: 14, padding: "14px 18px", backgroundColor: "rgba(38,145,186,0.06)", border: "1.5px solid var(--blue)", borderRadius: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{ fontSize: 14, color: "var(--blue)", fontWeight: 600 }}>
-                      {selectedDates.length} workshop{selectedDates.length > 1 ? "s" : ""} selected
+                      The Essence of Vinyasa Flow (28 Jan 2027)
                     </span>
                     <strong style={{ fontSize: 16, color: "var(--blue)" }}>Total: CHF {totalPrice}.–</strong>
                   </div>
@@ -353,11 +380,11 @@ export default function WorkshopsPage() {
                 disabled={status === "sending" || selectedDates.length === 0 || !isHumanVerified}
                 style={{ width: "100%", justifyContent: "center", fontSize: 16, padding: "16px 24px", opacity: (status === "sending" || selectedDates.length === 0 || !isHumanVerified) ? 0.5 : 1 }}
               >
-                {status === "sending" ? "Sending Registration…" : selectedDates.length === 0 ? "Select at least one date to register" : `Register for ${selectedDates.length} Workshop${selectedDates.length > 1 ? "s" : ""} — CHF ${totalPrice}.– →`}
+                {status === "sending" ? "Sending Registration…" : selectedDates.length === 0 ? "Select date to register" : `Register for Workshop — CHF ${totalPrice}.– →`}
               </button>
 
               <p style={{ textAlign: "center", fontSize: 13, color: "var(--muted)", marginTop: 16 }}>
-                CHF 60.– per workshop · All 3 for CHF 180.– · Payment via TWINT · Susi confirms within 24 hours
+                CHF 60.– per participant · Payment via TWINT · RSVP by 18 January 2027 · Susi confirms within 24 hours
               </p>
             </form>
           )}

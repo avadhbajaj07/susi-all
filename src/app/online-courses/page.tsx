@@ -149,6 +149,10 @@ export default function OnlineCoursesPage() {
                       <span style={{ fontWeight: 700, color: "var(--ink-title)" }}>Monday Evening</span>
                       <span style={{ color: "var(--blue)", fontWeight: 700 }}>18:30 – 19:30</span>
                     </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, borderBottom: "1px dashed #E2DDD3", paddingBottom: 8 }}>
+                      <span style={{ fontWeight: 700, color: "var(--ink-title)" }}>Tuesday Midday</span>
+                      <span style={{ color: "var(--blue)", fontWeight: 700 }}>11:45 – 12:45</span>
+                    </div>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
                       <span style={{ fontWeight: 700, color: "var(--ink-title)" }}>Wednesday Morning</span>
                       <span style={{ color: "var(--blue)", fontWeight: 700 }}>09:00 – 10:00</span>
@@ -170,9 +174,30 @@ export default function OnlineCoursesPage() {
 
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <Link
-                  href="/book?session=online-class&slot=wed-morning"
+                  href="/book?session=online-class&slot=tue-midday"
                   className="btn-pill btn-pill-cyan"
                   style={{ width: "100%", justifyContent: "center", fontSize: 14, padding: "12px 18px" }}
+                >
+                  Book Tuesday Class (11:45) →
+                </Link>
+                <Link
+                  href="/book?session=online-class&slot=wed-morning"
+                  style={{
+                    width: "100%",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    padding: "12px 18px",
+                    borderRadius: 100,
+                    border: "1.5px solid var(--blue)",
+                    color: "var(--blue)",
+                    fontWeight: 700,
+                    fontSize: 14,
+                    textDecoration: "none",
+                    backgroundColor: "transparent",
+                    transition: "all 0.2s ease",
+                  }}
                 >
                   Book Wednesday Class (09:00) →
                 </Link>
